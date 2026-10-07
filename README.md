@@ -7,9 +7,9 @@ Evaluación Parcial 2 de DSY1105 Desarrollo de Aplicaciones Móviles, Duoc UC.
 ## Integrantes
 
 - Pablo Alexander Rico Rodríguez
-- William Rodríguez (completar el nombre completo)
+- William Martín Rodríguez Troncoso
 
-Equipo: GrupoX (completar el número de equipo)
+Equipo: Grupo 
 
 ## Qué hace la app
 
