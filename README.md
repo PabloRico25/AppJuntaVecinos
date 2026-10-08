@@ -49,8 +49,10 @@ app/src/main/java/com/example/appjuntavecinos/
 │   ├─ components/ piezas reutilizables
 │   └─ screens/    una pantalla por archivo
 ├─ viewmodel/      estado y validaciones de cada flujo
-├─ model/          entidades de Room, estados de formulario y resultados de validación
-└─ repository/     DAOs, base de datos y repositorios
+└─ data/
+    ├─ model/      entidades de Room, estados de formulario y resultados de validación
+    └─ repository/ DAOs, base de datos y repositorios
+
 ```
 
 ## Cómo ejecutarla
