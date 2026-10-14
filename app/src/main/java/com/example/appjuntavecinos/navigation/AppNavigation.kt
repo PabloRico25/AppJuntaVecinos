@@ -21,10 +21,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.appjuntavecinos.ui.screens.LoginScreen
+import com.example.appjuntavecinos.viewmodel.LoginViewModel
 
 @Composable
 fun AppNavigation() {
@@ -32,16 +35,17 @@ fun AppNavigation() {
     val entradaActual by navController.currentBackStackEntryAsState()
     val rutaActual = entradaActual?.destination?.route
     var rol by remember { mutableStateOf("") }
-
+    val loginViewModel: LoginViewModel = viewModel()
     val destinos = if (rol == "DIRECTIVA") destinosDirectiva else destinosVecino
 
     val contenido: @Composable () -> Unit = {
         NavHost(navController = navController, startDestination = Rutas.LOGIN) {
             composable(Rutas.LOGIN) {
-                LoginProvisional(
-                    onEntrar = { rolElegido, rutaInicial ->
-                        rol = rolElegido
-                        navController.navigate(rutaInicial) {
+                LoginScreen(
+                    viewModel = loginViewModel,
+                    onLoginValido = {
+                        rol = "VECINO"
+                        navController.navigate(Rutas.MIS_RESERVAS) {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     }
