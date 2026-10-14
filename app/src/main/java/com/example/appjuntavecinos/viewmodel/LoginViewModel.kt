@@ -1,18 +1,30 @@
 package com.example.appjuntavecinos.viewmodel
 
+import android.app.Application
 import android.util.Patterns
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.LoginErrores
 import com.example.appjuntavecinos.data.model.LoginUiState
+import com.example.appjuntavecinos.data.repository.JuntaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repositorio = JuntaRepository(application)
 
     private val _estado = MutableStateFlow(LoginUiState())
     val estado: StateFlow<LoginUiState> = _estado.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            repositorio.cargarDatosDeEjemplo()
+        }
+    }
 
     fun onCorreoChange(valor: String) {
         _estado.update {
