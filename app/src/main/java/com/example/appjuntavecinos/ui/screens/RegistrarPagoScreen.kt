@@ -128,14 +128,21 @@ fun RegistrarPagoScreen(
         )
 
         if (estado.tipo == "ARRIENDO") {
-            MenuDesplegable(
-                etiqueta = "Reserva que se paga",
-                valor = estado.reserva?.let { viewModel.etiquetaReserva(it) } ?: "",
-                opciones = reservas.map { viewModel.etiquetaReserva(it) },
-                onSeleccion = { viewModel.onReservaChange(reservas[it]) },
-                error = estado.errores.reserva,
-                modifier = Modifier.fillMaxWidth()
-            )
+            if (reservas.isEmpty()) {
+                Text(
+                    "No hay reservas confirmadas por pagar.",
+                    color = MaterialTheme.colorScheme.error
+                )
+            } else {
+                MenuDesplegable(
+                    etiqueta = "Reserva que se paga",
+                    valor = estado.reserva?.let { viewModel.etiquetaReserva(it) } ?: "",
+                    opciones = reservas.map { viewModel.etiquetaReserva(it) },
+                    onSeleccion = { viewModel.onReservaChange(reservas[it]) },
+                    error = estado.errores.reserva,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         if (estado.tipo == "CONSUMO_BASICO") {
