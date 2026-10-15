@@ -8,6 +8,7 @@ import com.example.appjuntavecinos.data.model.LoginErrores
 import com.example.appjuntavecinos.data.model.LoginUiState
 import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.data.repository.JuntaRepository
+import com.example.appjuntavecinos.utils.hashClave
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -66,6 +67,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
         _estado.update { it.copy(errores = nuevosErrores) }
         return nuevosErrores == LoginErrores()
+    }
+
+    fun iniciarSesion(onExito: () -> Unit) {
+        if (!validarFormulario()) return
+
+        viewModelScope.launch {
+            val actual = _estado.value
+            val usuario = repositorio.buscarUsuarioPorCorreo(actual.correo)
+
+            if (usuario != null && usuario.clave == hashClave(actual.clave)) {
+                _sesion.value = usuario
+                onExito()
+            } else {
+                _estado.update {
+                    it.copy(errores = it.errores.copy(general = "Correo o clave incorrectos"))
+                }
+            }
+        }
     }
 
     fun puedeConfirmarReservas(): Boolean = _sesion.value?.cargo == "SECRETARIA"
