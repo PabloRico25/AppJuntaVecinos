@@ -87,6 +87,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun cerrarSesion() {
+        _sesion.value = null
+        _estado.value = LoginUiState()
+    }
+
     fun puedeConfirmarReservas(): Boolean = _sesion.value?.cargo == "SECRETARIA"
 
     fun puedeRegistrarPagos(): Boolean = _sesion.value?.cargo == "TESORERIA"

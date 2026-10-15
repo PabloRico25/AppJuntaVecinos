@@ -1,13 +1,24 @@
 package com.example.appjuntavecinos.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.appjuntavecinos.ui.screens.LoginScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -26,6 +38,7 @@ fun AppNavigation() {
     val loginViewModel: LoginViewModel = viewModel()
     val sesion by loginViewModel.sesion.collectAsState()
     val destinos = if (sesion?.rol == "DIRECTIVA") destinosDirectiva else destinosVecino
+    var menuAbierto by remember { mutableStateOf(false) }
 
     val contenido: @Composable () -> Unit = {
         NavHost(navController = navController, startDestination = Rutas.LOGIN) {
@@ -67,7 +80,34 @@ fun AppNavigation() {
                 }
             }
         ) {
-            contenido()
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopAppBar(
+                    title = { Text(sesion?.nombre ?: "") },
+                    actions = {
+                        IconButton(onClick = { menuAbierto = true }) {
+                            Icon(Icons.Filled.AccountCircle, contentDescription = "Menú de la cuenta")
+                        }
+                        DropdownMenu(
+                            expanded = menuAbierto,
+                            onDismissRequest = { menuAbierto = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Cerrar sesión") },
+                                onClick = {
+                                    menuAbierto = false
+                                    loginViewModel.cerrarSesion()
+                                    navController.navigate(Rutas.LOGIN) {
+                                        popUpTo(navController.graph.id) { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                )
+                Box(modifier = Modifier.weight(1f)) {
+                    contenido()
+                }
+            }
         }
     }
 }
