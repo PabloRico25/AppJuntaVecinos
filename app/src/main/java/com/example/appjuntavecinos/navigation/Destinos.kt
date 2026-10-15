@@ -16,5 +16,6 @@ val destinosVecino = listOf(
 )
 
 val destinosDirectiva = listOf(
+    Destino(Rutas.RESERVAS, "Reservas", Icons.Filled.DateRange),
     Destino(Rutas.PAGOS, "Pagos", Icons.Filled.ShoppingCart)
 )

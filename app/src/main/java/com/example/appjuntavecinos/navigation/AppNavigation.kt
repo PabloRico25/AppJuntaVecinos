@@ -34,6 +34,7 @@ import com.example.appjuntavecinos.ui.screens.MisReservasScreen
 import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
 import com.example.appjuntavecinos.ui.screens.PagosScreen
 import com.example.appjuntavecinos.ui.screens.RegistrarPagoScreen
+import com.example.appjuntavecinos.ui.screens.ReservasDirectivaScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
@@ -57,7 +58,7 @@ fun AppNavigation() {
                     viewModel = loginViewModel,
                     onLoginValido = {
                         val rutaInicial = if (loginViewModel.sesion.value?.rol == "DIRECTIVA") {
-                            Rutas.PAGOS
+                            Rutas.RESERVAS
                         } else {
                             Rutas.MIS_RESERVAS
                         }
@@ -79,6 +80,15 @@ fun AppNavigation() {
                     onReservaCreada = {
                         navController.popBackStack()
                         scope.launch { avisos.showSnackbar("Reserva solicitada. Queda pendiente de confirmación") }
+                    }
+                )
+            }
+            composable(Rutas.RESERVAS) {
+                ReservasDirectivaScreen(
+                    gestionadaPorId = sesion?.id ?: 0,
+                    puedeConfirmar = loginViewModel.puedeConfirmarReservas(),
+                    onAviso = { mensaje ->
+                        scope.launch { avisos.showSnackbar(mensaje) }
                     }
                 )
             }
