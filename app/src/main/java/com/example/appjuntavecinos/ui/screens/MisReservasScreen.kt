@@ -1,0 +1,129 @@
+package com.example.appjuntavecinos.ui.screens
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.data.model.ReservaEntity
+import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
+
+@Composable
+fun MisReservasScreen(
+    vecinoId: Int,
+    onNuevaReserva: () -> Unit,
+    viewModel: MisReservasViewModel = viewModel()
+) {
+    val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
+    val reservas by flujoDeReservas.collectAsState(initial = emptyList())
+    val dependencias by viewModel.dependencias.collectAsState()
+    var reservaACancelar by remember { mutableStateOf<ReservaEntity?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Mis reservas", style = MaterialTheme.typography.headlineMedium)
+
+        Button(
+            onClick = onNuevaReserva,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Nueva reserva")
+        }
+
+        if (reservas.isEmpty()) {
+            Text("Todavía no tienes reservas. Pide la primera con el botón Nueva reserva.")
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(count = reservas.size, key = { indice -> reservas[indice].id }) { indice ->
+                    val reserva = reservas[indice]
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text("${reserva.fecha}, de ${reserva.horaInicio} a ${reserva.horaFin}")
+                            Text("Estado: ${etiquetaEstado(reserva.estado)}")
+                            if (reserva.estado == "PENDIENTE") {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    OutlinedButton(onClick = { reservaACancelar = reserva }) {
+                                        Text("Cancelar")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    reservaACancelar?.let { reserva ->
+        AlertDialog(
+            onDismissRequest = { reservaACancelar = null },
+            title = { Text("Cancelar reserva") },
+            text = { Text("¿Quieres cancelar esta reserva? No se puede deshacer.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.cancelar(reserva)
+                        reservaACancelar = null
+                    }
+                ) {
+                    Text("Sí, cancelar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { reservaACancelar = null }) {
+                    Text("No")
+                }
+            }
+        )
+    }
+}
+
+private fun etiquetaEstado(estado: String): String {
+    return when (estado) {
+        "PENDIENTE" -> "Pendiente"
+        "CONFIRMADA" -> "Confirmada"
+        "RECHAZADA" -> "Rechazada"
+        "CANCELADA" -> "Cancelada"
+        else -> estado
+    }
+}
