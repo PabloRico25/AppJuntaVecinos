@@ -30,6 +30,7 @@ import com.example.appjuntavecinos.ui.screens.LoginScreen
 import com.example.appjuntavecinos.ui.screens.MisReservasScreen
 import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
 import com.example.appjuntavecinos.ui.screens.PagosScreen
+import com.example.appjuntavecinos.ui.screens.RegistrarPagoScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +84,13 @@ fun AppNavigation() {
                     onRegistrarPago = { navController.navigate(Rutas.REGISTRAR_PAGO) }
                 )
             }
-            composable(Rutas.REGISTRAR_PAGO) { PantallaProvisoria("Registrar pago") }
+            composable(Rutas.REGISTRAR_PAGO) {
+                RegistrarPagoScreen(
+                    registradoPorId = sesion?.id ?: 0,
+                    puedeRegistrar = loginViewModel.puedeRegistrarPagos(),
+                    onPagoRegistrado = { navController.popBackStack() }
+                )
+            }
         }
     }
 
