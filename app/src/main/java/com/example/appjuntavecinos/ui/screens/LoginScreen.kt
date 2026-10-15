@@ -66,14 +66,19 @@ fun LoginScreen(
             trailingIcon = {
                 if (estado.errores.clave != null) {
                     Icon(Icons.Filled.Warning, contentDescription = "Error", tint = MaterialTheme.colorScheme.error)
-                } 
+                }
             },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(16.dp))
 
+        estado.errores.general?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+            Spacer(Modifier.height(8.dp))
+        }
+
         Button(
-            onClick = { if (viewModel.validarFormulario()) onLoginValido() },
+            onClick = { viewModel.iniciarSesion(onLoginValido) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Ingresar")
