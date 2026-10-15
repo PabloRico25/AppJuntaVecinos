@@ -103,11 +103,20 @@ fun NuevaReservaScreen(
             Text("Acepto el reglamento de la sede")
         }
         estado.errores.reglamento?.let {
-            Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 12.dp))
+            Text(
+                it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 12.dp)
+            )
         }
 
         estado.errores.general?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
+            Text(
+                it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         Button(

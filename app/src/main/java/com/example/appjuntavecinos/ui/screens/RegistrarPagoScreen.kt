@@ -134,7 +134,8 @@ fun RegistrarPagoScreen(
             if (reservas.isEmpty()) {
                 Text(
                     "No hay reservas confirmadas por pagar.",
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
                 )
             } else {
                 MenuDesplegable(
@@ -228,7 +229,11 @@ fun RegistrarPagoScreen(
                     )
                 }
                 estado.errores.comprobante?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error)
+                    Text(
+                        it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }
@@ -241,11 +246,20 @@ fun RegistrarPagoScreen(
             Text("Confirmo que es un registro informativo")
         }
         estado.errores.confirma?.let {
-            Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(start = 12.dp))
+            Text(
+                it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 12.dp)
+            )
         }
 
         estado.errores.general?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
+            Text(
+                it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
 
         Button(
