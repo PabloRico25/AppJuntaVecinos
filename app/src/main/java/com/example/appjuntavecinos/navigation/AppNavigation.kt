@@ -57,7 +57,7 @@ fun AppNavigation() {
                     viewModel = loginViewModel,
                     onLoginValido = {
                         val rutaInicial = if (loginViewModel.sesion.value?.rol == "DIRECTIVA") {
-                            Rutas.RESERVAS
+                            Rutas.PAGOS
                         } else {
                             Rutas.MIS_RESERVAS
                         }
@@ -67,11 +67,6 @@ fun AppNavigation() {
                     }
                 )
             }
-            (destinosVecino + destinosDirectiva)
-                .filter { it.ruta != Rutas.MIS_RESERVAS && it.ruta != Rutas.PAGOS }
-                .forEach { destino ->
-                    composable(destino.ruta) { PantallaProvisoria(destino.etiqueta) }
-                }
             composable(Rutas.MIS_RESERVAS) {
                 MisReservasScreen(
                     vecinoId = sesion?.id ?: 0,
@@ -156,12 +151,5 @@ fun AppNavigation() {
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun PantallaProvisoria(titulo: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(titulo)
     }
 }
