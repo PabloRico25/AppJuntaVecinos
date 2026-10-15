@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.appjuntavecinos.data.model.ReservaEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReservaDao {
@@ -17,6 +18,10 @@ interface ReservaDao {
 
     @Query("SELECT * FROM ReservaEntity WHERE dependenciaId = :dependenciaId AND fecha = :fecha AND estado = 'CONFIRMADA'")
     suspend fun obtenerConfirmadas(dependenciaId: Int, fecha: String): List<ReservaEntity>
+
+    @Query("SELECT * FROM ReservaEntity WHERE vecinoId = :vecinoId ORDER BY fecha, horaInicio")
+    fun observarPorVecino(vecinoId: Int): Flow<List<ReservaEntity>>
+
     @Update
     suspend fun actualizar(reserva: ReservaEntity)
 }

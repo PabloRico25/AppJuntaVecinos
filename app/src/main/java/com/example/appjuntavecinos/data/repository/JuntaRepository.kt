@@ -6,6 +6,7 @@ import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.utils.hashClave
+import kotlinx.coroutines.flow.Flow
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -40,6 +41,14 @@ class JuntaRepository(context: Context) {
     ): Boolean {
         val confirmadas = reservaDao.obtenerConfirmadas(dependenciaId, fecha)
         return confirmadas.any { it.horaInicio < horaFin && horaInicio < it.horaFin }
+    }
+
+    fun observarReservas(vecinoId: Int): Flow<List<ReservaEntity>> {
+        return reservaDao.observarPorVecino(vecinoId)
+    }
+
+    suspend fun cancelarReserva(reserva: ReservaEntity) {
+        reservaDao.actualizar(reserva.copy(estado = "CANCELADA"))
     }
 
     suspend fun cargarDatosDeEjemplo() {
