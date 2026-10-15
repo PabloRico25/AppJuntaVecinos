@@ -1,5 +1,6 @@
 package com.example.appjuntavecinos.ui.screens
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,10 +23,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.data.model.ReservaEntity
+import com.example.appjuntavecinos.ui.theme.Gray
+import com.example.appjuntavecinos.ui.theme.Green
+import com.example.appjuntavecinos.ui.theme.LightBlue
+import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
 @Composable
@@ -63,10 +69,15 @@ fun MisReservasScreen(
             ) {
                 items(count = reservas.size, key = { indice -> reservas[indice].id }) { indice ->
                     val reserva = reservas[indice]
+                    val colorTarjeta by animateColorAsState(
+                        targetValue = colorEstado(reserva.estado),
+                        label = "colorTarjeta"
+                    )
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = colorTarjeta,
+                            contentColor = TextoPrincipal
                         )
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -125,5 +136,13 @@ private fun etiquetaEstado(estado: String): String {
         "RECHAZADA" -> "Rechazada"
         "CANCELADA" -> "Cancelada"
         else -> estado
+    }
+}
+
+private fun colorEstado(estado: String): Color {
+    return when (estado) {
+        "PENDIENTE" -> LightBlue
+        "CONFIRMADA" -> Green
+        else -> Gray
     }
 }
