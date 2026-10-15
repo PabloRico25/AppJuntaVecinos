@@ -22,6 +22,9 @@ interface ReservaDao {
     @Query("SELECT * FROM ReservaEntity WHERE vecinoId = :vecinoId ORDER BY fecha, horaInicio")
     fun observarPorVecino(vecinoId: Int): Flow<List<ReservaEntity>>
 
+    @Query("SELECT * FROM ReservaEntity WHERE estado = 'CONFIRMADA' AND id NOT IN (SELECT reservaId FROM PagoEntity WHERE tipo = 'ARRIENDO' AND reservaId IS NOT NULL) ORDER BY fecha, horaInicio")
+    suspend fun obtenerConfirmadasSinPago(): List<ReservaEntity>
+
     @Update
     suspend fun actualizar(reserva: ReservaEntity)
 }

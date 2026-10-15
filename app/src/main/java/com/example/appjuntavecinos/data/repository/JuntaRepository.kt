@@ -51,6 +51,18 @@ class JuntaRepository(context: Context) {
         reservaDao.actualizar(reserva.copy(estado = "CANCELADA"))
     }
 
+    fun observarPagos(): Flow<List<PagoEntity>> {
+        return pagoDao.observarTodos()
+    }
+
+    suspend fun obtenerReservasPorPagar(): List<ReservaEntity> {
+        return reservaDao.obtenerConfirmadasSinPago()
+    }
+
+    suspend fun crearPago(pago: PagoEntity) {
+        pagoDao.insertar(pago)
+    }
+
     suspend fun cargarDatosDeEjemplo() {
         if (dependenciaDao.obtenerTodas().isNotEmpty()) return
 
