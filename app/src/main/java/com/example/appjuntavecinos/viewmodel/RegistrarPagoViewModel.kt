@@ -145,6 +145,7 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
     }
 
     fun guardar(registradoPorId: Int, puedeRegistrar: Boolean, onExito: () -> Unit) {
+        if (_estado.value.guardando) return
         if (!puedeRegistrar) {
             _estado.update {
                 it.copy(errores = it.errores.copy(general = "Solo la Tesorería puede registrar pagos"))
@@ -152,6 +153,8 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
             return
         }
         if (!validarFormulario()) return
+
+        _estado.update { it.copy(guardando = true) }
 
         viewModelScope.launch {
             val actual = _estado.value
@@ -161,7 +164,10 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
                 comprobanteGuardado = guardarComprobante(getApplication(), Uri.parse(actual.comprobante))
                 if (comprobanteGuardado == null) {
                     _estado.update {
-                        it.copy(errores = it.errores.copy(general = "No se pudo guardar el comprobante"))
+                        it.copy(
+                            guardando = false,
+                            errores = it.errores.copy(general = "No se pudo guardar el comprobante")
+                        )
                     }
                     return@launch
                 }

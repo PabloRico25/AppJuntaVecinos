@@ -10,6 +10,7 @@ data class RegistrarPagoUiState(
     val adjuntarComprobante: Boolean = false,
     val comprobante: String? = null,
     val confirma: Boolean = false,
+    val guardando: Boolean = false,
     val errores: RegistrarPagoErrores = RegistrarPagoErrores()
 )
 
