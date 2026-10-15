@@ -10,7 +10,7 @@ import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
 
 @Database(entities = [UsuarioEntity::class, DependenciaComunitariaEntity::class, ReservaEntity::class,
-    PagoEntity::class], version = 1 )
+    PagoEntity::class], version = 2 )
 abstract class AppDatabase : RoomDatabase(){
     abstract fun usuarioDao(): UsuarioDao
 
