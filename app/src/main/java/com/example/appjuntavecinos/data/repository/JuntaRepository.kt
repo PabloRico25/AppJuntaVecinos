@@ -51,6 +51,26 @@ class JuntaRepository(context: Context) {
         reservaDao.actualizar(reserva.copy(estado = "CANCELADA"))
     }
 
+    fun observarTodasLasReservas(): Flow<List<ReservaEntity>> {
+        return reservaDao.observarTodas()
+    }
+
+    suspend fun obtenerUsuarios(): List<UsuarioEntity> {
+        return usuarioDao.obtenerTodos()
+    }
+
+    suspend fun confirmarReserva(reserva: ReservaEntity, gestionadaPorId: Int): Boolean {
+        if (hayChoque(reserva.dependenciaId, reserva.fecha, reserva.horaInicio, reserva.horaFin)) {
+            return false
+        }
+        reservaDao.actualizar(reserva.copy(estado = "CONFIRMADA", gestionadaPorId = gestionadaPorId))
+        return true
+    }
+
+    suspend fun rechazarReserva(reserva: ReservaEntity, gestionadaPorId: Int) {
+        reservaDao.actualizar(reserva.copy(estado = "RECHAZADA", gestionadaPorId = gestionadaPorId))
+    }
+
     fun observarPagos(): Flow<List<PagoEntity>> {
         return pagoDao.observarTodos()
     }

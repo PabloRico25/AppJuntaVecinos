@@ -10,6 +10,9 @@ interface UsuarioDao {
     @Query("SELECT * FROM UsuarioEntity WHERE correo = :correo")
     suspend fun buscarPorCorreo(correo: String): UsuarioEntity?
 
+    @Query("SELECT * FROM UsuarioEntity")
+    suspend fun obtenerTodos(): List<UsuarioEntity>
+
     @Insert
     suspend fun insertar(usuario: UsuarioEntity)
 }
