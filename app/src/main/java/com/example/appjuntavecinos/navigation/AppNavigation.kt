@@ -1,12 +1,10 @@
 package com.example.appjuntavecinos.navigation
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.appjuntavecinos.ui.screens.LoginScreen
+import com.example.appjuntavecinos.ui.screens.MisReservasScreen
 import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 
@@ -60,17 +59,16 @@ fun AppNavigation() {
                     }
                 )
             }
-            (destinosVecino + destinosDirectiva).forEach { destino ->
-                composable(destino.ruta) {
-                    PantallaProvisoria(
-                        titulo = destino.etiqueta,
-                        onNuevaReserva = if (destino.ruta == Rutas.MIS_RESERVAS) {
-                            { navController.navigate(Rutas.NUEVA_RESERVA) }
-                        } else {
-                            null
-                        }
-                    )
+            (destinosVecino + destinosDirectiva)
+                .filter { it.ruta != Rutas.MIS_RESERVAS }
+                .forEach { destino ->
+                    composable(destino.ruta) { PantallaProvisoria(destino.etiqueta) }
                 }
+            composable(Rutas.MIS_RESERVAS) {
+                MisReservasScreen(
+                    vecinoId = sesion?.id ?: 0,
+                    onNuevaReserva = { navController.navigate(Rutas.NUEVA_RESERVA) }
+                )
             }
             composable(Rutas.NUEVA_RESERVA) {
                 NuevaReservaScreen(
@@ -131,17 +129,8 @@ fun AppNavigation() {
 }
 
 @Composable
-private fun PantallaProvisoria(titulo: String, onNuevaReserva: (() -> Unit)? = null) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+private fun PantallaProvisoria(titulo: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(titulo)
-        if (onNuevaReserva != null) {
-            Button(onClick = onNuevaReserva) {
-                Text("Nueva reserva")
-            }
-        }
     }
 }
