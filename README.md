@@ -14,7 +14,7 @@ Evaluación Parcial 2 de DSY1105 Desarrollo de Aplicaciones Móviles, Duoc UC.
 Hay dos tipos de usuario, que entran por un login con correo y clave:
 
 - **Vecino/a:** pide reservas de una dependencia (Salón Principal o Sala Multiuso), ve el estado de sus solicitudes y cancela las que siguen pendientes.
-- **Directiva:** ve la lista de pagos. Según el cargo se habilitan los botones: la Tesorería registra pagos, y la Secretaría y la Presidencia solo miran.
+- **Directiva:** ve las reservas y los pagos. Según el cargo se habilitan los botones: la Secretaría confirma o rechaza reservas, la Tesorería registra pagos y la Presidencia solo mira.
 
 ## Funcionalidades
 
@@ -23,9 +23,9 @@ Hay dos tipos de usuario, que entran por un login con correo y clave:
 - [x] Mis reservas, con el estado de cada una (pendiente, confirmada, cancelada o rechazada) y su color
 - [x] Nueva reserva, con validaciones (fecha, horas, horario de la sede, horario ocupado) y aviso al crearla
 - [x] Cancelar una reserva pendiente, con confirmación
+- [x] Reservas de la directiva: la Secretaría confirma o rechaza, y se vuelve a revisar el choque al confirmar
 - [x] Pagos de la directiva, con la lista de ingresos y gastos
 - [x] Registro de pagos con comprobante de cámara o galería (solo Tesorería)
-- [ ] Reservas de la directiva: confirmar o rechazar (Secretaría)
 - [ ] Disponibilidad de las dependencias por día
 - [ ] Resumen financiero
 - [ ] Ticket QR y escaneo del ticket en la entrada
@@ -45,6 +45,7 @@ El comprobante elegido se copia a la carpeta privada de la app, para que siga di
 - La hora de fin tiene que ser mayor que la de inicio, y las dos dentro del horario de la sede (de 09:00 a 22:00).
 - No se puede reservar un horario que ya esté ocupado por una reserva confirmada de la misma dependencia.
 - Solo se puede cancelar una reserva pendiente.
+- Solo la Secretaría confirma o rechaza reservas, y solo las que están pendientes. Al confirmar se vuelve a revisar que el horario no choque con otra reserva ya confirmada.
 - Solo la Tesorería registra pagos.
 - Un pago de arriendo exige una reserva confirmada, y cada reserva tiene como máximo un pago de arriendo.
 - El monto de un pago tiene que ser mayor que 0.
@@ -92,13 +93,12 @@ Todos los datos son ficticios. La clave de todos es `1234`.
 | juan.perez@zaror.test | Vecino | Pedir, ver y cancelar sus reservas |
 | ana.munoz@zaror.test | Vecina | Igual que Juan; no tiene reservas al empezar |
 | pedro.soto@zaror.test | Vecino | Igual que Juan |
-| maria.torres@zaror.test | Directiva, Secretaría | Ver los pagos |
-| luis.rojas@zaror.test | Directiva, Tesorería | Ver los pagos y registrar pagos |
-| carmen.vidal@zaror.test | Directiva, Presidencia | Ver los pagos |
+| maria.torres@zaror.test | Directiva, Secretaría | Ver reservas y pagos, y confirmar o rechazar reservas |
+| luis.rojas@zaror.test | Directiva, Tesorería | Ver reservas y pagos, y registrar pagos |
+| carmen.vidal@zaror.test | Directiva, Presidencia | Ver reservas y pagos |
 
 ## Limitaciones
 
-- La Secretaría todavía no puede confirmar ni rechazar reservas, así que las que piden los vecinos quedan pendientes. Las confirmadas que se ven vienen de los datos de ejemplo.
 - No incluye disponibilidad por día, resumen financiero ni el ticket QR con su escaneo.
 - Los datos son ficticios; no hay información real de la organización ni de sus vecinos.
 - Toda la información se guarda en el celular (Room). Cada celular tiene su propia base de datos y no se comparten entre aparatos.
