@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.appjuntavecinos.ui.screens.LoginScreen
 import com.example.appjuntavecinos.ui.screens.MisReservasScreen
 import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
+import com.example.appjuntavecinos.ui.screens.PagosScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +61,7 @@ fun AppNavigation() {
                 )
             }
             (destinosVecino + destinosDirectiva)
-                .filter { it.ruta != Rutas.MIS_RESERVAS }
+                .filter { it.ruta != Rutas.MIS_RESERVAS && it.ruta != Rutas.PAGOS }
                 .forEach { destino ->
                     composable(destino.ruta) { PantallaProvisoria(destino.etiqueta) }
                 }
@@ -76,6 +77,13 @@ fun AppNavigation() {
                     onReservaCreada = { navController.popBackStack() }
                 )
             }
+            composable(Rutas.PAGOS) {
+                PagosScreen(
+                    puedeRegistrar = loginViewModel.puedeRegistrarPagos(),
+                    onRegistrarPago = { navController.navigate(Rutas.REGISTRAR_PAGO) }
+                )
+            }
+            composable(Rutas.REGISTRAR_PAGO) { PantallaProvisoria("Registrar pago") }
         }
     }
 
