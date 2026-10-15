@@ -1,10 +1,12 @@
 package com.example.appjuntavecinos.navigation
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.appjuntavecinos.ui.screens.LoginScreen
+import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +61,22 @@ fun AppNavigation() {
                 )
             }
             (destinosVecino + destinosDirectiva).forEach { destino ->
-                composable(destino.ruta) { PantallaProvisoria(destino.etiqueta) }
+                composable(destino.ruta) {
+                    PantallaProvisoria(
+                        titulo = destino.etiqueta,
+                        onNuevaReserva = if (destino.ruta == Rutas.MIS_RESERVAS) {
+                            { navController.navigate(Rutas.NUEVA_RESERVA) }
+                        } else {
+                            null
+                        }
+                    )
+                }
+            }
+            composable(Rutas.NUEVA_RESERVA) {
+                NuevaReservaScreen(
+                    vecinoId = sesion?.id ?: 0,
+                    onReservaCreada = { navController.popBackStack() }
+                )
             }
         }
     }
@@ -113,8 +131,17 @@ fun AppNavigation() {
 }
 
 @Composable
-private fun PantallaProvisoria(titulo: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+private fun PantallaProvisoria(titulo: String, onNuevaReserva: (() -> Unit)? = null) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(titulo)
+        if (onNuevaReserva != null) {
+            Button(onClick = onNuevaReserva) {
+                Text("Nueva reserva")
+            }
+        }
     }
 }

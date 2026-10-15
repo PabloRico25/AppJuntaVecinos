@@ -7,6 +7,7 @@ object Rutas {
     const val DISPONIBILIDAD = "disponibilidad"
     const val FINANZAS = "finanzas"
 
+    const val NUEVA_RESERVA = "nueva_reserva"
     const val RESERVAS = "reservas"
     const val PAGOS = "pagos"
     const val RESUMEN = "resumen"
