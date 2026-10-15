@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -127,7 +128,7 @@ fun RegistrarPagoScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        if (estado.tipo == "ARRIENDO") {
+        AnimatedVisibility(visible = estado.tipo == "ARRIENDO") {
             if (reservas.isEmpty()) {
                 Text(
                     "No hay reservas confirmadas por pagar.",
@@ -145,7 +146,7 @@ fun RegistrarPagoScreen(
             }
         }
 
-        if (estado.tipo == "CONSUMO_BASICO") {
+        AnimatedVisibility(visible = estado.tipo == "CONSUMO_BASICO") {
             MenuDesplegable(
                 etiqueta = "Categoría",
                 valor = etiquetaCategoria(estado.categoria),
@@ -204,27 +205,29 @@ fun RegistrarPagoScreen(
             )
         }
 
-        if (estado.adjuntarComprobante) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { tomarFotografia() }) {
-                    Text("Tomar fotografía")
+        AnimatedVisibility(visible = estado.adjuntarComprobante) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { tomarFotografia() }) {
+                        Text("Tomar fotografía")
+                    }
+                    OutlinedButton(onClick = { galeriaLauncher.launch("image/*") }) {
+                        Text("Elegir de la galería")
+                    }
                 }
-                OutlinedButton(onClick = { galeriaLauncher.launch("image/*") }) {
-                    Text("Elegir de la galería")
+                if (estado.comprobante != null) {
+                    AsyncImage(
+                        model = estado.comprobante,
+                        contentDescription = "Comprobante elegido",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                    )
                 }
-            }
-            if (estado.comprobante != null) {
-                AsyncImage(
-                    model = estado.comprobante,
-                    contentDescription = "Comprobante elegido",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                )
-            }
-            estado.errores.comprobante?.let {
-                Text(it, color = MaterialTheme.colorScheme.error)
+                estado.errores.comprobante?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
 
