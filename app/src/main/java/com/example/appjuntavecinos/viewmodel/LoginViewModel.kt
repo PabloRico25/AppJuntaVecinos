@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.LoginErrores
 import com.example.appjuntavecinos.data.model.LoginUiState
+import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _estado = MutableStateFlow(LoginUiState())
     val estado: StateFlow<LoginUiState> = _estado.asStateFlow()
 
+    private val _sesion = MutableStateFlow<UsuarioEntity?>(null)
+    val sesion: StateFlow<UsuarioEntity?> = _sesion.asStateFlow()
+
     init {
         viewModelScope.launch {
             repositorio.cargarDatosDeEjemplo()
@@ -30,7 +34,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         _estado.update {
             it.copy(
                 correo = valor,
-                errores = it.errores.copy(correo = null)
+                errores = it.errores.copy(correo = null, general = null)
             )
         }
     }
@@ -39,7 +43,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         _estado.update {
             it.copy(
                 clave = valor,
-                errores = it.errores.copy(clave = null)
+                errores = it.errores.copy(clave = null, general = null)
             )
         }
     }
@@ -63,4 +67,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         _estado.update { it.copy(errores = nuevosErrores) }
         return nuevosErrores == LoginErrores()
     }
+
+    fun puedeConfirmarReservas(): Boolean = _sesion.value?.cargo == "SECRETARIA"
+
+    fun puedeRegistrarPagos(): Boolean = _sesion.value?.cargo == "TESORERIA"
 }

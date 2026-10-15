@@ -8,5 +8,6 @@ data class LoginUiState(
 
 data class LoginErrores(
     val correo: String? = null,
-    val clave: String? = null
+    val clave: String? = null,
+    val general: String? = null
 )
