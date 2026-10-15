@@ -10,6 +10,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -18,6 +20,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +35,7 @@ import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
 import com.example.appjuntavecinos.ui.screens.PagosScreen
 import com.example.appjuntavecinos.ui.screens.RegistrarPagoScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +47,8 @@ fun AppNavigation() {
     val sesion by loginViewModel.sesion.collectAsState()
     val destinos = if (sesion?.rol == "DIRECTIVA") destinosDirectiva else destinosVecino
     var menuAbierto by remember { mutableStateOf(false) }
+    val avisos = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     val contenido: @Composable () -> Unit = {
         NavHost(navController = navController, startDestination = Rutas.LOGIN) {
@@ -75,7 +81,10 @@ fun AppNavigation() {
             composable(Rutas.NUEVA_RESERVA) {
                 NuevaReservaScreen(
                     vecinoId = sesion?.id ?: 0,
-                    onReservaCreada = { navController.popBackStack() }
+                    onReservaCreada = {
+                        navController.popBackStack()
+                        scope.launch { avisos.showSnackbar("Reserva solicitada. Queda pendiente de confirmación") }
+                    }
                 )
             }
             composable(Rutas.PAGOS) {
@@ -88,7 +97,10 @@ fun AppNavigation() {
                 RegistrarPagoScreen(
                     registradoPorId = sesion?.id ?: 0,
                     puedeRegistrar = loginViewModel.puedeRegistrarPagos(),
-                    onPagoRegistrado = { navController.popBackStack() }
+                    onPagoRegistrado = {
+                        navController.popBackStack()
+                        scope.launch { avisos.showSnackbar("Pago registrado") }
+                    }
                 )
             }
         }
@@ -137,6 +149,10 @@ fun AppNavigation() {
                 )
                 Box(modifier = Modifier.weight(1f)) {
                     contenido()
+                    SnackbarHost(
+                        hostState = avisos,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
                 }
             }
         }
