@@ -132,8 +132,11 @@ fun MisReservasScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { reservaACancelar = null }) {
-                    Text("No")
+                TextButton(
+                    onClick = { reservaACancelar = null },
+                    colors = ButtonDefaults.textButtonColors(contentColor = TextoPrincipal)
+                ) {
+                    Text("No", fontWeight = FontWeight.Bold)
                 }
             }
         )
