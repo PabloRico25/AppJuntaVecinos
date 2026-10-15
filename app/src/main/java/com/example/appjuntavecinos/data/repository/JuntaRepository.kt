@@ -28,6 +28,20 @@ class JuntaRepository(context: Context) {
         return dependenciaDao.obtenerTodas()
     }
 
+    suspend fun crearReserva(reserva: ReservaEntity) {
+        reservaDao.insertar(reserva)
+    }
+
+    suspend fun hayChoque(
+        dependenciaId: Int,
+        fecha: String,
+        horaInicio: String,
+        horaFin: String
+    ): Boolean {
+        val confirmadas = reservaDao.obtenerConfirmadas(dependenciaId, fecha)
+        return confirmadas.any { it.horaInicio < horaFin && horaInicio < it.horaFin }
+    }
+
     suspend fun cargarDatosDeEjemplo() {
         if (dependenciaDao.obtenerTodas().isNotEmpty()) return
 
