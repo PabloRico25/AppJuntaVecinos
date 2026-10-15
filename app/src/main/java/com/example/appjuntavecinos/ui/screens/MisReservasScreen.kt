@@ -143,7 +143,7 @@ fun MisReservasScreen(
     }
 }
 
-private fun etiquetaEstado(estado: String): String {
+fun etiquetaEstado(estado: String): String {
     return when (estado) {
         "PENDIENTE" -> "Pendiente"
         "CONFIRMADA" -> "Confirmada"
@@ -153,7 +153,7 @@ private fun etiquetaEstado(estado: String): String {
     }
 }
 
-private fun colorEstado(estado: String): Color {
+fun colorEstado(estado: String): Color {
     return when (estado) {
         "PENDIENTE" -> LightBlue
         "CONFIRMADA" -> Green
