@@ -36,10 +36,12 @@ import com.example.appjuntavecinos.ui.screens.LoginScreen
 import com.example.appjuntavecinos.ui.screens.MisReservasScreen
 import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
 import com.example.appjuntavecinos.ui.screens.PagosScreen
+import com.example.appjuntavecinos.ui.screens.PuertaScreen
 import com.example.appjuntavecinos.ui.screens.RegistrarPagoScreen
 import com.example.appjuntavecinos.ui.screens.ReservasDirectivaScreen
 import com.example.appjuntavecinos.ui.screens.ResumenScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
+import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +51,8 @@ fun AppNavigation() {
     val entradaActual by navController.currentBackStackEntryAsState()
     val rutaActual = entradaActual?.destination?.route
     val loginViewModel: LoginViewModel = viewModel()
+    val puertaViewModel: PuertaViewModel = viewModel()
+    val modoPuerta by puertaViewModel.modoPuerta.collectAsState()   // NUEVO (puerta 5)
     val sesion by loginViewModel.sesion.collectAsState()
     val destinos = if (sesion?.rol == "DIRECTIVA") destinosDirectiva else destinosVecino
     var menuAbierto by remember { mutableStateOf(false) }
@@ -60,6 +64,7 @@ fun AppNavigation() {
             composable(Rutas.LOGIN) {
                 LoginScreen(
                     viewModel = loginViewModel,
+                    puertaViewModel = puertaViewModel,
                     onLoginValido = {
                         val rutaInicial = if (loginViewModel.sesion.value?.rol == "DIRECTIVA") {
                             Rutas.RESERVAS
@@ -109,7 +114,6 @@ fun AppNavigation() {
             composable(Rutas.RESUMEN) {
                 ResumenScreen()
             }
-            // NUEVO: la pantalla de disponibilidad, compartida por vecino y directiva
             composable(Rutas.DISPONIBILIDAD) {
                 DisponibilidadScreen(
                     mostrarNombres = sesion?.rol == "DIRECTIVA"
@@ -128,7 +132,12 @@ fun AppNavigation() {
         }
     }
 
-    if (rutaActual == Rutas.LOGIN || rutaActual == null) {
+    // NUEVO (puerta 5): primero se mira si este aparato es una puerta
+    if (modoPuerta == null) {
+        Box(modifier = Modifier.fillMaxSize())
+    } else if (modoPuerta == true) {
+        PuertaScreen(viewModel = puertaViewModel)
+    } else if (rutaActual == Rutas.LOGIN || rutaActual == null) {
         contenido()
     } else {
         NavigationSuiteScaffold(
@@ -149,7 +158,6 @@ fun AppNavigation() {
                 TopAppBar(
                     title = { Text(sesion?.nombre ?: "") },
                     actions = {
-                        // NUEVO: ícono de calendario, solo la directiva y solo en Reservas
                         if (sesion?.rol == "DIRECTIVA" && rutaActual == Rutas.RESERVAS) {
                             IconButton(onClick = { navController.navigate(Rutas.DISPONIBILIDAD) }) {
                                 Icon(Icons.Filled.DateRange, contentDescription = "Ver disponibilidad")
