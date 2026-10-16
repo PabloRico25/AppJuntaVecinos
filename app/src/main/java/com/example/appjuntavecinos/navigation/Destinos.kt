@@ -2,6 +2,7 @@ package com.example.appjuntavecinos.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -19,5 +20,6 @@ val destinosVecino = listOf(
 val destinosDirectiva = listOf(
     Destino(Rutas.RESERVAS, "Reservas", Icons.Filled.DateRange),
     Destino(Rutas.PAGOS, "Pagos", Icons.Filled.ShoppingCart),
+    Destino(Rutas.RESUMEN, "Resumen", Icons.Filled.Info),
     Destino(Rutas.ESCANEAR, "Escanear", Icons.Filled.Search)
 )

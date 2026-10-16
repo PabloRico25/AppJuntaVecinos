@@ -36,6 +36,7 @@ import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
 import com.example.appjuntavecinos.ui.screens.PagosScreen
 import com.example.appjuntavecinos.ui.screens.RegistrarPagoScreen
 import com.example.appjuntavecinos.ui.screens.ReservasDirectivaScreen
+import com.example.appjuntavecinos.ui.screens.ResumenScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
@@ -102,6 +103,9 @@ fun AppNavigation() {
             }
             composable(Rutas.ESCANEAR) {
                 EscanearScreen()
+            }
+            composable(Rutas.RESUMEN) {
+                ResumenScreen()
             }
             composable(Rutas.REGISTRAR_PAGO) {
                 RegistrarPagoScreen(
