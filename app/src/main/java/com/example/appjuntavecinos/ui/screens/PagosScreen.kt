@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.data.model.PagoEntity
+import com.example.appjuntavecinos.ui.theme.LightBlue
+import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.viewmodel.PagosViewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -30,6 +32,9 @@ fun PagosScreen(
     viewModel: PagosViewModel = viewModel()
 ) {
     val pagos by viewModel.pagos.collectAsState(initial = emptyList())
+    val reservasPorCobrar by viewModel.reservasPorCobrar.collectAsState(initial = emptyList())   // NUEVO
+    val dependencias by viewModel.dependencias.collectAsState()                                   // NUEVO
+    val usuarios by viewModel.usuarios.collectAsState()                                           // NUEVO
 
     Column(
         modifier = Modifier
@@ -48,6 +53,30 @@ fun PagosScreen(
             }
         } else {
             Text("Solo la Tesorería puede registrar pagos.")
+        }
+
+        // NUEVO: tarjeta "Por cobrar", solo si hay alguna reserva confirmada sin pago
+        if (reservasPorCobrar.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = LightBlue,
+                    contentColor = TextoPrincipal
+                )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "Por cobrar",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    reservasPorCobrar.forEach { reserva ->
+                        val nombreVecino = usuarios.firstOrNull { it.id == reserva.vecinoId }?.nombre ?: ""
+                        val nombreSala = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: ""
+                        Text("$nombreVecino, $nombreSala, ${reserva.fecha}")
+                    }
+                }
+            }
         }
 
         if (pagos.isEmpty()) {
