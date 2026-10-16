@@ -14,6 +14,11 @@ data class DatosQr(
     val nombreVecino: String
 )
 
+data class DatosCodigoCorto(
+    val reservaId: Int,
+    val firma: String
+)
+
 enum class EstadoIngreso {
     VALIDO,
     FUERA_DE_HORARIO,
@@ -45,6 +50,23 @@ fun leerContenidoQr(texto: String): DatosQr? {
     return DatosQr(reservaId, dependenciaId, partes[3], partes[4], partes[5], partes[6])
 }
 
+fun armarCodigoCorto(reserva: ReservaEntity): String {
+    return reserva.id.toString() + "-" + firmaCorta(reserva)
+}
+
+fun leerCodigoCorto(texto: String): DatosCodigoCorto? {
+    val partes = texto.trim().uppercase().split("-")
+    if (partes.size != 2) return null
+
+    val reservaId = partes[0].toIntOrNull() ?: return null
+    if (partes[1].length != 6) return null
+    return DatosCodigoCorto(reservaId, partes[1])
+}
+
+fun codigoCortoEsValido(reserva: ReservaEntity, firma: String): Boolean {
+    return firmaCorta(reserva) == firma
+}
+
 fun evaluarIngreso(datos: DatosQr, fechaHoy: String, horaActual: String): EstadoIngreso {
     if (datos.fecha != fechaHoy) return EstadoIngreso.FUERA_DE_HORARIO
 
@@ -59,6 +81,17 @@ fun evaluarIngreso(datos: DatosQr, fechaHoy: String, horaActual: String): Estado
 
 private fun firmar(cuerpo: String): String {
     return hashClave(cuerpo + CLAVE_FIRMA).take(16)
+}
+
+private fun firmaCorta(reserva: ReservaEntity): String {
+    val cuerpo = listOf(
+        reserva.id.toString(),
+        reserva.dependenciaId.toString(),
+        reserva.fecha,
+        reserva.horaInicio,
+        reserva.horaFin
+    ).joinToString("|")
+    return hashClave(cuerpo + CLAVE_FIRMA).take(6).uppercase()
 }
 
 private fun aMinutos(hora: String): Int {

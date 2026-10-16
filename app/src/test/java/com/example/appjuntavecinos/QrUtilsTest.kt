@@ -2,12 +2,17 @@ package com.example.appjuntavecinos
 
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.utils.EstadoIngreso
+import com.example.appjuntavecinos.utils.armarCodigoCorto
 import com.example.appjuntavecinos.utils.armarContenidoQr
+import com.example.appjuntavecinos.utils.codigoCortoEsValido
 import com.example.appjuntavecinos.utils.evaluarIngreso
+import com.example.appjuntavecinos.utils.leerCodigoCorto
 import com.example.appjuntavecinos.utils.leerContenidoQr
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class QrUtilsTest {
@@ -70,5 +75,42 @@ class QrUtilsTest {
         val datos = leerContenidoQr(armarContenidoQr(reserva, "Juan Pérez"))!!
 
         assertEquals(EstadoIngreso.FUERA_DE_HORARIO, evaluarIngreso(datos, "2026-10-27", "18:00"))
+    }
+
+    @Test
+    fun el_codigo_corto_tiene_la_forma_numero_guion_firma() {
+        val codigo = armarCodigoCorto(reserva)
+
+        assertTrue(codigo.startsWith("7-"))
+        assertEquals(8, codigo.length)
+    }
+
+    @Test
+    fun el_codigo_corto_se_lee_y_calza_con_su_reserva() {
+        val datos = leerCodigoCorto(armarCodigoCorto(reserva))
+
+        assertNotNull(datos)
+        assertEquals(7, datos!!.reservaId)
+        assertTrue(codigoCortoEsValido(reserva, datos.firma))
+    }
+
+    @Test
+    fun si_cambia_la_reserva_el_codigo_corto_ya_no_calza() {
+        val datos = leerCodigoCorto(armarCodigoCorto(reserva))!!
+
+        assertFalse(codigoCortoEsValido(reserva.copy(horaInicio = "19:00"), datos.firma))
+    }
+
+    @Test
+    fun el_codigo_corto_se_acepta_en_minusculas_y_con_espacios() {
+        val codigo = armarCodigoCorto(reserva)
+
+        assertNotNull(leerCodigoCorto("  " + codigo.lowercase() + " "))
+    }
+
+    @Test
+    fun un_texto_sin_la_forma_del_codigo_corto_no_se_lee() {
+        assertNull(leerCodigoCorto("hola"))
+        assertNull(leerCodigoCorto("7-12"))
     }
 }
