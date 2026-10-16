@@ -156,7 +156,9 @@ class JuntaRepository(context: Context) {
             PagoEntity(tipo = "CONSUMO_BASICO", categoria = "AGUA", monto = 24200,
                 fecha = fechaEn(-4), registradoPorId = 5),
             PagoEntity(tipo = "CONSUMO_BASICO", categoria = "GAS", monto = 24000,
-                fecha = fechaEn(-5), registradoPorId = 5)
+                fecha = fechaEn(-5), registradoPorId = 5),
+            PagoEntity(reservaId = 1, tipo = "ARRIENDO", monto = 50000,
+                fecha = fechaEn(-1), registradoPorId = 5)
         )
         pagos.forEach { pagoDao.insertar(it) }
     }
