@@ -164,7 +164,8 @@ fun MisReservasScreen(
 
     reservaConQr?.let { reserva ->
         val imagen = remember(reserva.id) {
-            generarQr(armarContenidoQr(reserva, nombreVecino)).asImageBitmap()
+            generarQr(armarContenidoQr(reserva, nombreVecino),
+                900).asImageBitmap()
         }
         AlertDialog(
             onDismissRequest = { reservaConQr = null },
@@ -178,12 +179,13 @@ fun MisReservasScreen(
                     Image(
                         bitmap = imagen,
                         contentDescription = "Código QR de la reserva",
-                        modifier = Modifier.size(240.dp)
+                        modifier = Modifier.size(300.dp)
                     )
                     Text(
                         text = "Código: ${armarCodigoCorto(reserva)}",
                         fontWeight = FontWeight.Bold
                     )
+                    Text("Muéstralo en la entrada el día de tu reserva.")
                 }
             },
             confirmButton = {
