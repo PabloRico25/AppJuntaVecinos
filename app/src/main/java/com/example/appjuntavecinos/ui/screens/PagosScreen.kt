@@ -97,6 +97,6 @@ private fun etiquetaPago(pago: PagoEntity): String {
     }
 }
 
-private fun formatoPesos(monto: Int): String {
+fun formatoPesos(monto: Int): String {
     return "$" + NumberFormat.getIntegerInstance(Locale("es", "CL")).format(monto)
 }
