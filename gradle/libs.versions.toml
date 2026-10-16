@@ -15,6 +15,9 @@ lifecycleViewmodelCompose = "2.11.0"
 coil = "2.7.0"
 zxing = "3.5.3"
 codeScanner = "16.1.0"
+datastore = "1.2.1"
+camerax = "1.6.2"
+mlkitBarcode = "17.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,7 +44,12 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 play-services-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "codeScanner" }
-
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+google-mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
