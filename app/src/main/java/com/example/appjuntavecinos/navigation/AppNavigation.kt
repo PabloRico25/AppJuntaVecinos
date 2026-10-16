@@ -29,6 +29,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.appjuntavecinos.ui.screens.EscanearScreen
 import com.example.appjuntavecinos.ui.screens.LoginScreen
 import com.example.appjuntavecinos.ui.screens.MisReservasScreen
 import com.example.appjuntavecinos.ui.screens.NuevaReservaScreen
@@ -98,6 +99,9 @@ fun AppNavigation() {
                     puedeRegistrar = loginViewModel.puedeRegistrarPagos(),
                     onRegistrarPago = { navController.navigate(Rutas.REGISTRAR_PAGO) }
                 )
+            }
+            composable(Rutas.ESCANEAR) {
+                EscanearScreen()
             }
             composable(Rutas.REGISTRAR_PAGO) {
                 RegistrarPagoScreen(
