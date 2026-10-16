@@ -13,6 +13,9 @@ interface ReservaDao {
     @Insert
     suspend fun insertar(reserva: ReservaEntity)
 
+    @Query("SELECT * FROM ReservaEntity WHERE id = :id")
+    suspend fun obtenerPorId(id: Int): ReservaEntity?
+
     @Query("SELECT * FROM ReservaEntity WHERE vecinoId = :vecinoId ORDER BY fecha")
     suspend fun obtenerPorVecino(vecinoId: Int): List<ReservaEntity>
 

@@ -11,5 +11,6 @@ data class EscanearUiState(
 
 data class ResultadoEscaneo(
     val estado: EstadoIngreso,
-    val datos: DatosQr?
+    val datos: DatosQr?,
+    val motivo: String? = null
 )

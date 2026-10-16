@@ -73,7 +73,7 @@ fun EscanearScreen(
         OutlinedTextField(
             value = estado.codigo,
             onValueChange = { viewModel.onCodigoChange(it) },
-            label = { Text("Código del QR (a mano)") },
+            label = { Text("Código corto o texto del QR") },
             isError = estado.error != null,
             supportingText = { estado.error?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
@@ -117,7 +117,7 @@ fun EscanearScreen(
                         Text("Sala: ${dependencias.firstOrNull { it.id == datos.dependenciaId }?.nombre ?: ""}")
                         Text("${datos.fecha}, de ${datos.horaInicio} a ${datos.horaFin}")
                     } else {
-                        Text("No es un QR de la junta o fue alterado.")
+                        Text(resultado.motivo ?: "No es un QR de la junta o fue alterado.")
                     }
                 }
             }

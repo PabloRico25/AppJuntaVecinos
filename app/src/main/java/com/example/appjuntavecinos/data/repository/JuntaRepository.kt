@@ -79,6 +79,14 @@ class JuntaRepository(context: Context) {
         return pagoDao.observarReservasPagadas()
     }
 
+    suspend fun buscarReserva(id: Int): ReservaEntity? {
+        return reservaDao.obtenerPorId(id)
+    }
+
+    suspend fun reservaPagada(id: Int): Boolean {
+        return pagoDao.contarPagosDeArriendo(id) > 0
+    }
+
     suspend fun obtenerReservasPorPagar(): List<ReservaEntity> {
         return reservaDao.obtenerConfirmadasSinPago()
     }

@@ -23,6 +23,9 @@ interface PagoDao {
     @Query("SELECT reservaId FROM PagoEntity WHERE tipo = 'ARRIENDO' AND reservaId IS NOT NULL")
     fun observarReservasPagadas(): Flow<List<Int>>
 
+    @Query("SELECT COUNT(*) FROM PagoEntity WHERE tipo = 'ARRIENDO' AND reservaId = :reservaId")
+    suspend fun contarPagosDeArriendo(reservaId: Int): Int
+
     @Delete
     suspend fun eliminar(pago: PagoEntity)
 }

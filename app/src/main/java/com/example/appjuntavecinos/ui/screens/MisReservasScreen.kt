@@ -37,6 +37,7 @@ import com.example.appjuntavecinos.ui.theme.Gray
 import com.example.appjuntavecinos.ui.theme.Green
 import com.example.appjuntavecinos.ui.theme.LightBlue
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.utils.armarCodigoCorto
 import com.example.appjuntavecinos.utils.armarContenidoQr
 import com.example.appjuntavecinos.utils.generarQr
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
@@ -179,7 +180,10 @@ fun MisReservasScreen(
                         contentDescription = "Código QR de la reserva",
                         modifier = Modifier.size(240.dp)
                     )
-                    Text("Muéstralo en la entrada el día de tu reserva.")
+                    Text(
+                        text = "Código: ${armarCodigoCorto(reserva)}",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             },
             confirmButton = {
