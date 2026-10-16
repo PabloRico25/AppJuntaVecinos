@@ -1,5 +1,7 @@
 package com.example.appjuntavecinos.ui.screens
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,25 +20,54 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.appjuntavecinos.ui.components.ActivarPuertaDialog
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
+import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
+    puertaViewModel: PuertaViewModel,   // NUEVO
     onLoginValido: () -> Unit
 ) {
     val estado by viewModel.estado.collectAsState()
+    val dependencias by puertaViewModel.dependencias.collectAsState()   // NUEVO
+    var toques by remember { mutableIntStateOf(0) }                      // NUEVO
+    var ultimoToque by remember { mutableLongStateOf(0L) }               // NUEVO
+    var mostrarActivacion by remember { mutableStateOf(false) }          // NUEVO
 
     Column(
         modifier = Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Inicia sesión", style = MaterialTheme.typography.headlineMedium)
+        // NUEVO: el título es el gesto escondido, 7 toques seguidos
+        Text(
+            "Inicia sesión",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                val ahora = System.currentTimeMillis()
+                toques = if (ahora - ultimoToque > 2000) 1 else toques + 1
+                ultimoToque = ahora
+                if (toques >= 7) {
+                    toques = 0
+                    puertaViewModel.cargarDependencias()
+                    mostrarActivacion = true
+                }
+            }
+        )
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
@@ -83,5 +114,17 @@ fun LoginScreen(
         ) {
             Text("Ingresar")
         }
+    }
+
+    // NUEVO: el diálogo que activa el modo puerta
+    if (mostrarActivacion) {
+        ActivarPuertaDialog(
+            dependencias = dependencias,
+            onActivar = { salaId, clave ->
+                puertaViewModel.activar(salaId, clave)
+                mostrarActivacion = false
+            },
+            onCancelar = { mostrarActivacion = false }
+        )
     }
 }
