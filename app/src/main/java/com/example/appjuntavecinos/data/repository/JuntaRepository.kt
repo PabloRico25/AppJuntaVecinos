@@ -2,6 +2,7 @@ package com.example.appjuntavecinos.data.repository
 
 import android.content.Context
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
+import com.example.appjuntavecinos.data.model.IngresoEntity
 import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
@@ -20,6 +21,7 @@ class JuntaRepository(context: Context) {
     private val pagoDao = db.pagoDao()
     private val reservaDao = db.reservaDao()
     private val dependenciaDao = db.dependenciaDao()
+    private val ingresoDao = db.ingresoDao()
 
     suspend fun buscarUsuarioPorCorreo(correo: String): UsuarioEntity? {
         return usuarioDao.buscarPorCorreo(correo)
@@ -93,6 +95,16 @@ class JuntaRepository(context: Context) {
 
     suspend fun crearPago(pago: PagoEntity) {
         pagoDao.insertar(pago)
+    }
+
+    // NUEVO: los ingresos que ya pasaron por la puerta
+    suspend fun obtenerReservasUsadas(): Set<Int> {
+        return ingresoDao.obtenerReservasUsadas().toSet()
+    }
+
+    // NUEVO: guarda que esa reserva ya entró
+    suspend fun registrarIngreso(ingreso: IngresoEntity) {
+        ingresoDao.insertar(ingreso)
     }
 
     suspend fun cargarDatosDeEjemplo() {
