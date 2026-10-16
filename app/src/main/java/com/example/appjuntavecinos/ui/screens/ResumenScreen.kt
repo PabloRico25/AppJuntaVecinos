@@ -2,6 +2,7 @@ package com.example.appjuntavecinos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +27,7 @@ import com.example.appjuntavecinos.ui.theme.FondoSaldo
 import com.example.appjuntavecinos.ui.theme.IngresoVerde
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.utils.ResumenFinanciero
+import com.example.appjuntavecinos.utils.anchoDeVentana
 import com.example.appjuntavecinos.viewmodel.ResumenViewModel
 
 @Composable
@@ -34,6 +37,7 @@ fun ResumenScreen(
     val resumen by viewModel.resumen.collectAsState(
         initial = ResumenFinanciero(0, 0, 0, emptyMap())
     )
+    val ancho = anchoDeVentana()
 
     Column(
         modifier = Modifier
@@ -45,27 +49,34 @@ fun ResumenScreen(
         Text("Resumen financiero", style = MaterialTheme.typography.headlineMedium)
         Text(viewModel.nombreMes)
 
-        TarjetaMonto(
-            titulo = "Ingresos (arriendos)",
-            monto = resumen.ingresos,
-            colorMonto = IngresoVerde,
-            colorFondo = MaterialTheme.colorScheme.surfaceVariant,
-            estilo = MaterialTheme.typography.titleLarge
-        )
-        TarjetaMonto(
-            titulo = "Gastos (consumos básicos)",
-            monto = resumen.gastos,
-            colorMonto = ErrorRojo,
-            colorFondo = MaterialTheme.colorScheme.surfaceVariant,
-            estilo = MaterialTheme.typography.titleLarge
-        )
-        TarjetaMonto(
-            titulo = "Saldo",
-            monto = resumen.saldo,
-            colorMonto = if (resumen.saldo < 0) ErrorRojo else IngresoVerde,
-            colorFondo = FondoSaldo,
-            estilo = MaterialTheme.typography.headlineMedium
-        )
+        // Guía 9: un diseño distinto para Compact, Medium y Expanded.
+        when (ancho) {
+            WindowWidthSizeClass.Expanded -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TarjetaIngresos(resumen, Modifier.weight(1f))
+                    TarjetaGastos(resumen, Modifier.weight(1f))
+                    TarjetaSaldo(resumen, Modifier.weight(1f))
+                }
+            }
+            WindowWidthSizeClass.Medium -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TarjetaIngresos(resumen, Modifier.weight(1f))
+                    TarjetaGastos(resumen, Modifier.weight(1f))
+                }
+                TarjetaSaldo(resumen, Modifier.fillMaxWidth())
+            }
+            else -> {
+                TarjetaIngresos(resumen, Modifier.fillMaxWidth())
+                TarjetaGastos(resumen, Modifier.fillMaxWidth())
+                TarjetaSaldo(resumen, Modifier.fillMaxWidth())
+            }
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -93,15 +104,52 @@ fun ResumenScreen(
 }
 
 @Composable
+private fun TarjetaIngresos(resumen: ResumenFinanciero, modifier: Modifier = Modifier) {
+    TarjetaMonto(
+        titulo = "Ingresos (arriendos)",
+        monto = resumen.ingresos,
+        colorMonto = IngresoVerde,
+        colorFondo = MaterialTheme.colorScheme.surfaceVariant,
+        estilo = MaterialTheme.typography.titleLarge,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun TarjetaGastos(resumen: ResumenFinanciero, modifier: Modifier = Modifier) {
+    TarjetaMonto(
+        titulo = "Gastos (consumos básicos)",
+        monto = resumen.gastos,
+        colorMonto = ErrorRojo,
+        colorFondo = MaterialTheme.colorScheme.surfaceVariant,
+        estilo = MaterialTheme.typography.titleLarge,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun TarjetaSaldo(resumen: ResumenFinanciero, modifier: Modifier = Modifier) {
+    TarjetaMonto(
+        titulo = "Saldo",
+        monto = resumen.saldo,
+        colorMonto = if (resumen.saldo < 0) ErrorRojo else IngresoVerde,
+        colorFondo = FondoSaldo,
+        estilo = MaterialTheme.typography.headlineMedium,
+        modifier = modifier
+    )
+}
+
+@Composable
 private fun TarjetaMonto(
     titulo: String,
     monto: Int,
     colorMonto: Color,
     colorFondo: Color,
-    estilo: TextStyle
+    estilo: TextStyle,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = colorFondo,
             contentColor = TextoPrincipal
