@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +30,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.appjuntavecinos.ui.screens.DisponibilidadScreen
 import com.example.appjuntavecinos.ui.screens.EscanearScreen
 import com.example.appjuntavecinos.ui.screens.LoginScreen
 import com.example.appjuntavecinos.ui.screens.MisReservasScreen
@@ -107,6 +109,12 @@ fun AppNavigation() {
             composable(Rutas.RESUMEN) {
                 ResumenScreen()
             }
+            // NUEVO: la pantalla de disponibilidad, compartida por vecino y directiva
+            composable(Rutas.DISPONIBILIDAD) {
+                DisponibilidadScreen(
+                    mostrarNombres = sesion?.rol == "DIRECTIVA"
+                )
+            }
             composable(Rutas.REGISTRAR_PAGO) {
                 RegistrarPagoScreen(
                     registradoPorId = sesion?.id ?: 0,
@@ -141,6 +149,12 @@ fun AppNavigation() {
                 TopAppBar(
                     title = { Text(sesion?.nombre ?: "") },
                     actions = {
+                        // NUEVO: ícono de calendario, solo la directiva y solo en Reservas
+                        if (sesion?.rol == "DIRECTIVA" && rutaActual == Rutas.RESERVAS) {
+                            IconButton(onClick = { navController.navigate(Rutas.DISPONIBILIDAD) }) {
+                                Icon(Icons.Filled.DateRange, contentDescription = "Ver disponibilidad")
+                            }
+                        }
                         IconButton(onClick = { menuAbierto = true }) {
                             Icon(Icons.Filled.AccountCircle, contentDescription = "Menú de la cuenta")
                         }
