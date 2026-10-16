@@ -71,6 +71,7 @@ fun AppNavigation() {
             composable(Rutas.MIS_RESERVAS) {
                 MisReservasScreen(
                     vecinoId = sesion?.id ?: 0,
+                    nombreVecino = sesion?.nombre ?: "",
                     onNuevaReserva = { navController.navigate(Rutas.NUEVA_RESERVA) }
                 )
             }

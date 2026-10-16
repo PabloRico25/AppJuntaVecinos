@@ -1,12 +1,14 @@
 package com.example.appjuntavecinos.ui.screens
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -22,8 +24,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,18 +37,23 @@ import com.example.appjuntavecinos.ui.theme.Gray
 import com.example.appjuntavecinos.ui.theme.Green
 import com.example.appjuntavecinos.ui.theme.LightBlue
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.utils.armarContenidoQr
+import com.example.appjuntavecinos.utils.generarQr
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
 @Composable
 fun MisReservasScreen(
     vecinoId: Int,
+    nombreVecino: String,
     onNuevaReserva: () -> Unit,
     viewModel: MisReservasViewModel = viewModel()
 ) {
     val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
     val reservas by flujoDeReservas.collectAsState(initial = emptyList())
     val dependencias by viewModel.dependencias.collectAsState()
+    val pagadas by viewModel.reservasPagadas.collectAsState(initial = emptyList())
     var reservaACancelar by remember { mutableStateOf<ReservaEntity?>(null) }
+    var reservaConQr by remember { mutableStateOf<ReservaEntity?>(null) }
 
     Column(
         modifier = Modifier
@@ -105,6 +114,16 @@ fun MisReservasScreen(
                                     }
                                 }
                             }
+                            if (reserva.estado == "CONFIRMADA" && reserva.id in pagadas) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Button(onClick = { reservaConQr = reserva }) {
+                                        Text("Ver QR", fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -137,6 +156,35 @@ fun MisReservasScreen(
                     colors = ButtonDefaults.textButtonColors(contentColor = TextoPrincipal)
                 ) {
                     Text("No", fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
+
+    reservaConQr?.let { reserva ->
+        val imagen = remember(reserva.id) {
+            generarQr(armarContenidoQr(reserva, nombreVecino)).asImageBitmap()
+        }
+        AlertDialog(
+            onDismissRequest = { reservaConQr = null },
+            title = { Text("Tu código QR") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Image(
+                        bitmap = imagen,
+                        contentDescription = "Código QR de la reserva",
+                        modifier = Modifier.size(240.dp)
+                    )
+                    Text("Muéstralo en la entrada el día de tu reserva.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { reservaConQr = null }) {
+                    Text("Cerrar", fontWeight = FontWeight.Bold)
                 }
             }
         )
