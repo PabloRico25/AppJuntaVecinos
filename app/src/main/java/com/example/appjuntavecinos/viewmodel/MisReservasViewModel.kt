@@ -19,6 +19,8 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
     private val _dependencias = MutableStateFlow<List<DependenciaComunitariaEntity>>(emptyList())
     val dependencias: StateFlow<List<DependenciaComunitariaEntity>> = _dependencias.asStateFlow()
 
+    val reservasPagadas: Flow<List<Int>> = repositorio.observarReservasPagadas()
+
     init {
         viewModelScope.launch {
             _dependencias.value = repositorio.obtenerDependencias()

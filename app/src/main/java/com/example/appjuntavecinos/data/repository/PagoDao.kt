@@ -20,6 +20,9 @@ interface PagoDao {
     @Query("SELECT * FROM PagoEntity ORDER BY fecha DESC, id DESC")
     fun observarTodos(): Flow<List<PagoEntity>>
 
+    @Query("SELECT reservaId FROM PagoEntity WHERE tipo = 'ARRIENDO' AND reservaId IS NOT NULL")
+    fun observarReservasPagadas(): Flow<List<Int>>
+
     @Delete
     suspend fun eliminar(pago: PagoEntity)
 }

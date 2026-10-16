@@ -75,6 +75,10 @@ class JuntaRepository(context: Context) {
         return pagoDao.observarTodos()
     }
 
+    fun observarReservasPagadas(): Flow<List<Int>> {
+        return pagoDao.observarReservasPagadas()
+    }
+
     suspend fun obtenerReservasPorPagar(): List<ReservaEntity> {
         return reservaDao.obtenerConfirmadasSinPago()
     }
