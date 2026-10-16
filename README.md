@@ -93,8 +93,7 @@ app/src/main/java/com/example/appjuntavecinos/
 4. Conectar un celular con la depuración USB activada, o crear un dispositivo en Device Manager.
 5. Ejecutar el módulo `app`.
 
-La app funciona desde Android 7.0 (API 24). La base de datos local se llena sola la primera vez con datos de ejemplo: 2 dependencias, 6 usuarios, 8 reservas y 5 pagos.
-
+La app funciona desde Android 7.0 (API 24). La base de datos local se llena sola la primera vez con datos de ejemplo: 2 dependencias, 6 usuarios, 8 reservas y 6 pagos.
 Si el celular ya tenía instalada una versión anterior de la app, hay que borrar sus datos (o desinstalarla) antes de abrir esta, porque la base de datos cambió de versión.
 
 ## Usuarios de prueba
