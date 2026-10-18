@@ -1,5 +1,6 @@
 package com.example.appjuntavecinos.ui.screens
 
+import com.example.appjuntavecinos.ui.components.coloresBotonTexto
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -45,7 +46,7 @@ fun MisReservasScreen(
                         style = MaterialTheme.typography.titleMedium)
                     Text("${fechaParaMostrar(reserva.fecha)} · ${reserva.horaInicio} a ${reserva.horaFin}")
                     EstadoReserva(reserva.estado)
-                    TextButton(onClick = { onDetalle(reserva.id) }) { Text("Ver detalle #${reserva.id}") }
+                    TextButton(colors = coloresBotonTexto(), onClick = { onDetalle(reserva.id) }) { Text("Ver detalle #${reserva.id}") }
                 }
             }
         }

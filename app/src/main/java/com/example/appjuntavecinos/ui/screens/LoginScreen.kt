@@ -21,26 +21,27 @@ import com.example.appjuntavecinos.ui.theme.AppJuntaVecinosTheme
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel, onLoginValido: () -> Unit, modifier: Modifier = Modifier) {
+fun LoginScreen(viewModel: LoginViewModel, onLoginValido: () -> Unit, modifier: Modifier = Modifier, onActivarPuerta: () -> Unit = {}) {
     val estado by viewModel.estado.collectAsState()
     LoginFormulario(estado, viewModel::onCorreoChange, viewModel::onClaveChange,
-        { viewModel.iniciarSesion(onLoginValido) }, modifier)
+        { viewModel.iniciarSesion(onLoginValido) }, modifier, onActivarPuerta)
 }
 
 // Recibe datos y eventos: la Preview puede dibujarlo sin abrir una base de datos.
 @Composable
 private fun LoginFormulario(
     estado: LoginUiState, onCorreoChange: (String) -> Unit,
-    onClaveChange: (String) -> Unit, onIngresar: () -> Unit, modifier: Modifier = Modifier
+    onClaveChange: (String) -> Unit, onIngresar: () -> Unit, modifier: Modifier = Modifier, onActivarPuerta: () -> Unit = {}
 ) {
     var mostrarClave by rememberSaveable { mutableStateOf(false) }
     val foco = LocalFocusManager.current
     ContenidoFormulario(modifier) {
         Spacer(Modifier.height(16.dp))
         Text("Junta de Vecinos Zaror", style = MaterialTheme.typography.headlineSmall)
-        Text("Inicia sesión", style = MaterialTheme.typography.titleLarge)
+        TituloConSieteToques("Inicia sesión", onActivarPuerta)
         Text("Entra con tu correo y tu clave. Datos ficticios.", style = MaterialTheme.typography.bodyMedium)
         OutlinedTextField(
+            colors = coloresCampo(),
             value = estado.correo, onValueChange = onCorreoChange,
             label = { Text("Correo") }, singleLine = true, enabled = !estado.cargando,
             leadingIcon = { Icon(Icons.Default.Email, null) },
@@ -51,6 +52,7 @@ private fun LoginFormulario(
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
+            colors = coloresCampo(),
             value = estado.clave, onValueChange = onClaveChange,
             label = { Text("Clave") }, singleLine = true, enabled = !estado.cargando,
             leadingIcon = { Icon(Icons.Default.Lock, null) },

@@ -14,6 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.appjuntavecinos.utils.*
 
+// El azul claro se conserva en botones; texto, cursor y borde enfocados necesitan contraste.
+@Composable
+fun coloresCampo() = OutlinedTextFieldDefaults.colors(
+    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+    focusedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    cursorColor = MaterialTheme.colorScheme.onSurface
+)
+
+@Composable
+fun coloresBotonTexto() = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+
 @Composable
 fun ContenidoFormulario(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -45,6 +56,7 @@ fun MenuDesplegable(
     var abierto by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded = abierto, onExpandedChange = { if (habilitado) abierto = it }) {
         OutlinedTextField(
+            colors = coloresCampo(),
             value = valor, onValueChange = {}, readOnly = true, enabled = habilitado,
             label = { Text(etiqueta) }, isError = error != null,
             trailingIcon = {
@@ -80,10 +92,10 @@ fun CampoFecha(fecha: String, onFechaChange: (Long?) -> Unit, error: String? = n
         DatePickerDialog(
             onDismissRequest = { abierto = false },
             confirmButton = {
-                TextButton(onClick = { onFechaChange(selector.selectedDateMillis); abierto = false },
+                TextButton(colors = coloresBotonTexto(), onClick = { onFechaChange(selector.selectedDateMillis); abierto = false },
                     enabled = selector.selectedDateMillis != null) { Text("Aceptar") }
             },
-            dismissButton = { TextButton(onClick = { abierto = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(colors = coloresBotonTexto(), onClick = { abierto = false }) { Text("Cancelar") } }
         ) {
             DatePicker(state = selector)
         }

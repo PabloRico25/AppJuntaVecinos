@@ -1,122 +1,271 @@
-# Guía del proyecto: etapa de reservas
+# Guía para estudiar y defender AppJuntaVecinos
 
-Esta guía explica el avance de William. No significa que la aplicación completa
-esté terminada ni equivale a un porcentaje de la rúbrica.
+Esta guía sigue el código de la versión de William. Primero recorre la app con las
+cuentas del README; después abre los archivos en este orden. No necesitas memorizar
+todo: debes poder explicar qué dato entra, quién lo valida, dónde se guarda y cómo
+vuelve a aparecer en pantalla.
 
-## 1. Cómo empieza la app
+## 1. El mapa general
 
-`MainActivity.kt` inicia Compose y aplica `AppJuntaVecinosTheme`.
-Dentro del tema se llama a `AppNavigation()`, que contiene el `Scaffold`
-(las barras y los márgenes) y el `NavHost` (las pantallas y sus rutas).
+```text
+Persona toca o escribe
+        ↓
+Screen: dibuja y comunica el evento
+        ↓
+ViewModel: valida y actualiza el estado
+        ↓
+JuntaRepository: comprueba las reglas que afectan a los datos
+        ↓
+DAO: ejecuta la consulta en Room
+        ↓
+Flow avisa el cambio → la pantalla vuelve a dibujarse
+```
 
-`Rutas.kt` guarda los nombres de las rutas. `Destinos.kt` define los elementos
-de la barra inferior según el rol. Las pantallas internas tienen botón Volver.
+`MainActivity` inicia Compose y aplica el tema. `AppNavigation` contiene el
+`Scaffold`, que organiza barras y márgenes, y el `NavHost`, que muestra la ruta
+actual. `Rutas` guarda nombres y `Destinos` define las pestañas por rol.
 
-## 2. El circuito del formulario
+Una función con `@Composable` describe interfaz. Compose puede ejecutarla otra vez
+cuando cambia el estado: por eso no debemos insertar un pago directamente en el
+cuerpo de una función de pantalla.
 
-Ejemplo al escribir el correo:
+## 2. Entender el estado con el correo
 
-1. `OutlinedTextField` muestra `estado.correo`.
-2. El cambio de texto llama a `onCorreoChange(valor)`.
-3. El ViewModel actualiza `_estado` con `update { it.copy(...) }`.
-4. La pantalla observa `estado` con `collectAsState()` y se vuelve a dibujar.
+Abrir `LoginUiState`, `LoginViewModel` y `LoginScreen`.
 
-`it` representa el estado anterior. `copy(correo = valor)` crea un estado nuevo
-y conserva los campos que no se mencionan. El segundo `copy`, sobre `errores`,
-limpia solo el error del campo que se está corrigiendo.
+1. El campo muestra `estado.correo`.
+2. Al escribir, `onValueChange` llama a `onCorreoChange(valor)`.
+3. El ViewModel ejecuta `_estado.update { it.copy(...) }`.
+4. `collectAsState()` recibe el cambio y Compose muestra el nuevo texto.
 
-La pantalla recibe datos y envía eventos. No decide si la clave es válida ni si
-una reserva puede confirmarse.
+`it` es el estado anterior. `copy(correo = valor)` crea una copia cambiando solo el
+correo. El segundo `copy` cambia únicamente `errores.correo` a `null`, sin borrar
+el error de la clave. `String?` admite texto o ausencia de texto; `null` significa
+que ese campo no tiene un error que mostrar.
 
-## 3. Para qué sirve cada clase de Login
+`_estado` es mutable y privado: solo el ViewModel lo modifica. `estado` se expone
+como `StateFlow`, para observarlo. `val` impide reemplazar la referencia; no convierte
+por sí solo todo objeto en inmutable.
 
-- `LoginUiState`: correo, clave, errores e indicador de carga.
-- `LoginErrores`: un mensaje nullable por campo y uno general. `null` significa
-  que no hay error. Está junto al UiState en `data/model`, siguiendo el contrato actualizado.
-- `LoginViewModel`: valida, consulta al repositorio y guarda la sesión.
-- `LoginScreen`: dibuja el formulario y sus mensajes.
-- `LoginScreenPreview`: dibuja datos de ejemplo, sin iniciar Room.
+La pantalla usa `isError` y `supportingText` para mostrar el error al lado del campo.
+El botón llama a la validación; si pasa, el repositorio busca al usuario. Las claves
+ficticias se comparan como hash SHA-256.
 
-El ViewModel ahora hereda de `AndroidViewModel` para recibir `Application`,
-el contexto que necesita el repositorio al abrir Room. Se obtiene con
-`viewModel()`; no se construye manualmente dentro de la pantalla.
+**Comprueba:** enviar el Login vacío y luego con una clave incorrecta.
+**Explícalo:** ¿por qué no sirve dejar `value = ""` y `onValueChange = {}`?
 
-La clave se compara mediante `hashClave`. El mismo mensaje general se usa
-cuando el correo no existe o la clave es incorrecta.
+## 3. Sesión, navegación y ViewModel
 
-## 4. Qué hace Room
+`LoginViewModel` tiene una sola instancia en `AppNavigation`. Mantiene la sesión al
+cambiar de ruta y al recrear la actividad por un giro. Al cerrar sesión se limpia
+el historial de navegación, así Atrás no regresa a una pantalla privada.
 
-- Una `Entity` define las columnas de una tabla.
-- Un `Dao` contiene consultas y operaciones de esa tabla.
-- `AppDatabase` reúne las cuatro tablas y permite acceder a sus DAO.
-- `JuntaRepository` ofrece operaciones que usan esos DAO.
-- KSP genera el código de Room al compilar.
+La sesión no se guarda en Room ni DataStore: si Android termina el proceso, al
+volver se solicita Login. Las reservas sí permanecen en Room. Son dos cosas distintas.
 
-Una consulta que devuelve `Flow` avisa cuando cambian los datos. Así Mis reservas
-se actualiza después de guardar, confirmar o cancelar.
+Los ViewModels que necesitan abrir Room usan `AndroidViewModel`, que recibe
+`Application`. Compose los obtiene mediante `viewModel()`, sin construirlos cada
+vez que se dibuja una pantalla. `viewModelScope.launch` ejecuta una tarea suspendida
+ligada a la vida del ViewModel.
 
-Una transacción reúne varias consultas y una escritura como una sola operación.
-En confirmar reserva sirve para comprobar que el horario sigue libre y escribir
-la confirmación sin que otra confirmación se interponga.
+**Comprueba:** entrar, abrir Nueva reserva, elegir una sala y girar el aparato.
+Luego cerrar el proceso y abrirlo de nuevo: pide Login, pero conserva lo guardado.
 
-## 5. Dónde están las reglas de reservas
+## 4. Room: Entity, DAO y repositorio
 
-`NuevaReservaViewModel.validarFormulario()` usa `validarDatosReserva`, una función
-de la capa `viewmodel`, para comprobar:
+| Pieza | Función | Ejemplo |
+|---|---|---|
+| Entity | Define columnas de una tabla | `ReservaEntity` |
+| DAO | Define consultas SQL y escrituras | `ReservaDao.obtenerPorId` |
+| AppDatabase | Reúne tablas y DAO | `AppDatabase.obtener(context)` |
+| Repositorio | Coordina consultas y reglas | `JuntaRepository.crearReserva` |
+| KSP | Genera implementación al compilar | Configuración de Room en Gradle |
 
-- Dependencia seleccionada.
-- Fecha válida y no pasada.
-- Horas válidas, de 09:00 a 22:00.
-- Inicio anterior al fin.
-- Aceptación del reglamento.
+Hay cinco tablas: UsuarioEntity, DependenciaComunitariaEntity, ReservaEntity,
+PagoEntity e IngresoEntity. La carga inicial inserta datos ficticios una vez en una
+transacción. Las fechas de ejemplo se calculan al cargar, no al abrir cada pantalla.
 
-El repositorio comprueba los datos que afectan a la escritura y consulta
-reservas confirmadas antes de guardar. `horariosSeCruzan` usa:
+Una consulta `Flow` vuelve a emitir cuando cambia su tabla. Por eso al registrar un
+pago cambian Pagos, Por cobrar, Resumen y la disponibilidad del ticket.
+
+La versión 3 agrega IngresoEntity. `MIGRACION_2_3` ejecuta un `CREATE TABLE` para
+conservar lo que ya existía. No usa una actualización que borre la base.
+
+**Comprueba:** guardar una reserva, cerrar y volver a abrir la app.
+**Explícalo:** ¿qué diferencia hay entre guardar un campo en el UiState y guardar una fila en Room?
+
+## 5. Reglas de reservas
+
+Abrir `ReglasReserva`, `NuevaReservaViewModel` y `JuntaRepository`.
+
+El formulario exige sala, fecha no pasada, horas válidas entre 09:00 y 22:00,
+inicio anterior al fin y aceptación del reglamento. Las fechas son `yyyy-MM-dd` y
+las horas `HH:mm`, con ceros a la izquierda; por eso esas cadenas ordenadas se
+pueden comparar para el mismo formato.
+
+El cruce usa límites estrictos:
 
 ```kotlin
 inicioA < finB && inicioB < finA
 ```
 
-El límite es estricto: terminar y empezar a la misma hora no es un choque.
-Disponibilidad usa esa misma comparación, y muestra las pendientes como
-Solicitado sin tratarlas como ocupadas.
+Una reserva de 10:00 a 12:00 se cruza con 11:00 a 13:00, pero no con 12:00 a 14:00.
+Solo CONFIRMADA ocupa el horario. Las PENDIENTES pueden coincidir, así que Secretaría
+vuelve a revisar el cruce al confirmar.
 
-La fecha del calendario se convierte con UTC. Usar directamente la zona chilena
-sobre la medianoche UTC podría mostrar el día anterior.
+Una **transacción** reúne la lectura y la escritura como una operación. Sirve para
+que dos confirmaciones simultáneas no acepten el mismo horario.
 
-## 6. Los permisos
+DatePicker entrega una fecha basada en UTC. `fechaDesdeMillis` usa esa misma zona
+para no convertir la medianoche en el día anterior al pasar por la zona chilena.
 
-`LoginViewModel` expone los permisos de la sesión. La pantalla los usa para
-mostrar los botones adecuados. El ViewModel de gestión también comprueba el
-cargo, y el repositorio vuelve a verificarlo antes de escribir.
+**Comprueba:** crear dos pendientes que coincidan y confirmar ambas: la segunda se rechaza.
 
-- Vecino: solicita y cancela únicamente sus propias pendientes.
-- Secretaría: confirma o rechaza pendientes.
-- Tesorería y Presidencia: consulta de reservas en esta etapa.
-- Finanzas: consulta sin nombres para vecinos.
+## 6. Permisos de los usuarios
 
-Ocultar un botón no reemplaza la validación de la operación.
+| Usuario | Acciones de escritura |
+|---|---|
+| Vecino | Crear reserva y cancelar una pendiente propia |
+| Secretaría | Confirmar o rechazar pendientes |
+| Tesorería | Registrar pagos |
+| Presidencia | Consulta |
 
-## 7. Qué falta y en qué orden
+Ocultar el botón ayuda a la persona; no basta para proteger la escritura. El
+ViewModel y el repositorio vuelven a comprobar lo que corresponde. El repositorio
+consulta al usuario almacenado antes de confirmar una reserva o guardar un pago.
 
-1. Formulario Registrar pago: tipo, reserva/categoría, monto, fecha y validaciones.
-2. Cámara y galería para adjuntar un comprobante y conservarlo en archivos privados.
-3. Listado de pagos, autorización de Tesorería y prevención de pagos duplicados.
-4. Generación de ticket QR para una reserva confirmada y pagada.
-5. Lectura del QR y validación de dependencia y ventana de ingreso.
-6. Pruebas finales en teléfono, adaptación de pantallas, accesibilidad y revisión de rúbrica.
-7. Preparación de entrega y evidencias reales de colaboración.
+Los vecinos consultan Finanzas sin nombres ni comprobantes. Cada ruta comprueba
+el rol antes de mostrar su contenido.
 
-Las pestañas pendientes están identificadas. El resumen actual usa los pagos
-ficticios persistidos; no crea pagos nuevos.
+## 7. Registrar pago: el segundo formulario
 
-## 8. Ejercicios para preparar la defensa
+Abrir `RegistrarPagoUiState`, `ReglasPago`, `RegistrarPagoViewModel` y
+`RegistrarPagoScreen`.
 
-- Explica por qué `_estado` es privado y `estado` se expone como StateFlow.
-- Cambia un texto del Login y ubica el color del botón en el tema.
-- Añade una validación al formulario de reserva y su mensaje visual.
-- Sigue una solicitud desde el botón Enviar hasta el DAO.
-- Explica por qué dos pendientes pueden coincidir, pero dos confirmadas no.
-- Muestra que la reserva sigue guardada después de reiniciar el proceso.
+- RadioButton: Arriendo o Consumo básico; seleccionar el tipo cambia los campos.
+- Arriendo: reserva CONFIRMADA sin pago anterior.
+- Consumo: ELECTRICIDAD, AGUA o GAS; no se asocia a una reserva.
+- Monto: entero positivo en pesos, hasta nueve dígitos.
+- Fecha: real y no futura.
+- Descripción: opcional, hasta 240 caracteres.
+- Switch: activa el comprobante opcional; si se activa, hay que elegir una imagen.
+- Checkbox: acepta que es un registro informativo.
 
-Primero lee cada pieza con calma y luego intenta explicarla sin mirar esta guía.
+`validarDatosPago` produce mensajes por campo. Al guardar se deshabilita el
+formulario para evitar dobles toques. El repositorio relee el estado de la reserva
+y comprueba el duplicado dentro de una transacción.
+
+No se llama a un banco. Un arriendo suma ingresos; un consumo suma gastos.
+`ResumenViewModel` agrupa por mes y categoría: **saldo = ingresos − gastos**.
+
+**Comprueba:** enviar vacío; luego registrar un arriendo; intentar pagar la misma reserva otra vez.
+
+## 8. Cámara y galería
+
+La pantalla usa `rememberLauncherForActivityResult`: abre otra actividad de Android
+y recibe un resultado cuando regresa.
+
+- `TakePicture`: Android toma una foto y la escribe en la URI creada por FileProvider.
+- `GetContent`: la persona elige una imagen de la galería/documentos.
+- `RequestPermission`: pide permiso de cámara cuando hace falta. Si se deniega,
+  se informa y se puede usar galería.
+- `AsyncImage` de Coil muestra la vista previa y el comprobante guardado.
+
+Una URI identifica un recurso; no siempre es una ruta de archivo que se pueda abrir
+con `File`. Por eso se lee con `contentResolver`.
+
+`guardarComprobante` copia los bytes a la carpeta privada `files/comprobantes`,
+comprueba el límite de 20 MB y que sea una imagen. En Room se guarda la URI de esa
+copia, no toda la imagen. Si el pago falla, se retira la copia nueva para no dejar
+un archivo sin registro. La imagen original de la galería no se elimina.
+
+**Comprueba:** elegir una imagen, guardar el pago y consultar Ver comprobante tras reiniciar.
+
+## 9. Ticket y lectura QR
+
+Abrir `TicketQrScreen`, `QrUtils`, `QrImagen` y `EscanearViewModel`.
+
+Solo se muestra el ticket de una reserva propia CONFIRMADA y pagada. El contenido
+incluye versión `JV1`, id de reserva, id de sala, fecha, inicio, fin, nombre y firma.
+ZXing convierte ese texto en un bitmap QR; no valida permisos ni horarios.
+
+La firma se calcula con SHA-256 usando los datos y una clave compartida de la demo.
+Cambiar la fecha o el nombre sin recalcularla invalida el ticket. Esa clave está en
+la app: el diseño es académico, no un control de acceso de producción.
+
+El lector comprueba formato, firma, sala, fecha y ventana. Para una reserva que
+empieza a las 18:00 acepta **17:50 a 18:15**, incluidos ambos extremos. No usa la
+hora de término como límite de entrada.
+
+El QR completo sirve entre aparatos porque lleva los datos. El código corto solo
+lleva id y firma reducida: necesita buscar la reserva y su pago en la base local.
+La pestaña Escanear consulta el ticket y no consume su uso.
+
+**Comprueba:** un código inventado, la sala equivocada, un ticket fuera de horario y uno dentro de la ventana.
+
+## 10. Modo puerta
+
+Abrir `PuertaPreferencias`, `PuertaViewModel`, `PuertaScreen` y `LectorQrFrontal`.
+
+Siete toques en Inicia sesión abren la configuración. DataStore guarda el modo,
+la sala y el hash de la clave. Al abrir la app, AppNavigation lee esa configuración:
+si está activa, muestra la puerta antes de la navegación normal.
+
+CameraX mantiene la cámara frontal y entrega imágenes. ML Kit analiza cada imagen
+y devuelve el texto del QR. Se cierra cada imagen analizada para que la cámara
+pueda seguir entregando cuadros. Al salir de la pantalla se libera la cámara.
+
+`evaluarPuerta` comprueba firma, sala, horario y usos anteriores. Al aceptar,
+`registrarIngreso` inserta el id de reserva en IngresoEntity en una transacción.
+Ese id es clave primaria, así no se puede registrar dos veces. El resultado aparece
+cuatro segundos; mantener el mismo QR delante no produce una lectura continua.
+
+Atrás abre el diálogo de clave; no desactiva la puerta directamente. La pantalla
+mantiene el aparato encendido mientras se usa. Android sigue teniendo sus controles
+de sistema: esto no configura una tablet como dispositivo administrado.
+
+El bloqueo de repetición es **por aparato**. No hay servidor compartido ni sincronización.
+Preparar todos los tickets de la demostración en un solo aparato emisor evita ids
+repetidos entre bases independientes.
+
+## 11. Diseño, animaciones y tamaños
+
+`Color.kt` contiene la paleta y `Theme.kt` asigna los papeles `primary`, `background`,
+`surface` y sus colores `on...`. `onPrimary` es el color de contenido que se dibuja
+sobre primary. `dynamicColor = false` conserva la paleta elegida.
+
+`ContenidoFormulario` centra el contenido, limita su ancho a 720 dp, permite
+scroll y deja espacio al teclado. Resumen organiza sus tres totales en una fila
+cuando dispone de 600 dp y en columna en pantallas estrechas. Las listas usan
+LazyColumn, que compone los elementos necesarios para la vista.
+
+`AnimatedVisibility` anima errores, el bloque de comprobante y resultados del lector.
+Una animación visual acompaña un cambio real de estado; no reemplaza la validación.
+
+## 12. Cómo leer las pruebas
+
+- `ReglasReservaTest` y `PagosQrTest`: reglas puras; corren sin emulador.
+- `ReservasRoomTest` y `PagosRecursosTest`: Room, transacciones, migración, imágenes y lectura de QR en Android.
+- `LoginNavegacionTest` y `PagosPuertaNavegacionTest`: escriben y tocan la interfaz real.
+- Los archivos Example... son pruebas de la plantilla; no prueban reglas del negocio.
+
+Cada prueba prepara un caso, realiza una acción y comprueba el resultado esperado.
+Las bases de repositorio son independientes. Las pruebas de pantalla crean y retiran
+sus propias filas; ejecutarlas en un emulador destinado a pruebas.
+
+## 13. Preparar la defensa sin memorizar respuestas
+
+1. Dibuja el recorrido de `onCorreoChange` y explica ambos `copy`.
+2. Sigue Enviar solicitud hasta el `INSERT` del DAO.
+3. Explica por qué se comprueba un cruce dos veces: al solicitar y al confirmar.
+4. Muestra por qué Carmen no puede registrar pagos y Luis sí.
+5. Diferencia la imagen temporal de cámara de la copia privada del comprobante.
+6. Explica qué parte genera el QR y qué parte decide si permite ingresar.
+7. Calcula a mano la ventana de una reserva de 19:00 a 21:00.
+8. Explica qué conserva Room, qué conserva DataStore y qué conserva el ViewModel.
+9. Distingue una prueba pasada de una funcionalidad pendiente de comprobar en un teléfono físico.
+10. Haz un cambio pequeño: agrega una validación de descripción y comprueba su mensaje.
+
+Orden sugerido: Login y estado; reservas y Room; permisos y pagos; recursos nativos;
+QR y puerta. Al terminar cada bloque, intenta explicarlo con tus palabras sin mirar
+el archivo. Las evidencias de colaboración y la defensa no se reemplazan por compilar.

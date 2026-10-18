@@ -11,6 +11,10 @@ import kotlinx.coroutines.launch
 
 class MisReservasViewModel(application: Application) : AndroidViewModel(application) {
     private val repositorio = JuntaRepository(application)
+    val pagadas = repositorio.observarReservasPagadas().catch {
+        _mensaje.value = "No se pudo consultar el pago del ticket"
+        emit(emptyList())
+    }
     private val _dependencias = MutableStateFlow<List<DependenciaComunitariaEntity>>(emptyList())
     val dependencias: StateFlow<List<DependenciaComunitariaEntity>> = _dependencias
     private val _usuarios = MutableStateFlow<List<UsuarioEntity>>(emptyList())
@@ -52,5 +56,4 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
             } finally { _procesando.value = false }
         }
     }
-    fun limpiarMensaje() { _mensaje.value = null }
 }

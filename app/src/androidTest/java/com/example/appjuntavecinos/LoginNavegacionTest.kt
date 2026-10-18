@@ -5,6 +5,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.appjuntavecinos.data.repository.AppDatabase
+import com.example.appjuntavecinos.data.model.UsuarioEntity
+import com.example.appjuntavecinos.utils.hashClave
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -46,8 +48,15 @@ class LoginNavegacionTest {
     }
 
     @Test fun vecinoPuedeNavegarYElFormularioMuestraErrores() {
-        ingresar("ana.munoz@zaror.test")
+        esperar("Ingresar")
+        val base = AppDatabase.obtener(InstrumentationRegistry.getInstrumentation().targetContext)
+        val correo = "prueba${System.nanoTime()}@zaror.test"
+        val id = runBlocking { base.usuarioDao().insertar(UsuarioEntity(nombre = "Vecino de prueba",
+            correo = correo, clave = hashClave("1234"), rol = "VECINO")) }
+        try {
+        ingresar(correo)
         esperar("Nueva reserva")
+        esperar("Todavía no tienes reservas")
         compose.onNodeWithText("Todavía no tienes reservas").assertExists()
         compose.onNodeWithText("Nueva reserva").performClick()
         esperar("Enviar solicitud")
@@ -59,6 +68,9 @@ class LoginNavegacionTest {
         esperar("Libre: disponible. Solicitado: pendiente de revisión. Ocupado: reserva confirmada.")
         compose.onNodeWithText("Juan Pérez", substring = true).assertDoesNotExist()
         salir()
+        } finally {
+            runBlocking { base.openHelper.writableDatabase.execSQL("DELETE FROM UsuarioEntity WHERE id = ?", arrayOf(id)) }
+        }
     }
 
     @Test fun presidenciaTieneConsultaSinBotonesDeGestion() {

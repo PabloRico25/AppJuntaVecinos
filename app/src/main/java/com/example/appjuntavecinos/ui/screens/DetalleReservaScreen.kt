@@ -10,13 +10,14 @@ import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
 @Composable
-fun DetalleReservaScreen(reservaId: Int, vecinoId: Int, viewModel: MisReservasViewModel = viewModel()) {
+fun DetalleReservaScreen(reservaId: Int, vecinoId: Int, onTicket: (Int) -> Unit, viewModel: MisReservasViewModel = viewModel()) {
     val flujo = remember(vecinoId, viewModel) { viewModel.reservas(vecinoId) }
     val reservas by flujo.collectAsState(initial = null)
     val dependencias by viewModel.dependencias.collectAsState()
     val usuarios by viewModel.usuarios.collectAsState()
     val mensaje by viewModel.mensaje.collectAsState()
     val procesando by viewModel.procesando.collectAsState()
+    val pagadas by viewModel.pagadas.collectAsState(initial = emptyList())
     var confirmarCancelar by remember { mutableStateOf(false) }
     val reserva = reservas?.find { it.id == reservaId }
     ContenidoFormulario {
@@ -40,7 +41,11 @@ fun DetalleReservaScreen(reservaId: Int, vecinoId: Int, viewModel: MisReservasVi
                     OutlinedButton(onClick = { confirmarCancelar = true }, enabled = !procesando,
                         modifier = Modifier.fillMaxWidth()) { Text("Cancelar solicitud") }
                 }
-                "CONFIRMADA" -> Text("Tu reserva está confirmada. La emisión del ticket QR se incorporará en la próxima etapa.")
+                "CONFIRMADA" -> {
+                    if (reserva.id in pagadas) Button(onClick = { onTicket(reserva.id) },
+                        modifier = Modifier.fillMaxWidth()) { Text("Ver ticket QR") }
+                    else Text("Tu reserva está confirmada. El ticket estará disponible cuando Tesorería registre el pago.")
+                }
                 "RECHAZADA" -> Text("Puedes consultar otros horarios y enviar una nueva solicitud.")
                 "CANCELADA" -> Text("Cancelaste esta solicitud. Ya no está pendiente de revisión.")
             }
@@ -53,10 +58,10 @@ fun DetalleReservaScreen(reservaId: Int, vecinoId: Int, viewModel: MisReservasVi
             onDismissRequest = { confirmarCancelar = false },
             title = { Text("¿Cancelar esta solicitud?") },
             text = { Text("La solicitud quedará cancelada. Puedes crear otra después.") },
-            confirmButton = { TextButton(onClick = {
+            confirmButton = { TextButton(colors = coloresBotonTexto(), onClick = {
                 confirmarCancelar = false; viewModel.cancelar(reserva, vecinoId)
             }) { Text("Sí, cancelar") } },
-            dismissButton = { TextButton(onClick = { confirmarCancelar = false }) { Text("Volver") } }
+            dismissButton = { TextButton(colors = coloresBotonTexto(), onClick = { confirmarCancelar = false }) { Text("Volver") } }
         )
     }
 }

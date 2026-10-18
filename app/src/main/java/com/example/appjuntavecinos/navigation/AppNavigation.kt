@@ -15,12 +15,32 @@ import androidx.navigation.navArgument
 import com.example.appjuntavecinos.ui.screens.*
 import com.example.appjuntavecinos.ui.theme.Gray
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
+import com.example.appjuntavecinos.viewmodel.PuertaViewModel
+import com.example.appjuntavecinos.ui.components.ActivarPuertaDialog
+import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
     // Una sola instancia conserva la sesión al cambiar de pantalla o girar el teléfono.
     val loginViewModel: LoginViewModel = viewModel()
+    val puertaViewModel: PuertaViewModel = viewModel()
+    val configuracion by puertaViewModel.configuracion.collectAsState()
+    val errorPuerta by puertaViewModel.error.collectAsState()
+    var activarPuerta by remember { mutableStateOf(false) }
+    val avisos = remember { SnackbarHostState() }
+    val alcance = rememberCoroutineScope()
+    if (configuracion.cargando) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (errorPuerta == null) CircularProgressIndicator() else Text(errorPuerta.orEmpty())
+        }
+        return
+    }
+    if (configuracion.modoPuerta) {
+        PuertaScreen(puertaViewModel)
+        return
+    }
     val usuario by loginViewModel.sesion.collectAsState()
     val navController = rememberNavController()
     val entrada by navController.currentBackStackEntryAsState()
@@ -34,6 +54,8 @@ fun AppNavigation() {
     val titulo = when (ruta) {
         Rutas.NUEVA_RESERVA -> "Nueva reserva"
         Rutas.DETALLE_RESERVA -> "Detalle de reserva"
+        Rutas.REGISTRAR_PAGO -> "Registrar pago"
+        Rutas.TICKET_QR -> "Ticket QR"
         Rutas.DISPONIBILIDAD -> "Disponibilidad"
         else -> destinos.find { it.ruta == ruta }?.titulo ?: "Junta de Vecinos Zaror"
     }
@@ -52,6 +74,7 @@ fun AppNavigation() {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(avisos) },
         topBar = {
             if (usuario != null) TopAppBar(
                 title = { Text(titulo) },
@@ -106,7 +129,7 @@ fun AppNavigation() {
     ) { innerPadding ->
         NavHost(navController, startDestination = Rutas.LOGIN, modifier = Modifier.padding(innerPadding)) {
             composable(Rutas.LOGIN) {
-                LoginScreen(loginViewModel, onLoginValido = {
+                LoginScreen(loginViewModel, onActivarPuerta = { puertaViewModel.limpiarError(); activarPuerta = true }, onLoginValido = {
                     navController.navigate(if (loginViewModel.sesion.value?.rol == "DIRECTIVA") Rutas.RESERVAS else Rutas.MIS_RESERVAS) {
                         popUpTo(Rutas.LOGIN) { inclusive = true }
                     }
@@ -128,7 +151,13 @@ fun AppNavigation() {
             }
             composable(Rutas.DETALLE_RESERVA, arguments = listOf(navArgument("reservaId") { type = NavType.IntType })) { entradaDetalle ->
                 usuario?.takeIf { it.rol == "VECINO" }?.let {
-                    DetalleReservaScreen(entradaDetalle.arguments?.getInt("reservaId") ?: 0, it.id)
+                    DetalleReservaScreen(entradaDetalle.arguments?.getInt("reservaId") ?: 0, it.id,
+                        onTicket = { id -> navController.navigate("ticket_qr/$id") })
+                }
+            }
+            composable(Rutas.TICKET_QR, arguments = listOf(navArgument("reservaId") { type = NavType.IntType })) { entradaTicket ->
+                usuario?.takeIf { it.rol == "VECINO" }?.let {
+                    TicketQrScreen(entradaTicket.arguments?.getInt("reservaId") ?: 0, it.id, it.nombre)
                 }
             }
             composable(Rutas.DISPONIBILIDAD) { if (usuario != null) DisponibilidadScreen(directiva) }
@@ -142,13 +171,21 @@ fun AppNavigation() {
             }
             composable(Rutas.RESUMEN) { if (directiva) ResumenFinancieroScreen(esDirectiva = true) }
             composable(Rutas.PAGOS) {
-                if (directiva) PendienteScreen("Registro de pagos",
-                    "En la próxima etapa podrás registrar arriendos y gastos, y adjuntar comprobantes. Los movimientos de ejemplo se pueden consultar en Resumen.")
+                if (directiva) PagosScreen(loginViewModel.puedeRegistrarPagos(),
+                    onRegistrarPago = { navController.navigate(Rutas.REGISTRAR_PAGO) })
+            }
+            composable(Rutas.REGISTRAR_PAGO) {
+                usuario?.takeIf { it.rol == "DIRECTIVA" }?.let {
+                    RegistrarPagoScreen(it.id, loginViewModel.puedeRegistrarPagos(), onPagoRegistrado = {
+                        navController.popBackStack()
+                        alcance.launch { avisos.showSnackbar("Pago registrado") }
+                    })
+                }
             }
             composable(Rutas.ESCANEAR) {
-                if (directiva) PendienteScreen("Escanear ticket",
-                    "La emisión de tickets QR y su lectura con cámara se incorporarán en la próxima etapa.")
+                if (directiva) EscanearScreen()
             }
         }
     }
+    if (activarPuerta) ActivarPuertaDialog(puertaViewModel) { activarPuerta = false }
 }

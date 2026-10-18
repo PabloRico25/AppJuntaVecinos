@@ -7,6 +7,7 @@ import java.util.Locale
 import java.util.TimeZone
 
 fun fechaDeHoy(): String = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(Date())
+fun horaActual(): String = SimpleDateFormat("HH:mm", Locale.ROOT).format(Date())
 
 fun fechaEn(dias: Int): String {
     val calendario = Calendar.getInstance()

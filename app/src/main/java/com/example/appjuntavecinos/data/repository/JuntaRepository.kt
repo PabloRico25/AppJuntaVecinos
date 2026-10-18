@@ -17,6 +17,41 @@ class JuntaRepository(context: Context, private val base: AppDatabase = AppDatab
     fun observarReservas(vecinoId: Int) = base.reservaDao().observarPorVecino(vecinoId)
     fun observarTodasLasReservas() = base.reservaDao().observarTodas()
     fun observarPagos(): Flow<List<PagoEntity>> = base.pagoDao().observarTodos()
+    fun observarReservasPagadas() = base.pagoDao().observarReservasPagadas()
+    suspend fun buscarReserva(id: Int) = base.reservaDao().obtenerPorId(id)
+    suspend fun reservaPagada(id: Int) = base.pagoDao().contarPagosDeArriendo(id) > 0
+    suspend fun obtenerReservasPorPagar() = base.reservaDao().obtenerConfirmadasSinPago()
+
+    suspend fun crearPago(pago: PagoEntity): Long = base.withTransaction {
+        val usuario = base.usuarioDao().obtenerPorId(pago.registradoPorId)
+        require(usuario?.rol == "DIRECTIVA" && usuario.cargo == "TESORERIA") {
+            "Solo la Tesorería puede registrar pagos"
+        }
+        require(pago.tipo in listOf("ARRIENDO", "CONSUMO_BASICO")) { "Elige el tipo de pago" }
+        require(pago.monto.isFinite() && pago.monto > 0 && pago.monto <= 999999999 && pago.monto % 1.0 == 0.0) {
+            "El monto debe ser un entero entre 1 y 999999999"
+        }
+        require(fechaEsValida(pago.fecha) && pago.fecha <= fechaDeHoy()) { "Revisa la fecha del pago" }
+        if (pago.tipo == "ARRIENDO") {
+            val reserva = pago.reservaId?.let { buscarReserva(it) }
+            require(reserva?.estado == "CONFIRMADA") { "Elige una reserva confirmada" }
+            require(!reservaPagada(reserva!!.id)) { "Esta reserva ya tiene un pago de arriendo" }
+        } else {
+            require(pago.categoria in listOf("ELECTRICIDAD", "AGUA", "GAS")) { "Elige la categoría del gasto" }
+        }
+        base.pagoDao().insertar(pago.copy(
+            id = 0, reservaId = if (pago.tipo == "ARRIENDO") pago.reservaId else null,
+            categoria = if (pago.tipo == "CONSUMO_BASICO") pago.categoria else ""
+        ))
+    }
+
+    suspend fun registrarIngreso(texto: String, salaId: Int): ResultadoPuerta = base.withTransaction {
+        val resultado = evaluarPuerta(texto, salaId, fechaDeHoy(), horaActual(), base.ingresoDao().obtenerReservasUsadas())
+        if (resultado.estado != "ABIERTA") return@withTransaction resultado
+        val datos = requireNotNull(resultado.datos)
+        val id = base.ingresoDao().insertar(IngresoEntity(datos.reservaId, fechaDeHoy(), horaActual()))
+        if (id == -1L) ResultadoPuerta("CERRADA", "Este ticket ya fue utilizado", datos) else resultado
+    }
 
     suspend fun hayChoque(dependenciaId: Int, fecha: String, horaInicio: String, horaFin: String): Boolean =
         base.reservaDao().obtenerConfirmadas(dependenciaId, fecha).any {

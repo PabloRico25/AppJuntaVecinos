@@ -1,5 +1,6 @@
 package com.example.appjuntavecinos.ui.screens
 
+import com.example.appjuntavecinos.ui.components.coloresBotonTexto
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -62,15 +63,15 @@ fun ReservasDirectivaScreen(
             onDismissRequest = { seleccion = null },
             title = { Text(if (confirmar) "Confirmar reserva" else "Rechazar solicitud") },
             text = { Text("${fechaParaMostrar(reserva.fecha)}, ${reserva.horaInicio} a ${reserva.horaFin}. ¿Continuar?") },
-            confirmButton = { TextButton(onClick = {
+            confirmButton = { TextButton(colors = coloresBotonTexto(), onClick = {
                 seleccion = null; viewModel.gestionar(reserva, usuario, confirmar)
             }) { Text("Aceptar") } },
-            dismissButton = { TextButton(onClick = { seleccion = null }) { Text("Volver") } }
+            dismissButton = { TextButton(colors = coloresBotonTexto(), onClick = { seleccion = null }) { Text("Volver") } }
         )
     }
     if (mensaje != null) AlertDialog(
         onDismissRequest = viewModel::limpiarMensaje,
         title = { Text("Resultado") }, text = { Text(mensaje.orEmpty()) },
-        confirmButton = { TextButton(onClick = viewModel::limpiarMensaje) { Text("Entendido") } }
+        confirmButton = { TextButton(colors = coloresBotonTexto(), onClick = viewModel::limpiarMensaje) { Text("Entendido") } }
     )
 }

@@ -9,6 +9,8 @@ object Rutas {
     const val DETALLE_RESERVA = "detalle_reserva/{reservaId}"
     const val RESERVAS = "reservas"
     const val PAGOS = "pagos"
+    const val REGISTRAR_PAGO = "registrar_pago"
+    const val TICKET_QR = "ticket_qr/{reservaId}"
     const val RESUMEN = "resumen"
     const val ESCANEAR = "escanear"
 }

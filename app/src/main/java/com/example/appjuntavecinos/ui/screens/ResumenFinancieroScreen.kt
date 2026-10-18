@@ -24,17 +24,20 @@ fun ResumenFinancieroScreen(esDirectiva: Boolean, viewModel: ResumenViewModel = 
         Text("Finanzas de la junta", style = MaterialTheme.typography.headlineSmall)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { viewModel.cambiarMes(-1) }) { Text("Anterior") }
+            TextButton(colors = coloresBotonTexto(), onClick = { viewModel.cambiarMes(-1) }) { Text("Anterior") }
             Text(mesParaMostrar(estado.mes), modifier = Modifier.weight(1f))
-            TextButton(onClick = { viewModel.cambiarMes(1) }) { Text("Siguiente") }
+            TextButton(colors = coloresBotonTexto(), onClick = { viewModel.cambiarMes(1) }) { Text("Siguiente") }
         }
         MensajeError(estado.error)
-        listOf("Ingresos" to estado.ingresos, "Gastos" to estado.gastos, "Saldo" to estado.saldo).forEach { (titulo, valor) ->
-            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-                containerColor = if (titulo == "Saldo") MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(titulo)
-                    Text(pesos(valor), style = MaterialTheme.typography.headlineSmall)
+        val totales = listOf("Ingresos" to estado.ingresos, "Gastos" to estado.gastos, "Saldo" to estado.saldo)
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth >= 600.dp) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    totales.forEach { (titulo, valor) -> TarjetaTotal(titulo, valor, Modifier.weight(1f)) }
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    totales.forEach { (titulo, valor) -> TarjetaTotal(titulo, valor, Modifier.fillMaxWidth()) }
                 }
             }
         }
@@ -54,7 +57,19 @@ fun ResumenFinancieroScreen(esDirectiva: Boolean, viewModel: ResumenViewModel = 
                 }
             }
         }
-        Text("Consulta de registros locales y ficticios. El registro de nuevos pagos y comprobantes queda para la próxima etapa.",
+        Text("Consulta de registros locales y ficticios. Solo Tesorería registra nuevos pagos desde la pestaña Pagos.",
             style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun TarjetaTotal(titulo: String, valor: Double, modifier: Modifier) {
+    Card(modifier, colors = CardDefaults.cardColors(
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        containerColor = if (titulo == "Saldo") MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)) {
+        Column(Modifier.padding(16.dp)) {
+            Text(titulo)
+            Text(pesos(valor), style = MaterialTheme.typography.headlineSmall)
+        }
     }
 }
