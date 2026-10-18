@@ -13,7 +13,7 @@ Evaluación Parcial 2 de DSY1105 Desarrollo de Aplicaciones Móviles, Duoc UC.
 
 Hay dos tipos de usuario, que entran por un login con correo y clave:
 
-- **Vecino/a:** pide reservas de una dependencia (Salón Principal o Sala Multiuso), ve el estado de sus solicitudes, cancela las que siguen pendientes, revisa la disponibilidad de horarios y, cuando una reserva está confirmada y pagada, muestra su código QR.
+- **Vecino/a:** pide reservas de una dependencia (Salón Principal o Sala Multiuso), ve el estado de sus solicitudes y abre el detalle de cada una, cancela las que siguen pendientes, revisa la disponibilidad de horarios, consulta las finanzas de la junta (solo lectura) y, cuando una reserva está confirmada y pagada, muestra su ticket con el código QR.
 - **Directiva:** ve las reservas, los pagos y el resumen financiero, y escanea los QR de los vecinos. Según el cargo se habilitan los botones: la Secretaría confirma o rechaza reservas, la Tesorería registra pagos y la Presidencia solo mira.
 
 Un tercer modo, sin login, convierte el aparato en una puerta que valida el QR sola (ver más abajo).
@@ -22,15 +22,16 @@ Un tercer modo, sin login, convierte el aparato en una puerta que valida el QR s
 
 - [x] Login con correo y clave, con validación por campo y la clave guardada como hash SHA-256
 - [x] Cerrar sesión desde el menú de la cuenta
-- [x] Mis reservas, con el estado de cada una (pendiente, confirmada, cancelada o rechazada) y su color
+- [x] Mis reservas, con el estado de cada una (pendiente, confirmada, cancelada o rechazada) y su color; al tocar una reserva se abre su detalle
 - [x] Nueva reserva, con validaciones (fecha, horas, horario de la sede, horario ocupado) y aviso al crearla
-- [x] Cancelar una reserva pendiente, con confirmación
+- [x] Detalle de reserva: estado, datos y fecha de solicitud; desde ahí se cancela una reserva pendiente (con confirmación) o se abre el ticket de una confirmada y pagada
 - [x] Disponibilidad por dependencia y fecha, con las franjas libres, confirmadas y solicitadas
 - [x] Reservas de la directiva: la Secretaría confirma o rechaza, y se vuelve a revisar el choque al confirmar
 - [x] Pagos de la directiva, con la lista de ingresos y gastos y un aviso de reservas confirmadas que faltan por pagar
 - [x] Registro de pagos con comprobante de cámara o galería (solo Tesorería)
-- [x] Resumen financiero del mes: ingresos, gastos, saldo y gastos por categoría, con un diseño distinto según el ancho de la pantalla
-- [x] Código QR firmado de una reserva confirmada y pagada, con un código corto para escribir a mano
+- [x] Resumen financiero: ingresos, gastos, saldo y gastos por categoría, con botones para cambiar de mes y un diseño distinto según el ancho de la pantalla
+- [x] Finanzas del vecino: el mismo resumen, en solo lectura
+- [x] Ticket QR de una reserva confirmada y pagada: código QR firmado, datos de la reserva, ventana de ingreso y un código corto para escribir a mano
 - [x] Escanear el QR: acceso permitido, fuera de horario o código no válido
 - [x] Modo puerta: un aparato se convierte en lector fijo de una sala y valida el QR por su cuenta
 
@@ -47,13 +48,13 @@ El comprobante elegido se copia a la carpeta privada de la app, para que siga di
 
 ## El código QR
 
-Cuando una reserva está confirmada y tiene su pago de arriendo registrado, el vecino ve el botón Ver QR. El QR lleva dentro la reserva, la sala, la fecha, las horas, el nombre del vecino y una firma (un hash de esos datos más una clave de la app). La Secretaría lo escanea y la app responde:
+Cuando una reserva está confirmada y tiene su pago de arriendo registrado, el vecino ve en su detalle el botón Ver ticket QR, que abre la pantalla del ticket. El QR lleva dentro la reserva, la sala, la fecha, las horas, el nombre del vecino y una firma (un hash de esos datos más una clave de la app). La Secretaría lo escanea y la app responde:
 
 - **Acceso permitido:** la firma es válida y es el día de la reserva, entre 10 minutos antes y 15 minutos después de la hora de inicio.
 - **Fuera de horario:** la firma es válida, pero no es el día o la hora.
 - **Código no válido:** no es un QR de la junta o alguien cambió un dato.
 
-Debajo del QR se muestra también un código corto, por ejemplo `1-5267E2`, que se puede escribir en la caja de la pantalla Escanear si no se puede usar la cámara. Ese código busca la reserva en la base de datos del aparato, así que solo funciona en el celular que la tiene.
+En la pantalla del ticket se muestra, debajo del QR, la ventana de ingreso (por ejemplo "de 17:50 a 18:15") y también un código corto, por ejemplo `1-5267E2`, que se puede escribir en la caja de la pantalla Escanear si no se puede usar la cámara. Ese código busca la reserva en la base de datos del aparato, así que solo funciona en el celular que la tiene.
 
 ## Modo puerta
 
@@ -74,7 +75,7 @@ Si las cuatro se cumplen, la pantalla se pone verde con "Puerta abierta" y el no
 
 ## Resumen financiero
 
-La directiva ve, en la pestaña Resumen, el mes actual con los ingresos (pagos de arriendo), los gastos (consumos básicos), el saldo y los gastos separados por categoría. Se actualiza solo cuando se registra un pago nuevo. En pantallas más anchas (una tablet o el teléfono girado) las tarjetas se acomodan distinto: apiladas, en pareja o las tres en una fila.
+La directiva (pestaña Resumen) y el vecino (pestaña Finanzas, en solo lectura) ven el mes elegido con los ingresos (pagos de arriendo), los gastos (consumos básicos), el saldo y los gastos separados por categoría. Parte en el mes actual; con los botones Anterior y Siguiente se cambia de mes, y no se puede avanzar más allá del mes actual. Se actualiza solo cuando se registra un pago nuevo. En pantallas más anchas (una tablet o el teléfono girado) las tarjetas se acomodan distinto: apiladas, en pareja o las tres en una fila.
 
 ## Disponibilidad
 
@@ -89,7 +90,7 @@ Tanto el vecino como la directiva pueden ver, por dependencia y fecha, qué hora
 - Solo la Secretaría confirma o rechaza reservas, y solo las que están pendientes. Al confirmar se vuelve a revisar que el horario no choque con otra reserva ya confirmada.
 - Solo la Tesorería registra pagos.
 - Un pago de arriendo exige una reserva confirmada, y cada reserva tiene como máximo un pago de arriendo.
-- El monto de un pago tiene que ser mayor que 0.
+- El monto de un pago tiene que ser mayor que 0, y su fecha no puede ser futura.
 - Un pago es solo informativo: no procesa transacciones reales.
 - El QR solo se muestra si la reserva está confirmada y pagada.
 
@@ -110,8 +111,7 @@ Estas piezas no se trabajaron en clase. Las integramos por nuestra cuenta, con e
 - **`BackHandler` y `keepScreenOn`** (`ui/screens/PuertaScreen.kt`): en el modo puerta, bloquean el botón atrás y mantienen la pantalla encendida.
 - **`verticalScroll`** (Disponibilidad, Escanear, Nueva reserva, Registrar pago y Resumen): permite recorrer la pantalla hacia abajo cuando el contenido no cabe.
 - **`combine`** (Disponibilidad, Pagos y Resumen): junta varios flujos de datos en uno, para que las listas y los totales se actualicen solos.
-- **`navArgument`** (`navigation/AppNavigation.kt`): pasa el número de la reserva a la pantalla de Detalle.
-
+- **`navArgument`** (`navigation/AppNavigation.kt`): pasa el número de la reserva a las pantallas de Detalle y de Ticket QR.
 
 ## Estructura del proyecto
 
@@ -147,7 +147,7 @@ Todos los datos son ficticios. La clave de todos es `1234`.
 
 | Correo | Rol | Qué puede hacer |
 |---|---|---|
-| juan.perez@zaror.test | Vecino | Pedir, ver y cancelar sus reservas, ver la disponibilidad y ver el QR de la reserva confirmada y pagada |
+| juan.perez@zaror.test | Vecino | Pedir, ver y cancelar sus reservas, ver la disponibilidad y las finanzas, y ver el ticket QR de la reserva confirmada y pagada |
 | ana.munoz@zaror.test | Vecina | Igual que Juan; no tiene reservas al empezar |
 | pedro.soto@zaror.test | Vecino | Igual que Juan |
 | maria.torres@zaror.test | Directiva, Secretaría | Ver reservas, pagos y resumen, confirmar o rechazar reservas y escanear QR |
@@ -160,6 +160,7 @@ Todos los datos son ficticios. La clave de todos es `1234`.
 - El lector de códigos de la pantalla Escanear necesita Google Play Services en el aparato. Si no está, se puede escribir el código a mano.
 - El código corto solo funciona en el aparato donde existe la reserva; entre aparatos distintos solo sirve el QR.
 - El modo puerta es simulado: no abre ninguna cerradura física, y la clave para salir de ese modo se escribe con el teclado normal del celular, que a veces pone una mayúscula o un espacio de más sin que se note.
+- El resumen financiero muestra totales, no una lista de movimientos; el detalle de cada pago está en la pantalla Pagos, que ven solo los cargos de la directiva.
 - Window Size Classes solo se aplicó a la pantalla Resumen, como ejemplo de diseño adaptable; el resto de la app usa el mismo diseño en cualquier tamaño.
 - Los datos son ficticios; no hay información real de la organización ni de sus vecinos.
 - Toda la información se guarda en el celular (Room y DataStore). Cada celular tiene su propia base de datos y no se comparten entre aparatos: lo que un cargo registra en su teléfono no le llega a otro cargo en el suyo.
