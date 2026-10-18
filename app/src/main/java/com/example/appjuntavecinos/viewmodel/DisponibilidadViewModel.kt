@@ -33,6 +33,7 @@ class DisponibilidadViewModel(application: Application) : AndroidViewModel(appli
     private val _fecha = MutableStateFlow(fechaDeHoy())
     val fecha: StateFlow<String> = _fecha.asStateFlow()
 
+    // No visto en clase (lo integramos con permiso del docente): combine junta varios Flow en uno.
     val franjas: Flow<List<Franja>> = combine(
         repositorio.observarTodasLasReservas(),
         _dependenciaId,

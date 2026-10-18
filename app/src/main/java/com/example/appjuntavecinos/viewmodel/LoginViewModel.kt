@@ -55,6 +55,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         val nuevosErrores = LoginErrores(
             correo = when {
                 actual.correo.isBlank() -> "Escribe tu correo"
+                // No visto en clase (lo integramos con permiso del docente): Patterns.EMAIL_ADDRESS de Android valida el correo.
                 !Patterns.EMAIL_ADDRESS.matcher(actual.correo).matches() -> "Escribe un correo válido"
                 else -> null
             },

@@ -22,6 +22,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 
+// No visto en clase (lo integramos con permiso del docente): CameraX y ML Kit leen el QR con la cámara frontal.
 // Lector de QR propio con la cámara FRONTAL.
 // Por qué no usamos el lector de Google (GmsBarcodeScanning): no permite elegir la cámara.
 // Aquí se juntan dos librerías:

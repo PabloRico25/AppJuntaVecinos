@@ -23,6 +23,7 @@ class ResumenViewModel(application: Application) : AndroidViewModel(application)
     private val _mes = MutableStateFlow(mesActual)
     val mes: StateFlow<String> = _mes.asStateFlow()
 
+    // No visto en clase (lo integramos con permiso del docente): combine junta varios Flow en uno.
     val resumen: Flow<ResumenFinanciero> = combine(_mes, repositorio.observarPagos()) { mesElegido, pagos ->
         calcularResumen(pagos, mesElegido)
     }

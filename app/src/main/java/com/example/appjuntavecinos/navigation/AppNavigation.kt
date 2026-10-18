@@ -88,6 +88,7 @@ fun AppNavigation() {
                     onDetalle = { id -> navController.navigate("detalle_reserva/$id") }
                 )
             }
+            // No visto en clase (lo integramos con permiso del docente): navArgument pasa el número de la reserva a la pantalla.
             composable(
                 route = Rutas.DETALLE_RESERVA,
                 arguments = listOf(navArgument("reservaId") { type = NavType.IntType })

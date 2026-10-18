@@ -12,6 +12,7 @@ fun crearUriCamara(context: Context): Uri {
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)
 }
 
+// No visto en clase (lo integramos con permiso del docente): la foto se copia a filesDir para que no se pierda.
 fun guardarComprobante(context: Context, origen: Uri): String? {
     val carpeta = File(context.filesDir, "comprobantes")
     carpeta.mkdirs()

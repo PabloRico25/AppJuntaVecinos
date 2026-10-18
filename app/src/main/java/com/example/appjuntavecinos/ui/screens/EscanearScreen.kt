@@ -39,6 +39,7 @@ fun EscanearScreen(
     val dependencias by viewModel.dependencias.collectAsState()
     val context = LocalContext.current
 
+    // No visto en clase (lo integramos con permiso del docente): lector de códigos de Google (ML Kit).
     fun abrirLector() {
         GmsBarcodeScanning.getClient(context)
             .startScan()
@@ -56,6 +57,7 @@ fun EscanearScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            // No visto en clase (lo integramos con permiso del docente): verticalScroll deja recorrer la pantalla hacia abajo.
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)

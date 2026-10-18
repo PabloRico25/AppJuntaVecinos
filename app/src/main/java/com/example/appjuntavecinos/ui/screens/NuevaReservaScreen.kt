@@ -46,6 +46,7 @@ fun NuevaReservaScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            // No visto en clase (lo integramos con permiso del docente): verticalScroll deja recorrer la pantalla hacia abajo.
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)

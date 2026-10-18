@@ -2,6 +2,7 @@ package com.example.appjuntavecinos.utils
 
 import java.security.MessageDigest
 
+// No visto en clase (lo integramos con permiso del docente): el hash SHA-256 con MessageDigest.
 // Convierte la clave en un hash SHA-256, que no se puede deshacer.
 // Usa MessageDigest, una clase de Java que ya viene en Android (documentación oficial).
 // Los bytes se pasan a hexadecimal para guardarlos como texto.
