@@ -79,6 +79,11 @@ fun evaluarIngreso(datos: DatosQr, fechaHoy: String, horaActual: String): Estado
     }
 }
 
+fun ventanaIngreso(horaInicio: String): String {
+    val inicio = aMinutos(horaInicio)
+    return "de " + aHora(inicio - 10) + " a " + aHora(inicio + 15)
+}
+
 private fun firmar(cuerpo: String): String {
     return hashClave(cuerpo + CLAVE_FIRMA).take(16)
 }
@@ -97,4 +102,8 @@ private fun firmaCorta(reserva: ReservaEntity): String {
 private fun aMinutos(hora: String): Int {
     val partes = hora.split(":")
     return partes[0].toInt() * 60 + partes[1].toInt()
+}
+
+private fun aHora(minutos: Int): String {
+    return "%02d:%02d".format(minutos / 60, minutos % 60)
 }

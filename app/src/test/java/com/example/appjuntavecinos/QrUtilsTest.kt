@@ -8,6 +8,7 @@ import com.example.appjuntavecinos.utils.codigoCortoEsValido
 import com.example.appjuntavecinos.utils.evaluarIngreso
 import com.example.appjuntavecinos.utils.leerCodigoCorto
 import com.example.appjuntavecinos.utils.leerContenidoQr
+import com.example.appjuntavecinos.utils.ventanaIngreso
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -112,5 +113,12 @@ class QrUtilsTest {
     fun un_texto_sin_la_forma_del_codigo_corto_no_se_lee() {
         assertNull(leerCodigoCorto("hola"))
         assertNull(leerCodigoCorto("7-12"))
+    }
+
+
+    @Test
+    fun la_ventana_de_ingreso_va_de_diez_minutos_antes_a_quince_despues() {
+        assertEquals("de 17:50 a 18:15", ventanaIngreso("18:00"))
+        assertEquals("de 08:50 a 09:15", ventanaIngreso("09:00"))
     }
 }
