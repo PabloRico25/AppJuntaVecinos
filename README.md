@@ -97,6 +97,22 @@ Tanto el vecino como la directiva pueden ver, por dependencia y fecha, qué hora
 
 Kotlin, Jetpack Compose, Material Design 3, MVVM con StateFlow, Room (con KSP), Navigation Compose, DataStore (preferencias del modo puerta), CameraX y ML Kit (lector de QR con la cámara frontal), Window Size Classes (diseño adaptable del Resumen), Coil para mostrar la imagen del comprobante, ZXing para dibujar el QR y el lector de códigos de Google (ML Kit) para escanearlo desde Escanear.
 
+## Piezas que no se vieron en clase
+
+Estas piezas no se trabajaron en clase. Las integramos por nuestra cuenta, con el permiso del docente para usar herramientas externas, y en el código cada una lleva un comentario `No visto en clase` que lo indica.
+
+- **ZXing** (`utils/QrImagen.kt`): dibuja el código QR de la reserva.
+- **Lector de códigos de Google, ML Kit** (`ui/screens/EscanearScreen.kt`): escanea el QR desde la pestaña Escanear.
+- **CameraX y ML Kit** (`ui/components/LectorQrFrontal.kt`): la cámara frontal del modo puerta, que lee el QR del vecino que se acerca.
+- **SHA-256 con `MessageDigest`** (`utils/ClaveUtils.kt`): guarda las claves como hash y no como texto. El docente aceptó cualquier hash.
+- **`Patterns.EMAIL_ADDRESS`** (`viewmodel/LoginViewModel.kt`): valida el formato del correo en el Login.
+- **Copia del comprobante a `filesDir`** (`utils/ComprobanteUtils.kt`): guarda la imagen del comprobante en la carpeta privada de la app, para que no se pierda.
+- **`BackHandler` y `keepScreenOn`** (`ui/screens/PuertaScreen.kt`): en el modo puerta, bloquean el botón atrás y mantienen la pantalla encendida.
+- **`verticalScroll`** (Disponibilidad, Escanear, Nueva reserva, Registrar pago y Resumen): permite recorrer la pantalla hacia abajo cuando el contenido no cabe.
+- **`combine`** (Disponibilidad, Pagos y Resumen): junta varios flujos de datos en uno, para que las listas y los totales se actualicen solos.
+- **`navArgument`** (`navigation/AppNavigation.kt`): pasa el número de la reserva a la pantalla de Detalle.
+
+
 ## Estructura del proyecto
 
 ```
