@@ -43,6 +43,7 @@ import com.example.appjuntavecinos.ui.screens.PuertaScreen
 import com.example.appjuntavecinos.ui.screens.RegistrarPagoScreen
 import com.example.appjuntavecinos.ui.screens.ReservasDirectivaScreen
 import com.example.appjuntavecinos.ui.screens.ResumenScreen
+import com.example.appjuntavecinos.ui.screens.TicketQrScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.launch
@@ -96,6 +97,16 @@ fun AppNavigation() {
                 DetalleReservaScreen(
                     reservaId = entrada.arguments?.getInt("reservaId") ?: 0,
                     vecinoId = sesion?.id ?: 0
+                )
+            }
+            composable(
+                route = Rutas.TICKET_QR,
+                arguments = listOf(navArgument("reservaId") { type = NavType.IntType })
+            ) { entrada ->
+                TicketQrScreen(
+                    reservaId = entrada.arguments?.getInt("reservaId") ?: 0,
+                    vecinoId = sesion?.id ?: 0,
+                    nombreVecino = sesion?.nombre ?: ""
                 )
             }
             composable(Rutas.NUEVA_RESERVA) {
