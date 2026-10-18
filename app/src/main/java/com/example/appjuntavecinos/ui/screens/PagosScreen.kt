@@ -55,7 +55,7 @@ fun PagosScreen(
             Text("Solo la Tesorería puede registrar pagos.")
         }
 
-        // NUEVO: tarjeta "Por cobrar", solo si hay alguna reserva confirmada sin pago
+
         if (reservasPorCobrar.isNotEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),

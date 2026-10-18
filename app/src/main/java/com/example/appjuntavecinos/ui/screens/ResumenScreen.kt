@@ -79,7 +79,7 @@ fun ResumenScreen(
             }
         }
 
-        // Guía 9: un diseño distinto para Compact, Medium y Expanded.
+
         when (ancho) {
             WindowWidthSizeClass.Expanded -> {
                 Row(
