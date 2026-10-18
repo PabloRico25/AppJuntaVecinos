@@ -10,6 +10,7 @@ import com.example.appjuntavecinos.data.model.RegistrarPagoErrores
 import com.example.appjuntavecinos.data.model.RegistrarPagoUiState
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.repository.JuntaRepository
+import com.example.appjuntavecinos.utils.fechaDeHoy
 import com.example.appjuntavecinos.utils.fechaDesdeMillis
 import com.example.appjuntavecinos.utils.guardarComprobante
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -133,7 +134,11 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
                 monto <= 0 -> "El monto debe ser mayor que 0"
                 else -> null
             },
-            fecha = if (actual.fecha.isBlank()) "Elige la fecha del pago" else null,
+            fecha = when {
+                actual.fecha.isBlank() -> "Elige la fecha del pago"
+                actual.fecha > fechaDeHoy() -> "La fecha del pago no puede ser futura"
+                else -> null
+            },
             comprobante = if (actual.adjuntarComprobante && actual.comprobante == null) {
                 "Elige una imagen o desactiva el comprobante"
             } else null,
