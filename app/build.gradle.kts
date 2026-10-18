@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    // No visto en clase (lo integramos con permiso del docente): ZXing, lector de Google, CameraX y ML Kit, para el código QR.
     implementation(libs.zxing.core)
     implementation(libs.play.services.code.scanner)
     testImplementation(libs.junit)
