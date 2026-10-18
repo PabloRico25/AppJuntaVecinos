@@ -31,11 +31,13 @@ import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 fun DetalleReservaScreen(
     reservaId: Int,
     vecinoId: Int,
+    onTicket: (Int) -> Unit,
     viewModel: MisReservasViewModel = viewModel()
 ) {
     val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
     val reservas by flujoDeReservas.collectAsState(initial = null)
     val dependencias by viewModel.dependencias.collectAsState()
+    val pagadas by viewModel.reservasPagadas.collectAsState(initial = null)
     val reserva = reservas?.firstOrNull { it.id == reservaId }
     var confirmandoCancelar by remember { mutableStateOf(false) }
 
@@ -73,6 +75,19 @@ fun DetalleReservaScreen(
                     )
                 ) {
                     Text("Cancelar solicitud", fontWeight = FontWeight.Bold)
+                }
+            }
+
+            if (reserva.estado == "CONFIRMADA") {
+                if (reserva.id in pagadas.orEmpty()) {
+                    Button(
+                        onClick = { onTicket(reserva.id) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Ver ticket QR", fontWeight = FontWeight.Bold)
+                    }
+                } else if (pagadas != null) {
+                    Text("Tu reserva está confirmada. El ticket estará disponible cuando Tesorería registre el pago.")
                 }
             }
         }

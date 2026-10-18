@@ -84,7 +84,6 @@ fun AppNavigation() {
             composable(Rutas.MIS_RESERVAS) {
                 MisReservasScreen(
                     vecinoId = sesion?.id ?: 0,
-                    nombreVecino = sesion?.nombre ?: "",
                     onNuevaReserva = { navController.navigate(Rutas.NUEVA_RESERVA) },
                     onDetalle = { id -> navController.navigate("detalle_reserva/$id") }
                 )
@@ -96,7 +95,8 @@ fun AppNavigation() {
             ) { entrada ->
                 DetalleReservaScreen(
                     reservaId = entrada.arguments?.getInt("reservaId") ?: 0,
-                    vecinoId = sesion?.id ?: 0
+                    vecinoId = sesion?.id ?: 0,
+                    onTicket = { id -> navController.navigate("ticket_qr/$id") }
                 )
             }
             composable(
