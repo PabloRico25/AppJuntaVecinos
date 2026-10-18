@@ -16,7 +16,8 @@ data class Destino(
 
 val destinosVecino = listOf(
     Destino(Rutas.MIS_RESERVAS, "Mis reservas", Icons.Filled.DateRange),
-    Destino(Rutas.DISPONIBILIDAD, "Disponibilidad", Icons.Filled.CheckCircle)
+    Destino(Rutas.DISPONIBILIDAD, "Disponibilidad", Icons.Filled.CheckCircle),
+    Destino(Rutas.FINANZAS, "Finanzas", Icons.Filled.Info)
 )
 
 val destinosDirectiva = listOf(

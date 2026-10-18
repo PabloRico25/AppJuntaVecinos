@@ -127,6 +127,9 @@ fun AppNavigation() {
             composable(Rutas.RESUMEN) {
                 ResumenScreen()
             }
+            composable(Rutas.FINANZAS) {
+                ResumenScreen()
+            }
             composable(Rutas.DISPONIBILIDAD) {
                 DisponibilidadScreen(
                     mostrarNombres = sesion?.rol == "DIRECTIVA"
