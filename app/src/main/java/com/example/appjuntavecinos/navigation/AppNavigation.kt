@@ -26,10 +26,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.appjuntavecinos.ui.screens.DetalleReservaScreen
 import com.example.appjuntavecinos.ui.screens.DisponibilidadScreen
 import com.example.appjuntavecinos.ui.screens.EscanearScreen
 import com.example.appjuntavecinos.ui.screens.LoginScreen
@@ -81,7 +84,17 @@ fun AppNavigation() {
                 MisReservasScreen(
                     vecinoId = sesion?.id ?: 0,
                     nombreVecino = sesion?.nombre ?: "",
-                    onNuevaReserva = { navController.navigate(Rutas.NUEVA_RESERVA) }
+                    onNuevaReserva = { navController.navigate(Rutas.NUEVA_RESERVA) },
+                    onDetalle = { id -> navController.navigate("detalle_reserva/$id") }
+                )
+            }
+            composable(
+                route = Rutas.DETALLE_RESERVA,
+                arguments = listOf(navArgument("reservaId") { type = NavType.IntType })
+            ) { entrada ->
+                DetalleReservaScreen(
+                    reservaId = entrada.arguments?.getInt("reservaId") ?: 0,
+                    vecinoId = sesion?.id ?: 0
                 )
             }
             composable(Rutas.NUEVA_RESERVA) {

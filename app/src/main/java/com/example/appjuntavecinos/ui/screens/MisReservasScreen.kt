@@ -2,6 +2,7 @@ package com.example.appjuntavecinos.ui.screens
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,6 +48,7 @@ fun MisReservasScreen(
     vecinoId: Int,
     nombreVecino: String,
     onNuevaReserva: () -> Unit,
+    onDetalle: (Int) -> Unit,
     viewModel: MisReservasViewModel = viewModel()
 ) {
     val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
@@ -85,7 +87,9 @@ fun MisReservasScreen(
                         label = "colorTarjeta"
                     )
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onDetalle(reserva.id) },
                         colors = CardDefaults.cardColors(
                             containerColor = colorTarjeta,
                             contentColor = TextoPrincipal
