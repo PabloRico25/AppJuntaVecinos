@@ -5,23 +5,29 @@ import androidx.lifecycle.AndroidViewModel
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.utils.ResumenFinanciero
 import com.example.appjuntavecinos.utils.calcularResumen
+import com.example.appjuntavecinos.utils.fechaDeHoy
+import com.example.appjuntavecinos.utils.sumarMeses
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 
 class ResumenViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = JuntaRepository(application)
 
-    private val hoy = Calendar.getInstance().time
-    private val mes = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(hoy)
+    val mesActual: String = fechaDeHoy().take(7)
 
-    val nombreMes: String = SimpleDateFormat("MMMM yyyy", Locale("es", "CL"))
-        .format(hoy)
-        .replaceFirstChar { it.uppercase() }
+    private val _mes = MutableStateFlow(mesActual)
+    val mes: StateFlow<String> = _mes.asStateFlow()
 
-    val resumen: Flow<ResumenFinanciero> = repositorio.observarPagos()
-        .map { pagos -> calcularResumen(pagos, mes) }
+    val resumen: Flow<ResumenFinanciero> = combine(_mes, repositorio.observarPagos()) { mesElegido, pagos ->
+        calcularResumen(pagos, mesElegido)
+    }
+
+    fun cambiarMes(cambio: Int) {
+        _mes.update { sumarMeses(it, cambio) }
+    }
 }

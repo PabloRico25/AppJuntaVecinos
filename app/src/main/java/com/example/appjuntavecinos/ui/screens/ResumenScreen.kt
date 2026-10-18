@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -28,6 +31,7 @@ import com.example.appjuntavecinos.ui.theme.IngresoVerde
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.utils.ResumenFinanciero
 import com.example.appjuntavecinos.utils.anchoDeVentana
+import com.example.appjuntavecinos.utils.nombreDelMes
 import com.example.appjuntavecinos.viewmodel.ResumenViewModel
 
 @Composable
@@ -37,6 +41,7 @@ fun ResumenScreen(
     val resumen by viewModel.resumen.collectAsState(
         initial = ResumenFinanciero(0, 0, 0, emptyMap())
     )
+    val mes by viewModel.mes.collectAsState()
     val ancho = anchoDeVentana()
 
     Column(
@@ -47,7 +52,31 @@ fun ResumenScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("Resumen financiero", style = MaterialTheme.typography.headlineMedium)
-        Text(viewModel.nombreMes)
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = { viewModel.cambiarMes(-1) },
+                colors = ButtonDefaults.textButtonColors(contentColor = TextoPrincipal)
+            ) {
+                Text("Anterior", fontWeight = FontWeight.Bold)
+            }
+            Text(
+                text = nombreDelMes(mes),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            TextButton(
+                onClick = { viewModel.cambiarMes(1) },
+                enabled = mes < viewModel.mesActual,
+                colors = ButtonDefaults.textButtonColors(contentColor = TextoPrincipal)
+            ) {
+                Text("Siguiente", fontWeight = FontWeight.Bold)
+            }
+        }
 
         // Guía 9: un diseño distinto para Compact, Medium y Expanded.
         when (ancho) {
@@ -92,7 +121,7 @@ fun ResumenScreen(
                     fontWeight = FontWeight.Bold
                 )
                 if (resumen.gastosPorCategoria.isEmpty()) {
-                    Text("Este mes no hay gastos.")
+                    Text("No hay gastos en este mes.")
                 } else {
                     resumen.gastosPorCategoria.forEach { (categoria, monto) ->
                         Text("${categoria.lowercase().replaceFirstChar { it.uppercase() }}: ${formatoPesos(monto)}")
