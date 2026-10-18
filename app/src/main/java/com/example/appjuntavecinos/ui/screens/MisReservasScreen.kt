@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.data.model.ReservaEntity
-import com.example.appjuntavecinos.ui.theme.ErrorRojo
 import com.example.appjuntavecinos.ui.theme.Gray
 import com.example.appjuntavecinos.ui.theme.Green
 import com.example.appjuntavecinos.ui.theme.LightBlue
@@ -55,7 +53,6 @@ fun MisReservasScreen(
     val reservas by flujoDeReservas.collectAsState(initial = emptyList())
     val dependencias by viewModel.dependencias.collectAsState()
     val pagadas by viewModel.reservasPagadas.collectAsState(initial = emptyList())
-    var reservaACancelar by remember { mutableStateOf<ReservaEntity?>(null) }
     var reservaConQr by remember { mutableStateOf<ReservaEntity?>(null) }
 
     Column(
@@ -103,22 +100,6 @@ fun MisReservasScreen(
                             )
                             Text("${reserva.fecha}, de ${reserva.horaInicio} a ${reserva.horaFin}")
                             Text("Estado: ${etiquetaEstado(reserva.estado)}")
-                            if (reserva.estado == "PENDIENTE") {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    Button(
-                                        onClick = { reservaACancelar = reserva },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = ErrorRojo,
-                                            contentColor = Color.White
-                                        )
-                                    ) {
-                                        Text("Cancelar", fontWeight = FontWeight.Bold)
-                                    }
-                                }
-                            }
                             if (reserva.estado == "CONFIRMADA" && reserva.id in pagadas) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -134,36 +115,6 @@ fun MisReservasScreen(
                 }
             }
         }
-    }
-
-    reservaACancelar?.let { reserva ->
-        AlertDialog(
-            onDismissRequest = { reservaACancelar = null },
-            title = { Text("Cancelar reserva") },
-            text = { Text("¿Quieres cancelar esta reserva? No se puede deshacer.") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.cancelar(reserva)
-                        reservaACancelar = null
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ErrorRojo,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Sí, cancelar", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { reservaACancelar = null },
-                    colors = ButtonDefaults.textButtonColors(contentColor = TextoPrincipal)
-                ) {
-                    Text("No", fontWeight = FontWeight.Bold)
-                }
-            }
-        )
     }
 
     reservaConQr?.let { reserva ->
