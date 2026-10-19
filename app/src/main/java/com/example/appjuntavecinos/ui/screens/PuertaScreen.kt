@@ -54,8 +54,6 @@ import com.example.appjuntavecinos.utils.EstadoPuerta
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.delay
 
-// Pantalla del modo puerta: muestra la cámara frontal y lee los QR sola.
-// Solo se sale con el gesto escondido (7 toques al título) y la clave elegida al activarla.
 @Composable
 fun PuertaScreen(
     viewModel: PuertaViewModel
@@ -66,28 +64,28 @@ fun PuertaScreen(
     val contexto = LocalContext.current
     val vista = LocalView.current
 
-    // Estado del gesto de salida: cuántos toques van y cuándo fue el último
+
     var toques by remember { mutableIntStateOf(0) }
     var ultimoToque by remember { mutableLongStateOf(0L) }
     var mostrarSalida by remember { mutableStateOf(false) }
     var claveSalida by remember { mutableStateOf("") }
     var errorSalida by remember { mutableStateOf<String?>(null) }
 
-    // Permiso de la cámara: se pregunta al sistema si ya está concedido
+
     var tienePermiso by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(contexto, Manifest.permission.CAMERA) ==
                     PackageManager.PERMISSION_GRANTED
         )
     }
-    // El lanzador que muestra el cuadro de permiso de Android (como en Registrar pago)
+
     val pedirPermiso = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
         tienePermiso = concedido
     }
 
-    // Al abrir la pantalla: se cargan los nombres de las salas y, si falta, se pide el permiso
+
     LaunchedEffect(Unit) {
         viewModel.cargarDependencias()
         if (!tienePermiso) {
@@ -95,18 +93,18 @@ fun PuertaScreen(
         }
     }
 
+
     // No visto en clase (lo integramos con permiso del docente): keepScreenOn mantiene la pantalla encendida.
-    // La pantalla de la puerta no se apaga mientras está abierta
     DisposableEffect(Unit) {
         vista.keepScreenOn = true
         onDispose { vista.keepScreenOn = false }
     }
 
+
     // No visto en clase (lo integramos con permiso del docente): BackHandler bloquea el botón atrás.
-    // El botón atrás no hace nada: solo se sale con el gesto y la clave
     BackHandler(enabled = true) { }
 
-    // El resultado se quita solo a los 4 segundos
+
     LaunchedEffect(resultado) {
         if (resultado != null) {
             delay(4000)
@@ -120,7 +118,7 @@ fun PuertaScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // El título es el gesto escondido para salir: 7 toques seguidos
+
             Text(
                 text = "Acerque su QR",
                 style = MaterialTheme.typography.displaySmall,
@@ -130,7 +128,7 @@ fun PuertaScreen(
                     indication = null
                 ) {
                     val ahora = System.currentTimeMillis()
-                    // Si pasaron más de 2 segundos desde el último toque, se cuenta de nuevo
+
                     toques = if (ahora - ultimoToque > 2000) 1 else toques + 1
                     ultimoToque = ahora
                     if (toques >= 7) {
@@ -149,8 +147,7 @@ fun PuertaScreen(
             Spacer(Modifier.height(24.dp))
 
             if (tienePermiso) {
-                // La cámara frontal, en un recuadro con esquinas redondeadas.
-                // activo = resultado == null: mientras se muestra un resultado, no se lee.
+
                 LectorQrFrontal(
                     activo = resultado == null,
                     onQrLeido = { texto -> viewModel.validar(texto) },
@@ -161,7 +158,7 @@ fun PuertaScreen(
                         .clip(RoundedCornerShape(16.dp))
                 )
             } else {
-                // Sin permiso no hay cámara: se explica y se ofrece pedirlo de nuevo
+
                 Text("La puerta necesita la cámara para leer los códigos QR.")
                 Spacer(Modifier.height(16.dp))
                 Button(onClick = { pedirPermiso.launch(Manifest.permission.CAMERA) }) {
@@ -170,7 +167,7 @@ fun PuertaScreen(
             }
         }
 
-        // El resultado cubre toda la pantalla: verde si abre, rojo si no
+
         resultado?.let { r ->
             val abierta = r.estado == EstadoPuerta.ABIERTA
             val colorTexto = if (abierta) TextoPrincipal else Color.White
@@ -199,7 +196,7 @@ fun PuertaScreen(
         }
     }
 
-    // Diálogo para salir del modo puerta: pide la clave elegida al activarlo
+
     if (mostrarSalida) {
         AlertDialog(
             onDismissRequest = { mostrarSalida = false },

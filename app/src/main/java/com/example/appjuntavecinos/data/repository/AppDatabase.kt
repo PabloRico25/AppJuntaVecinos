@@ -27,10 +27,8 @@ abstract class AppDatabase : RoomDatabase(){
 
     // companion object: lo que va aquí pertenece a la clase, no a cada objeto.
     // Se usa sin crear un AppDatabase: AppDatabase.obtener(context).
-    // Abre la base una sola vez para toda la app (singleton).
-    // databaseBuilder sale de la documentación oficial de Room (link de la presentación 2.5.1).
-    // synchronized evita que dos partes de la app la creen al mismo tiempo.
-    // @Volatile: todos los hilos ven el valor actual de la variable.
+
+
     companion object {
         @Volatile
         private var instancia: AppDatabase? = null

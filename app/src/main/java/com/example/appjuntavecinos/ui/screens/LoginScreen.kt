@@ -116,7 +116,7 @@ fun LoginScreen(
         }
     }
 
-    // NUEVO: el diálogo que activa el modo puerta
+
     if (mostrarActivacion) {
         ActivarPuertaDialog(
             dependencias = dependencias,

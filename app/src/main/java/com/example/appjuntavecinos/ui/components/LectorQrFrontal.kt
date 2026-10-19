@@ -41,43 +41,37 @@ fun LectorQrFrontal(
 ) {
     val contexto = LocalContext.current
 
-    // CameraX necesita un "dueño del ciclo de vida": cuando la app se pausa, la cámara se
-    // apaga sola y cuando vuelve, se enciende. La Activity (MainActivity) cumple ese papel.
+
     val duenoDelCiclo = contexto as LifecycleOwner
 
-    // PreviewView es la vista de Android que dibuja lo que ve la cámara.
-    // Compose no la trae, por eso se mete dentro con AndroidView.
+
+
     val vistaPrevia = remember { PreviewView(contexto) }
 
-    // rememberUpdatedState: el analizador de abajo se crea una sola vez, pero estos dos
-    // valores pueden cambiar. Así el analizador siempre ve el valor más reciente.
+
     val activoActual by rememberUpdatedState(activo)
     val alLeer by rememberUpdatedState(onQrLeido)
 
-    // DisposableEffect: se ejecuta al entrar a la pantalla y, cuando la pantalla se va,
-    // corre onDispose para soltar la cámara y el lector (si no, quedarían abiertos).
+
     DisposableEffect(Unit) {
-        // Un hilo aparte para analizar imágenes, así la pantalla no se congela.
+
         val ejecutor = Executors.newSingleThreadExecutor()
 
-        // El lector de ML Kit, configurado para buscar solo códigos QR.
+
         val lector = BarcodeScanning.getClient(
             BarcodeScannerOptions.Builder()
                 .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
                 .build()
         )
 
-        // Pedir la cámara es asíncrono: devuelve un "futuro" y se avisa cuando está lista.
         val futuroCamara = ProcessCameraProvider.getInstance(contexto)
         futuroCamara.addListener({
             val camara = futuroCamara.get()
 
-            // Caso de uso 1: la vista previa, que se dibuja en la PreviewView.
+
             val preview = Preview.Builder().build()
             preview.setSurfaceProvider(vistaPrevia.surfaceProvider)
 
-            // Caso de uso 2: el análisis. STRATEGY_KEEP_ONLY_LATEST descarta las imágenes
-            // viejas si el lector va lento, para trabajar siempre con la más reciente.
             val analisis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
@@ -88,7 +82,7 @@ fun LectorQrFrontal(
                     // Sin imagen, o lector en pausa: se suelta la imagen y se sigue.
                     imagen.close()
                 } else {
-                    // rotationDegrees le dice a ML Kit cuánto está girada la imagen.
+
                     val entrada = InputImage.fromMediaImage(foto, imagen.imageInfo.rotationDegrees)
                     lector.process(entrada)
                         .addOnSuccessListener { codigos ->
@@ -97,13 +91,12 @@ fun LectorQrFrontal(
                                 alLeer(texto)
                             }
                         }
-                        // Siempre hay que cerrar la imagen al terminar; si no, la cámara
-                        // se queda esperando y deja de entregar imágenes nuevas.
+
                         .addOnCompleteListener { imagen.close() }
                 }
             }
 
-            // Se sueltan usos anteriores y se conecta todo a la cámara FRONTAL.
+
             camara.unbindAll()
             camara.bindToLifecycle(
                 duenoDelCiclo,
@@ -117,7 +110,7 @@ fun LectorQrFrontal(
             try {
                 futuroCamara.get().unbindAll()
             } catch (e: Exception) {
-                // Si la cámara nunca llegó a abrirse, no hay nada que soltar.
+
             }
             ejecutor.shutdown()
             lector.close()
