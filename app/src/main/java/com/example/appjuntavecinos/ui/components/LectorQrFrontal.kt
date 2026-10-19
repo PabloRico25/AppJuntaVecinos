@@ -64,7 +64,6 @@ fun LectorQrFrontal(
                 .build()
         )
 
-        .
         val futuroCamara = ProcessCameraProvider.getInstance(contexto)
         futuroCamara.addListener({
             val camara = futuroCamara.get()
@@ -73,7 +72,6 @@ fun LectorQrFrontal(
             val preview = Preview.Builder().build()
             preview.setSurfaceProvider(vistaPrevia.surfaceProvider)
 
-            // viejas si el lector va lento, para trabajar siempre con la más reciente.
             val analisis = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()

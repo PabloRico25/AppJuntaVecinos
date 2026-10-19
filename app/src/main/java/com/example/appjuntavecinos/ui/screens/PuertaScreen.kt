@@ -94,12 +94,14 @@ fun PuertaScreen(
     }
 
 
+    // No visto en clase (lo integramos con permiso del docente): keepScreenOn mantiene la pantalla encendida.
     DisposableEffect(Unit) {
         vista.keepScreenOn = true
         onDispose { vista.keepScreenOn = false }
     }
 
 
+    // No visto en clase (lo integramos con permiso del docente): BackHandler bloquea el botón atrás.
     BackHandler(enabled = true) { }
 
 
