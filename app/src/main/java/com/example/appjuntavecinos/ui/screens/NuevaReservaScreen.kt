@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
 import com.example.appjuntavecinos.viewmodel.NuevaReservaViewModel
 
@@ -68,6 +69,7 @@ fun NuevaReservaScreen(
             readOnly = true,
             label = { Text("Fecha") },
             isError = estado.errores.fecha != null,
+            trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
             supportingText = { estado.errores.fecha?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
         )

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
 import com.example.appjuntavecinos.utils.crearUriCamara
 import com.example.appjuntavecinos.viewmodel.RegistrarPagoViewModel
@@ -169,6 +170,7 @@ fun RegistrarPagoScreen(
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             isError = estado.errores.monto != null,
+            trailingIcon = { if (estado.errores.monto != null) IconoDeError() },
             supportingText = { estado.errores.monto?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
         )
@@ -179,6 +181,7 @@ fun RegistrarPagoScreen(
             readOnly = true,
             label = { Text("Fecha del pago") },
             isError = estado.errores.fecha != null,
+            trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
             supportingText = { estado.errores.fecha?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
         )

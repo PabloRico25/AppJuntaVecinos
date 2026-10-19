@@ -1,5 +1,6 @@
 package com.example.appjuntavecinos.ui.components
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -13,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +39,12 @@ fun MenuDesplegable(
             onValueChange = {},
             readOnly = true,
             label = { Text(etiqueta) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido) },
+            trailingIcon = {
+                Row (verticalAlignment = Alignment.CenterVertically) {
+                    if (error != null) IconoDeError()
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandido)
+                }
+            },
             isError = error != null,
             supportingText = { error?.let { Text(it) } },
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth()

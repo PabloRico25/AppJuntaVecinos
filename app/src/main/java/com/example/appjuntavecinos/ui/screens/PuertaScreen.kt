@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.LectorQrFrontal
 import com.example.appjuntavecinos.ui.theme.ErrorRojo
 import com.example.appjuntavecinos.ui.theme.Green
@@ -212,6 +213,8 @@ fun PuertaScreen(
                         },
                         label = { Text("Clave") },
                         singleLine = true,
+                        isError = errorSalida != null,
+                        trailingIcon = { if (errorSalida != null) IconoDeError() },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                     )
