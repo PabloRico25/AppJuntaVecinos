@@ -13,7 +13,7 @@ Aplicación Android para administrar los arriendos de las salas de una junta de 
 
 Los vecinos piden reservas del Salón Principal o de la Sala Multiuso. Cuando la reserva está confirmada y pagada, reciben un ticket con código QR. La directiva confirma o rechaza reservas, registra pagos, revisa las finanzas y valida los QR en la entrada. Una tablet fija en una sala puede validar los QR por sí sola (modo puerta).
 
-| Usuario | Puede <br/>|
+| Usuario | Puede|
 |---|---|
 | Vecino/a | Pedir reservas, ver su estado, cancelar las pendientes, ver la disponibilidad y las finanzas de la junta, y mostrar su ticket QR |
 | Secretaría | Confirmar o rechazar las reservas pendientes |
