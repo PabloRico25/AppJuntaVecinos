@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.data.model.PagoEntity
+import com.example.appjuntavecinos.ui.theme.FondoTarjeta
 import com.example.appjuntavecinos.ui.theme.LightBlue
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.viewmodel.PagosViewModel
@@ -91,7 +92,8 @@ fun PagosScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = FondoTarjeta,
+                            contentColor = TextoPrincipal
                         )
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {

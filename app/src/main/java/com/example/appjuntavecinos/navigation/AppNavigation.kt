@@ -25,6 +25,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -32,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.appjuntavecinos.ui.components.ContenidoCentrado
 import com.example.appjuntavecinos.ui.screens.DetalleReservaScreen
 import com.example.appjuntavecinos.ui.screens.DisponibilidadScreen
 import com.example.appjuntavecinos.ui.screens.EscanearScreen
@@ -62,6 +65,8 @@ fun AppNavigation() {
     var menuAbierto by remember { mutableStateOf(false) }
     val avisos = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    // Resumen ya se adapta solo al ancho de la ventana, así que no se limita
+    val anchoMaximo = if (rutaActual == Rutas.RESUMEN || rutaActual == Rutas.FINANZAS) Dp.Unspecified else 640.dp
 
     val contenido: @Composable () -> Unit = {
         NavHost(navController = navController, startDestination = Rutas.LOGIN) {
@@ -166,7 +171,7 @@ fun AppNavigation() {
     } else if (modoPuerta == true) {
         PuertaScreen(viewModel = puertaViewModel)
     } else if (rutaActual == Rutas.LOGIN || rutaActual == null) {
-        contenido()
+        ContenidoCentrado(anchoMaximo) { contenido() }
     } else {
         NavigationSuiteScaffold(
             navigationSuiteItems = {
@@ -212,7 +217,7 @@ fun AppNavigation() {
                     }
                 )
                 Box(modifier = Modifier.weight(1f)) {
-                    contenido()
+                    ContenidoCentrado(anchoMaximo) { contenido() }
                     SnackbarHost(
                         hostState = avisos,
                         modifier = Modifier.align(Alignment.BottomCenter)

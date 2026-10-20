@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.ui.theme.ErrorRojo
 import com.example.appjuntavecinos.ui.theme.FondoSaldo
+import com.example.appjuntavecinos.ui.theme.FondoTarjeta
 import com.example.appjuntavecinos.ui.theme.IngresoVerde
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.utils.ResumenFinanciero
@@ -61,7 +62,7 @@ fun ResumenScreen(
         ) {
             TextButton(
                 onClick = { viewModel.cambiarMes(-1) },
-                colors = ButtonDefaults.textButtonColors(contentColor = TextoPrincipal)
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
             ) {
                 Text("Anterior", fontWeight = FontWeight.Bold)
             }
@@ -73,7 +74,7 @@ fun ResumenScreen(
             TextButton(
                 onClick = { viewModel.cambiarMes(1) },
                 enabled = mes < viewModel.mesActual,
-                colors = ButtonDefaults.textButtonColors(contentColor = TextoPrincipal)
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
             ) {
                 Text("Siguiente", fontWeight = FontWeight.Bold)
             }
@@ -111,7 +112,7 @@ fun ResumenScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                containerColor = FondoTarjeta,
                 contentColor = TextoPrincipal
             )
         ) {
@@ -139,7 +140,7 @@ private fun TarjetaIngresos(resumen: ResumenFinanciero, modifier: Modifier = Mod
         titulo = "Ingresos (arriendos)",
         monto = resumen.ingresos,
         colorMonto = IngresoVerde,
-        colorFondo = MaterialTheme.colorScheme.surfaceVariant,
+        colorFondo = FondoTarjeta,
         estilo = MaterialTheme.typography.titleLarge,
         modifier = modifier
     )
@@ -151,7 +152,7 @@ private fun TarjetaGastos(resumen: ResumenFinanciero, modifier: Modifier = Modif
         titulo = "Gastos (consumos básicos)",
         monto = resumen.gastos,
         colorMonto = ErrorRojo,
-        colorFondo = MaterialTheme.colorScheme.surfaceVariant,
+        colorFondo = FondoTarjeta,
         estilo = MaterialTheme.typography.titleLarge,
         modifier = modifier
     )

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.theme.ErrorRojo
 import com.example.appjuntavecinos.ui.theme.Gray
 import com.example.appjuntavecinos.ui.theme.Green
@@ -77,6 +78,7 @@ fun EscanearScreen(
             onValueChange = { viewModel.onCodigoChange(it) },
             label = { Text("Código corto o texto del QR") },
             isError = estado.error != null,
+            trailingIcon = { if (estado.error != null) IconoDeError() },
             supportingText = { estado.error?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
         )

@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,20 +27,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.appjuntavecinos.ui.components.ActivarPuertaDialog
+import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
-    puertaViewModel: PuertaViewModel,   // NUEVO
+    puertaViewModel: PuertaViewModel,
     onLoginValido: () -> Unit
 ) {
     val estado by viewModel.estado.collectAsState()
-    val dependencias by puertaViewModel.dependencias.collectAsState()   // NUEVO
-    var toques by remember { mutableIntStateOf(0) }                      // NUEVO
-    var ultimoToque by remember { mutableLongStateOf(0L) }               // NUEVO
-    var mostrarActivacion by remember { mutableStateOf(false) }          // NUEVO
+    val dependencias by puertaViewModel.dependencias.collectAsState()
+    var toques by remember { mutableIntStateOf(0) }
+    var ultimoToque by remember { mutableLongStateOf(0L) }
+    var mostrarActivacion by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
@@ -77,11 +75,7 @@ fun LoginScreen(
             singleLine = true,
             isError = estado.errores.correo != null,
             supportingText = { estado.errores.correo?.let { Text(it) } },
-            trailingIcon = {
-                if (estado.errores.correo != null) {
-                    Icon(Icons.Filled.Warning, contentDescription = "Error", tint = MaterialTheme.colorScheme.error)
-                }
-            },
+            trailingIcon = { if (estado.errores.correo != null) IconoDeError() },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(8.dp))
@@ -94,11 +88,7 @@ fun LoginScreen(
             visualTransformation = PasswordVisualTransformation(),
             isError = estado.errores.clave != null,
             supportingText = { estado.errores.clave?.let { Text(it) } },
-            trailingIcon = {
-                if (estado.errores.clave != null) {
-                    Icon(Icons.Filled.Warning, contentDescription = "Error", tint = MaterialTheme.colorScheme.error)
-                }
-            },
+            trailingIcon = { if (estado.errores.clave != null) IconoDeError() },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(16.dp))
