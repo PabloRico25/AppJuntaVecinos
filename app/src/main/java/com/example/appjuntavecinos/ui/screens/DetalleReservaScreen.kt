@@ -24,7 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.ui.theme.ErrorRojo
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
 @Composable
@@ -115,7 +114,7 @@ fun DetalleReservaScreen(
             dismissButton = {
                 TextButton(
                     onClick = { confirmandoCancelar = false },
-                    colors = ButtonDefaults.textButtonColors(contentColor = TextoPrincipal)
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
                 ) {
                     Text("No", fontWeight = FontWeight.Bold)
                 }
