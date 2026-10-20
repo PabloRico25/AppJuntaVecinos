@@ -9,7 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 
+
 // Limita el ancho del contenido y lo centra, para que en pantallas grandes los formularios no se estiren.
+// No visto en clase: widthIn pone un ancho máximo al contenido.
 @Composable
 fun ContenidoCentrado(
     anchoMaximo: Dp,

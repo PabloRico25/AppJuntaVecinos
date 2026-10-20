@@ -24,6 +24,7 @@ private val LightColorScheme = lightColorScheme(
     error = ErrorRojo
 )
 
+// No visto en clase: darkColorScheme define la paleta oscura e isSystemInDarkTheme() elige cuál usar según el modo del teléfono.
 private val DarkColorScheme = darkColorScheme(
     primary = Blue,
     onPrimary = TextoBoton,

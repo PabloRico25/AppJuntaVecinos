@@ -13,7 +13,7 @@ Aplicación Android para administrar los arriendos de las salas de una junta de 
 
 Los vecinos piden reservas del Salón Principal o de la Sala Multiuso. Cuando la reserva está confirmada y pagada, reciben un ticket con código QR. La directiva confirma o rechaza reservas, registra pagos, revisa las finanzas y valida los QR en la entrada. Una tablet fija en una sala puede validar los QR por sí sola (modo puerta).
 
-| Usuario | Puede|
+| Usuario | Puede |
 |---|---|
 | Vecino/a | Pedir reservas, ver su estado, cancelar las pendientes, ver la disponibilidad y las finanzas de la junta, y mostrar su ticket QR |
 | Secretaría | Confirmar o rechazar las reservas pendientes |
@@ -169,7 +169,7 @@ AppJuntaVecinos/
 
 ## Piezas que no se vieron en clase
 
-Las integramos por nuestra cuenta, con el permiso del docente para usar herramientas externas. En el código cada una lleva un comentario `No visto en clase`.
+Las integramos por nuestra cuenta. Las herramientas externas, con el permiso del docente. En el código cada una lleva un comentario `No visto en clase`.
 
 | Pieza | Dónde | Para qué |
 |---|---|---|
@@ -183,6 +183,8 @@ Las integramos por nuestra cuenta, con el permiso del docente para usar herramie
 | `verticalScroll` | Disponibilidad, Escanear, Nueva reserva, Registrar pago, Resumen y Ticket QR | Permite recorrer la pantalla hacia abajo |
 | `combine` | Disponibilidad, Pagos y Resumen | Junta varios flujos de datos en uno |
 | `navArgument` | `navigation/AppNavigation.kt` | Pasa el número de la reserva al Detalle y al Ticket QR |
+| `darkColorScheme` e `isSystemInDarkTheme()` | `ui/theme/Theme.kt` | Definen la paleta oscura y eligen la clara o la oscura según el modo del teléfono |
+| `widthIn` | `ui/components/ContenidoCentrado.kt` | Limita el ancho máximo del contenido en pantallas grandes |
 
 ## Limitaciones
 
