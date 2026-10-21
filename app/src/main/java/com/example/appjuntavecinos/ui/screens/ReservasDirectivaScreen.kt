@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.ui.theme.ErrorRojo
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.ReservasDirectivaViewModel
 
 @Composable
@@ -77,7 +78,7 @@ fun ReservasDirectivaScreen(
                                 fontWeight = FontWeight.Bold
                             )
                             Text("Solicitada por ${usuarios.firstOrNull { it.id == reserva.vecinoId }?.nombre ?: ""}")
-                            Text("${reserva.fecha}, de ${reserva.horaInicio} a ${reserva.horaFin}")
+                            Text("${fechaParaMostrar(reserva.fecha)}, de ${reserva.horaInicio} a ${reserva.horaFin}")
                             Text("Estado: ${etiquetaEstado(reserva.estado)}")
                             if (reserva.gestionadaPorId != null) {
                                 Text("Gestionada por ${usuarios.firstOrNull { it.id == reserva.gestionadaPorId }?.nombre ?: ""}")

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.ui.theme.ErrorRojo
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
 @Composable
@@ -59,7 +60,7 @@ fun DetalleReservaScreen(
                 fontWeight = FontWeight.Bold
             )
             Text("Estado: ${etiquetaEstado(reserva.estado)}")
-            Text("Fecha: ${reserva.fecha}")
+            Text("Fecha: ${fechaParaMostrar(reserva.fecha)}")
             Text("Horario: ${reserva.horaInicio} a ${reserva.horaFin}")
             Text("Solicitada el: ${reserva.fechaSolicitud}")
 

@@ -22,6 +22,7 @@ import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.ui.theme.FondoTarjeta
 import com.example.appjuntavecinos.ui.theme.LightBlue
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.PagosViewModel
 import java.text.NumberFormat
 import java.util.Locale
@@ -33,9 +34,9 @@ fun PagosScreen(
     viewModel: PagosViewModel = viewModel()
 ) {
     val pagos by viewModel.pagos.collectAsState(initial = emptyList())
-    val reservasPorCobrar by viewModel.reservasPorCobrar.collectAsState(initial = emptyList())   // NUEVO
-    val dependencias by viewModel.dependencias.collectAsState()                                   // NUEVO
-    val usuarios by viewModel.usuarios.collectAsState()                                           // NUEVO
+    val reservasPorCobrar by viewModel.reservasPorCobrar.collectAsState(initial = emptyList())
+    val dependencias by viewModel.dependencias.collectAsState()
+    val usuarios by viewModel.usuarios.collectAsState()
 
     Column(
         modifier = Modifier
@@ -74,7 +75,7 @@ fun PagosScreen(
                     reservasPorCobrar.forEach { reserva ->
                         val nombreVecino = usuarios.firstOrNull { it.id == reserva.vecinoId }?.nombre ?: ""
                         val nombreSala = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: ""
-                        Text("$nombreVecino, $nombreSala, ${reserva.fecha}")
+                        Text("$nombreVecino, $nombreSala, ${fechaParaMostrar(reserva.fecha)}")
                     }
                 }
             }
@@ -102,7 +103,7 @@ fun PagosScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text("${formatoPesos(pago.monto)}, ${pago.fecha}")
+                            Text("${formatoPesos(pago.monto)}, ${fechaParaMostrar(pago.fecha)}")
                             if (pago.reservaId != null) {
                                 Text("Reserva N° ${pago.reservaId}")
                             }

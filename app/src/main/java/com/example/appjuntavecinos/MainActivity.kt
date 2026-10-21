@@ -14,15 +14,10 @@ import com.example.appjuntavecinos.ui.theme.AppJuntaVecinosTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge() // pantalla moderna de Android 15
         setContent {
-            AppJuntaVecinosTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppNavigation()
-                }
+            AppJuntaVecinosTheme {Surface(modifier = Modifier.fillMaxSize(),// Surface pinta un fondo
+                color = MaterialTheme.colorScheme.background) {AppNavigation()}
             }
         }
     }

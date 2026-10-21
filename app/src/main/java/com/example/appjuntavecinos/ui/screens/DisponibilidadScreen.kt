@@ -11,7 +11,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -35,9 +34,9 @@ import com.example.appjuntavecinos.ui.theme.LightBlue
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.utils.HORA_APERTURA
 import com.example.appjuntavecinos.utils.HORA_CIERRE
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.DisponibilidadViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DisponibilidadScreen(
     mostrarNombres: Boolean,
@@ -47,7 +46,7 @@ fun DisponibilidadScreen(
     val usuarios by viewModel.usuarios.collectAsState()
     val dependenciaId by viewModel.dependenciaId.collectAsState()
     val fecha by viewModel.fecha.collectAsState()
-    val franjas by viewModel.franjas.collectAsState(initial = emptyList())
+    val bloques by viewModel.bloques.collectAsState(initial = emptyList())
     var mostrarCalendario by remember { mutableStateOf(false) }
 
     Column(
@@ -70,7 +69,7 @@ fun DisponibilidadScreen(
         )
 
         OutlinedTextField(
-            value = fecha,
+            value = fechaParaMostrar(fecha),
             onValueChange = {},
             readOnly = true,
             label = { Text("Fecha") },
@@ -85,13 +84,13 @@ fun DisponibilidadScreen(
 
         Text("Horario de la sede: $HORA_APERTURA a $HORA_CIERRE")
 
-        franjas.forEach { franja ->
-            val colorTarjeta = when (franja.tipo) {
+        bloques.forEach { bloque ->
+            val colorTarjeta = when (bloque.tipo) {
                 "CONFIRMADA" -> Green
                 "SOLICITADA" -> LightBlue
                 else -> Color.White
             }
-            val etiqueta = when (franja.tipo) {
+            val etiqueta = when (bloque.tipo) {
                 "CONFIRMADA" -> "Confirmada"
                 "SOLICITADA" -> "Solicitada"
                 else -> "Libre"
@@ -105,13 +104,13 @@ fun DisponibilidadScreen(
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
-                        text = "${franja.horaInicio} a ${franja.horaFin}",
+                        text = "${bloque.horaInicio} a ${bloque.horaFin}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(etiqueta)
-                    if (mostrarNombres && franja.vecinoId != null) {
-                        val nombre = usuarios.firstOrNull { it.id == franja.vecinoId }?.nombre ?: ""
+                    if (mostrarNombres && bloque.vecinoId != null) {
+                        val nombre = usuarios.firstOrNull { it.id == bloque.vecinoId }?.nombre ?: ""
                         Text(nombre)
                     }
                 }

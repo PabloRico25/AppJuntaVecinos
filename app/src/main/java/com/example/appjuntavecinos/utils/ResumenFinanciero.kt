@@ -17,5 +17,6 @@ fun calcularResumen(pagos: List<PagoEntity>, mes: String): ResumenFinanciero {
     val porCategoria = consumos
         .groupBy { it.categoria }
         .mapValues { entrada -> entrada.value.sumOf { it.monto } }
-    return ResumenFinanciero(ingresos, gastos, ingresos - gastos, porCategoria)
+    return ResumenFinanciero(ingresos, gastos, ingresos - gastos,
+        porCategoria)
 }

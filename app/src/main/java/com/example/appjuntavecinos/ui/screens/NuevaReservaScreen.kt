@@ -12,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -31,9 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.NuevaReservaViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NuevaReservaScreen(
     vecinoId: Int,
@@ -64,7 +63,7 @@ fun NuevaReservaScreen(
         )
 
         OutlinedTextField(
-            value = estado.fecha,
+            value = fechaParaMostrar(estado.fecha),
             onValueChange = {},
             readOnly = true,
             label = { Text("Fecha") },

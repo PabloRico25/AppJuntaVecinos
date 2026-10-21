@@ -24,7 +24,7 @@ private val LightColorScheme = lightColorScheme(
     error = ErrorRojo
 )
 
-// No visto en clase: darkColorScheme define la paleta oscura e isSystemInDarkTheme() elige cuál usar según el modo del teléfono.
+// No visto en clase: darkColorScheme define la paleta oscura e isSystemInDarkTheme() dice si el teléfono está en modo oscuro.
 private val DarkColorScheme = darkColorScheme(
     primary = Blue,
     onPrimary = TextoBoton,
@@ -48,8 +48,6 @@ private val DarkColorScheme = darkColorScheme(
     error = ErrorRojoOscuro,
     onError = TextoSobreErrorOscuro
 )
-
-// Sin colores dinámicos del teléfono: la app usa siempre estas dos paletas, la clara o la oscura según el modo del sistema.
 @Composable
 fun AppJuntaVecinosTheme(
     content: @Composable () -> Unit

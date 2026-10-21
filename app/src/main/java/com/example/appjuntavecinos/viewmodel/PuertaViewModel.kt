@@ -39,7 +39,7 @@ class PuertaViewModel(application: Application) : AndroidViewModel(application) 
     private val _resultado = MutableStateFlow<ResultadoPuerta?>(null)
     val resultado: StateFlow<ResultadoPuerta?> = _resultado.asStateFlow()
 
-    // Verdadero mientras se está validando un QR. El lector de la cámara puede entregar el
+    // mientras se está validando un QR. El lector de la cámara puede entregar el
     // mismo QR varias veces seguidas, y así solo se atiende la primera.
     private var procesando = false
 
@@ -77,7 +77,7 @@ class PuertaViewModel(application: Application) : AndroidViewModel(application) 
                 val usadas = repositorio.obtenerReservasUsadas()
                 val resultado = evaluarPuerta(texto, salaId.value, fechaDeHoy(), horaActual(), usadas)
                 val reservaId = resultado.reservaId
-                // Si la puerta se abre, se guarda que esa reserva ya entró (cuarta revisión).
+                // Si la puerta se abre, se guarda que esa reserva ya entró.
                 if (resultado.estado == EstadoPuerta.ABIERTA && reservaId != null) {
                     repositorio.registrarIngreso(IngresoEntity(reservaId, fechaDeHoy(), horaActual()))
                 }

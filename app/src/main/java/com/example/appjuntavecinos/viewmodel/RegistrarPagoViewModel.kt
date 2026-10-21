@@ -142,7 +142,7 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
             comprobante = if (actual.adjuntarComprobante && actual.comprobante == null) {
                 "Elige una imagen o desactiva el comprobante"
             } else null,
-            confirma = if (!actual.confirma) "Debes confirmar que es un registro informativo" else null
+            confirma = if (!actual.confirma) "Debes confirmar el registro" else null
         )
 
         _estado.update { it.copy(errores = nuevosErrores) }

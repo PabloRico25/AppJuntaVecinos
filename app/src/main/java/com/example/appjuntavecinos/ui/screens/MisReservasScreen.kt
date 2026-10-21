@@ -26,6 +26,7 @@ import com.example.appjuntavecinos.ui.theme.Gray
 import com.example.appjuntavecinos.ui.theme.Green
 import com.example.appjuntavecinos.ui.theme.LightBlue
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
 @Composable
@@ -82,7 +83,7 @@ fun MisReservasScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text("${reserva.fecha}, de ${reserva.horaInicio} a ${reserva.horaFin}")
+                            Text("${fechaParaMostrar(reserva.fecha)}, de ${reserva.horaInicio} a ${reserva.horaFin}")
                             Text("Estado: ${etiquetaEstado(reserva.estado)}")
                         }
                     }

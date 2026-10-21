@@ -59,13 +59,12 @@ fun AppNavigation() {
     val rutaActual = entradaActual?.destination?.route
     val loginViewModel: LoginViewModel = viewModel()
     val puertaViewModel: PuertaViewModel = viewModel()
-    val modoPuerta by puertaViewModel.modoPuerta.collectAsState()   // NUEVO (puerta 5)
+    val modoPuerta by puertaViewModel.modoPuerta.collectAsState()
     val sesion by loginViewModel.sesion.collectAsState()
     val destinos = if (sesion?.rol == "DIRECTIVA") destinosDirectiva else destinosVecino
     var menuAbierto by remember { mutableStateOf(false) }
     val avisos = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    // Resumen ya se adapta solo al ancho de la ventana, así que no se limita
     val anchoMaximo = if (rutaActual == Rutas.RESUMEN || rutaActual == Rutas.FINANZAS) Dp.Unspecified else 640.dp
 
     val contenido: @Composable () -> Unit = {
@@ -165,7 +164,6 @@ fun AppNavigation() {
         }
     }
 
-    // NUEVO (puerta 5): primero se mira si este aparato es una puerta
     if (modoPuerta == null) {
         Box(modifier = Modifier.fillMaxSize())
     } else if (modoPuerta == true) {

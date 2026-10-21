@@ -29,6 +29,7 @@ import com.example.appjuntavecinos.ui.theme.Gray
 import com.example.appjuntavecinos.ui.theme.Green
 import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.utils.EstadoIngreso
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.EscanearViewModel
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
@@ -119,7 +120,7 @@ fun EscanearScreen(
                     if (datos != null) {
                         Text("Vecino: ${datos.nombreVecino}")
                         Text("Sala: ${dependencias.firstOrNull { it.id == datos.dependenciaId }?.nombre ?: ""}")
-                        Text("${datos.fecha}, de ${datos.horaInicio} a ${datos.horaFin}")
+                        Text("${fechaParaMostrar(datos.fecha)}, de ${datos.horaInicio} a ${datos.horaFin}")
                     } else {
                         Text(resultado.motivo ?: "No es un QR de la junta o fue alterado.")
                     }

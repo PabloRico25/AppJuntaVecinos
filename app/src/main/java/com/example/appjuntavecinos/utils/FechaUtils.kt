@@ -34,3 +34,8 @@ fun nombreDelMes(mes: String): String {
         .format(primerDia)
         .replaceFirstChar { it.uppercase() }
 }
+
+fun fechaParaMostrar(fecha: String): String {
+    val partes = fecha.split("-")
+    return if (partes.size == 3) "${partes[2]}-${partes[1]}-${partes[0]}" else fecha
+}
