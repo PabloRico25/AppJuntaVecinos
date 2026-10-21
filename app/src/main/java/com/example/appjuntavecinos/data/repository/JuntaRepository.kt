@@ -12,9 +12,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-// context: lo que Android usa para saber dónde está la app en el celular
-// (carpetas, base de datos, recursos). Lo crea Android y lo recibimos desde el
-// ViewModel (AndroidViewModel(application), como en la Guía 12) para pasárselo a la base.
 class JuntaRepository(context: Context) {
     private val db = AppDatabase.obtener(context)
     private val usuarioDao = db.usuarioDao()
@@ -35,75 +32,68 @@ class JuntaRepository(context: Context) {
         reservaDao.insertar(reserva)
     }
 
-    suspend fun hayChoque(
-        dependenciaId: Int,
-        fecha: String,
-        horaInicio: String,
-        horaFin: String
-    ): Boolean {
-        val confirmadas = reservaDao.obtenerConfirmadas(dependenciaId, fecha)
+    suspend fun hayChoque(dependenciaId:Int,fecha:String,horaInicio:String,horaFin:String):Boolean
+    {val confirmadas=reservaDao.obtenerConfirmadas(dependenciaId,fecha)
         return confirmadas.any { it.horaInicio < horaFin && horaInicio < it.horaFin }
     }
 
-    fun observarReservas(vecinoId: Int): Flow<List<ReservaEntity>> {
+    fun observarReservas(vecinoId:Int):Flow<List<ReservaEntity>>{
         return reservaDao.observarPorVecino(vecinoId)
     }
 
-    suspend fun cancelarReserva(reserva: ReservaEntity) {
-        reservaDao.actualizar(reserva.copy(estado = "CANCELADA"))
+    suspend fun cancelarReserva(reserva:ReservaEntity){
+        reservaDao.actualizar(reserva.copy(estado ="CANCELADA"))
     }
 
-    fun observarTodasLasReservas(): Flow<List<ReservaEntity>> {
+    fun observarTodasLasReservas():Flow<List<ReservaEntity>>{
         return reservaDao.observarTodas()
     }
 
-    suspend fun obtenerUsuarios(): List<UsuarioEntity> {
+    suspend fun obtenerUsuarios():List<UsuarioEntity>{
         return usuarioDao.obtenerTodos()
     }
 
-    suspend fun confirmarReserva(reserva: ReservaEntity, gestionadaPorId: Int): Boolean {
-        if (hayChoque(reserva.dependenciaId, reserva.fecha, reserva.horaInicio, reserva.horaFin)) {
+    suspend fun confirmarReserva(reserva:ReservaEntity,gestionadaPorId:Int):Boolean {
+        if (hayChoque(reserva.dependenciaId,reserva.fecha,reserva.horaInicio,reserva.horaFin)){
             return false
         }
-        reservaDao.actualizar(reserva.copy(estado = "CONFIRMADA", gestionadaPorId = gestionadaPorId))
+        reservaDao.actualizar(reserva.copy(estado="CONFIRMADA",gestionadaPorId=gestionadaPorId))
         return true
     }
 
-    suspend fun rechazarReserva(reserva: ReservaEntity, gestionadaPorId: Int) {
-        reservaDao.actualizar(reserva.copy(estado = "RECHAZADA", gestionadaPorId = gestionadaPorId))
+    suspend fun rechazarReserva(reserva:ReservaEntity,gestionadaPorId:Int){
+        reservaDao.actualizar(reserva.copy(estado="RECHAZADA",gestionadaPorId=gestionadaPorId))
     }
 
-    fun observarPagos(): Flow<List<PagoEntity>> {
+    fun observarPagos():Flow<List<PagoEntity>>{
         return pagoDao.observarTodos()
     }
 
-    fun observarReservasPagadas(): Flow<List<Int>> {
+    fun observarReservasPagadas():Flow<List<Int>> {
         return pagoDao.observarReservasPagadas()
     }
 
-    suspend fun buscarReserva(id: Int): ReservaEntity? {
+    suspend fun buscarReserva(id:Int):ReservaEntity?{
         return reservaDao.obtenerPorId(id)
     }
 
-    suspend fun reservaPagada(id: Int): Boolean {
-        return pagoDao.contarPagosDeArriendo(id) > 0
+    suspend fun reservaPagada(id:Int):Boolean{
+        return pagoDao.contarPagosDeArriendo(id)>0
     }
 
-    suspend fun obtenerReservasPorPagar(): List<ReservaEntity> {
+    suspend fun obtenerReservasPorPagar():List<ReservaEntity>{
         return reservaDao.obtenerConfirmadasSinPago()
     }
 
-    suspend fun crearPago(pago: PagoEntity) {
+    suspend fun crearPago(pago:PagoEntity){
         pagoDao.insertar(pago)
     }
 
-    // NUEVO: los ingresos que ya pasaron por la puerta
-    suspend fun obtenerReservasUsadas(): Set<Int> {
+    suspend fun obtenerReservasUsadas():Set<Int>{
         return ingresoDao.obtenerReservasUsadas().toSet()
     }
 
-    // NUEVO: guarda que esa reserva ya entró
-    suspend fun registrarIngreso(ingreso: IngresoEntity) {
+    suspend fun registrarIngreso(ingreso:IngresoEntity){
         ingresoDao.insertar(ingreso)
     }
 
@@ -112,26 +102,25 @@ class JuntaRepository(context: Context) {
 
         dependenciaDao.insertar(DependenciaComunitariaEntity(nombre = "Salón Principal"))
         dependenciaDao.insertar(DependenciaComunitariaEntity(nombre = "Sala Multiuso"))
-
         val clave = hashClave("1234")
         val usuarios = listOf(
-            UsuarioEntity(nombre = "Juan Pérez", correo = "juan.perez@zaror.test", clave = clave,
-                rol = "VECINO"),
-            UsuarioEntity(nombre = "Ana Muñoz", correo = "ana.munoz@zaror.test", clave = clave,
-                rol = "VECINO"),
-            UsuarioEntity(nombre = "Pedro Soto", correo = "pedro.soto@zaror.test", clave = clave,
-                rol = "VECINO"),
-            UsuarioEntity(nombre = "María Torres", correo = "maria.torres@zaror.test", clave = clave,
-                rol = "DIRECTIVA", cargo = "SECRETARIA"),
-            UsuarioEntity(nombre = "Luis Rojas", correo = "luis.rojas@zaror.test", clave = clave,
-                rol = "DIRECTIVA", cargo = "TESORERIA"),
-            UsuarioEntity(nombre = "Carmen Vidal", correo = "carmen.vidal@zaror.test", clave = clave,
-                rol = "DIRECTIVA", cargo = "PRESIDENCIA")
+            UsuarioEntity(nombre="Juan Pérez",correo ="juan.perez@zaror.test",clave=clave,
+                rol="VECINO"),
+            UsuarioEntity(nombre="Ana Muñoz",correo="ana.munoz@zaror.test",clave=clave,
+                rol="VECINO"),
+            UsuarioEntity(nombre="Pedro Soto",correo="pedro.soto@zaror.test",clave=clave,
+                rol="VECINO"),
+            UsuarioEntity(nombre="María Torres",correo="maria.torres@zaror.test",clave=clave,
+                rol="DIRECTIVA",cargo="SECRETARIA"),
+            UsuarioEntity(nombre="Luis Rojas",correo="luis.rojas@zaror.test",clave=clave,
+                rol="DIRECTIVA",cargo="TESORERIA"),
+            UsuarioEntity(nombre="Carmen Vidal",correo="carmen.vidal@zaror.test",clave=clave,
+                rol="DIRECTIVA",cargo="PRESIDENCIA")
         )
         usuarios.forEach { usuarioDao.insertar(it) }
 
         val reservas = listOf(
-            ReservaEntity(dependenciaId = 1, vecinoId = 1, fecha = fechaEn(11),
+            ReservaEntity(dependenciaId=1,vecinoId=1,fecha = fechaEn(11),
                 horaInicio = "18:00", horaFin = "21:00", estado = "CONFIRMADA",
                 fechaSolicitud = fechaEn(-5), gestionadaPorId = 4),
             ReservaEntity(dependenciaId = 2, vecinoId = 1, fecha = fechaEn(12),
@@ -175,9 +164,6 @@ class JuntaRepository(context: Context) {
         pagos.forEach { pagoDao.insertar(it) }
     }
 
-    // Fecha de hoy más (o menos) algunos días, como texto: 2026-10-17.
-    // Así los datos de ejemplo quedan siempre cerca del día en que se abre la app.
-    // SimpleDateFormat se ve en MiAppFormulario, el ejemplo del docente.
     private fun fechaEn(dias: Int): String {
         val calendario = Calendar.getInstance()
         calendario.add(Calendar.DAY_OF_YEAR, dias)

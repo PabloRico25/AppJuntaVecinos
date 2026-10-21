@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.data.repository.JuntaRepository
-import com.example.appjuntavecinos.utils.Franja
-import com.example.appjuntavecinos.utils.calcularFranjas
+import com.example.appjuntavecinos.utils.BloqueHorario
+import com.example.appjuntavecinos.utils.calcularBloques
 import com.example.appjuntavecinos.utils.fechaDeHoy
 import com.example.appjuntavecinos.utils.fechaDesdeMillis
 import kotlinx.coroutines.flow.Flow
@@ -34,12 +34,12 @@ class DisponibilidadViewModel(application: Application) : AndroidViewModel(appli
     val fecha: StateFlow<String> = _fecha.asStateFlow()
 
     // No visto en clase (lo integramos con permiso del docente): combine junta varios Flow en uno.
-    val franjas: Flow<List<Franja>> = combine(
+    val bloques: Flow<List<BloqueHorario>> = combine(
         repositorio.observarTodasLasReservas(),
         _dependenciaId,
         _fecha
     ) { reservas, dependenciaId, fecha ->
-        calcularFranjas(reservas, dependenciaId, fecha)
+        calcularBloques(reservas, dependenciaId, fecha)
     }
 
     init {

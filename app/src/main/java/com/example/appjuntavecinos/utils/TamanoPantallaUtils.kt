@@ -1,5 +1,5 @@
 package com.example.appjuntavecinos.utils
-
+// diseño adaptable de tamaños y diseños @OptIn marco experimental
 import androidx.activity.compose.LocalActivity
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass

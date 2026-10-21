@@ -31,7 +31,7 @@ Los tres cargos de la directiva ven reservas, pagos y resumen financiero, y pued
 | Detalle de reserva | Vecino | Cancela si está pendiente. Abre el ticket si está confirmada y pagada |
 | Nueva reserva | Vecino | Formulario con validación de fecha, horas, horario de la sede y horario ocupado |
 | Ticket QR | Vecino | Muestra el QR, la ventana de ingreso y un código corto |
-| Disponibilidad | Vecino y directiva | Franjas libres, confirmadas y solicitadas por sala y fecha. La directiva ve quién pidió cada una |
+| Disponibilidad | Vecino y directiva | Bloques horarios libres, confirmados y solicitados por sala y fecha. La directiva ve quién pidió cada uno |
 | Finanzas | Vecino | Ingresos, gastos, saldo y gastos por categoría del mes elegido, solo lectura |
 | Reservas | Directiva | La Secretaría confirma o rechaza. Al confirmar se revisa de nuevo el choque de horario |
 | Pagos | Directiva | Lista de ingresos y gastos, y aviso de las reservas confirmadas que faltan por pagar |
@@ -48,7 +48,7 @@ La app sigue el modo claro u oscuro del teléfono. En pantallas anchas la barra 
 |---|---|
 | Interfaz organizada y navegación clara | Material Design 3. Barra de navegación inferior que pasa a panel lateral en pantallas anchas (`NavigationSuiteScaffold`) y un `NavHost` con 12 rutas en `navigation/`. Modo claro y oscuro |
 | Formularios validados con íconos y mensajes visuales | Login, Nueva reserva y Registrar pago, más el código de Escanear y la clave del modo puerta. Cada campo con error muestra borde rojo, mensaje y el ícono de `IconoDeError`. Los formularios incluyen checkbox y switch |
-| Validaciones desde la lógica, no desde la interfaz | Las reglas están en los `ViewModel` y en `utils/`. La pantalla solo recibe un `UiState` (`data/model/*UiState.kt`) con los errores por campo y los muestra. 36 pruebas unitarias cubren las funciones de `utils/` |
+| Validaciones desde la lógica, no desde la interfaz | Las reglas están en los `ViewModel` y en `utils/`. La pantalla solo recibe un `UiState` (`data/model/*UiState.kt`) con los errores por campo y los muestra |
 | Animaciones funcionales | `animateColorAsState`: la tarjeta de una reserva cambia de color cuando cambia su estado (Mis reservas y Reservas). `AnimatedVisibility`: en Registrar pago los campos aparecen y desaparecen según el tipo de pago y el switch del comprobante |
 | Estructura modular y persistencia local | MVVM separado en carpetas (`ui`, `viewmodel`, `data`, `utils`, `navigation`). Room guarda usuarios, dependencias, reservas, pagos e ingresos a la puerta (5 entidades, base de datos versión 3). DataStore guarda la configuración del modo puerta |
 | Repositorio en GitHub y planificación en Trello | Historial de commits de los dos integrantes, con ramas por funcionalidad. Las tareas están en el tablero de Trello enlazado arriba |
@@ -62,6 +62,7 @@ La app sigue el modo claro u oscuro del teléfono. En pantallas anchas la barra 
 - Solo la Tesorería registra pagos. Un pago de arriendo exige una reserva confirmada y cada reserva tiene como máximo uno.
 - El monto es mayor que 0 y tiene hasta 9 dígitos. La fecha del pago no puede ser futura. Un pago es informativo: no procesa transacciones reales.
 - El QR solo existe si la reserva está confirmada y pagada.
+- Las fechas se muestran como día-mes-año, por ejemplo 21-10-2026, y se guardan como año-mes-día para poder ordenarlas y compararlas.
 
 ## QR y modo puerta
 
@@ -112,8 +113,6 @@ La base de datos se llena sola la primera vez con 2 dependencias, 6 usuarios, 8 
 | luis.rojas@zaror.test | Directiva, Tesorería |
 | carmen.vidal@zaror.test | Directiva, Presidencia |
 
-**Pruebas.** Hay 36 pruebas unitarias en `app/src/test`. En Android Studio: clic derecho sobre la carpeta `test` y Run Tests. Por consola: `./gradlew testDebugUnitTest` (en Windows, `gradlew.bat testDebugUnitTest`).
-
 ## Estructura del proyecto
 
 ```
@@ -121,31 +120,29 @@ AppJuntaVecinos/
 ├─ app/
 │  ├─ build.gradle.kts              módulo: SDK mínimo 24, objetivo 37, dependencias
 │  └─ src/
-│     ├─ main/
-│     │  ├─ AndroidManifest.xml     permiso de cámara y actividad principal
-│     │  ├─ res/                    íconos, colores, textos, tema y rutas de archivos
-│     │  └─ java/com/example/appjuntavecinos/
-│     │     ├─ MainActivity.kt
-│     │     ├─ navigation/
-│     │     │  ├─ AppNavigation.kt  NavHost, barra de navegación y contenido centrado
-│     │     │  ├─ Destinos.kt       pestañas del vecino y de la directiva
-│     │     │  └─ Rutas.kt          nombre de cada ruta
-│     │     ├─ ui/
-│     │     │  ├─ theme/            Color.kt, Theme.kt (claro y oscuro), Type.kt
-│     │     │  ├─ components/       ActivarPuertaDialog, ContenidoCentrado, IconoDeError,
-│     │     │  │                    LectorQrFrontal, MenuDesplegable
-│     │     │  └─ screens/          una pantalla por archivo (Login, MisReservas,
-│     │     │                       DetalleReserva, TicketQr, NuevaReserva, Disponibilidad,
-│     │     │                       ReservasDirectiva, Pagos, RegistrarPago, Resumen,
-│     │     │                       Escanear y Puerta)
-│     │     ├─ viewmodel/           un ViewModel por flujo: estado y validaciones
-│     │     ├─ utils/               hash, fechas, franjas horarias, QR, puerta,
-│     │     │                       comprobante, resumen financiero y ancho de ventana
-│     │     └─ data/
-│     │        ├─ model/            entidades de Room y estados de formulario (UiState)
-│     │        └─ repository/       DAOs, AppDatabase, PuertaPreferencias y JuntaRepository
-│     ├─ test/                      pruebas unitarias (36)
-│     └─ androidTest/               prueba instrumentada de la plantilla
+│     └─ main/
+│        ├─ AndroidManifest.xml     permiso de cámara y actividad principal
+│        ├─ res/                    íconos, colores, textos, tema y rutas de archivos
+│        └─ java/com/example/appjuntavecinos/
+│           ├─ MainActivity.kt
+│           ├─ navigation/
+│           │  ├─ AppNavigation.kt  NavHost, barra de navegación y contenido centrado
+│           │  ├─ Destinos.kt       pestañas del vecino y de la directiva
+│           │  └─ Rutas.kt          nombre de cada ruta
+│           ├─ ui/
+│           │  ├─ theme/            Color.kt, Theme.kt (claro y oscuro), Type.kt
+│           │  ├─ components/       ActivarPuertaDialog, ContenidoCentrado, IconoDeError,
+│           │  │                    LectorQrFrontal, MenuDesplegable
+│           │  └─ screens/          una pantalla por archivo (Login, MisReservas,
+│           │                       DetalleReserva, TicketQr, NuevaReserva, Disponibilidad,
+│           │                       ReservasDirectiva, Pagos, RegistrarPago, Resumen,
+│           │                       Escanear y Puerta)
+│           ├─ viewmodel/           un ViewModel por flujo: estado y validaciones
+│           ├─ utils/               hash, fechas, bloques horarios, QR, puerta,
+│           │                       comprobante, resumen financiero y tamaño de pantalla
+│           └─ data/
+│              ├─ model/            entidades de Room y estados de formulario (UiState)
+│              └─ repository/       DAOs, AppDatabase, PuertaPreferencias y JuntaRepository
 ├─ gradle/libs.versions.toml        versiones de todas las dependencias
 ├─ build.gradle.kts, settings.gradle.kts, gradlew y gradlew.bat
 └─ README.md

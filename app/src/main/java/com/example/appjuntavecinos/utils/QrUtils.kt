@@ -20,20 +20,12 @@ data class DatosCodigoCorto(
 )
 
 enum class EstadoIngreso {
-    VALIDO,
-    FUERA_DE_HORARIO,
-    NO_VALIDO
+    VALIDO,FUERA_DE_HORARIO,NO_VALIDO
 }
 
 fun armarContenidoQr(reserva: ReservaEntity, nombreVecino: String): String {
-    val cuerpo = listOf(
-        MARCA,
-        reserva.id.toString(),
-        reserva.dependenciaId.toString(),
-        reserva.fecha,
-        reserva.horaInicio,
-        reserva.horaFin,
-        nombreVecino.replace("|", " ")
+    val cuerpo = listOf(MARCA,reserva.id.toString(),reserva.dependenciaId.toString(),reserva.fecha,
+        reserva.horaInicio, reserva.horaFin, nombreVecino.replace("|", " ")
     ).joinToString("|")
     return cuerpo + "|" + firmar(cuerpo)
 }
@@ -56,7 +48,7 @@ fun armarCodigoCorto(reserva: ReservaEntity): String {
 
 fun leerCodigoCorto(texto: String): DatosCodigoCorto? {
     val partes = texto.trim().uppercase().split("-")
-    if (partes.size != 2) return null
+    if (partes.size != 2) return null 
 
     val reservaId = partes[0].toIntOrNull() ?: return null
     if (partes[1].length != 6) return null

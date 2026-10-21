@@ -33,7 +33,6 @@ fun ActivarPuertaDialog(
         title = { Text("Activar modo puerta") },
         text = {
             Column {
-                Text("Este aparato quedará como la puerta de una sala. Para salir se pedirá la clave que escribas aquí.")
                 MenuDesplegable(
                     etiqueta = "Sala de esta puerta",
                     valor = sala?.nombre ?: "",

@@ -27,10 +27,7 @@ class PagosViewModel(application: Application) : AndroidViewModel(application) {
     private val _usuarios = MutableStateFlow<List<UsuarioEntity>>(emptyList())
     val usuarios: StateFlow<List<UsuarioEntity>> = _usuarios.asStateFlow()
 
-    // No visto en clase (lo integramos con permiso del docente): combine junta varios Flow en uno.
-    // Reservas CONFIRMADA que todavía no tienen su pago de arriendo registrado.
-    // Se arma juntando dos Flow de Room con combine: si Luis registra un pago,
-    // esta lista se achica sola, sin que nadie tenga que refrescar la pantalla.
+    // No visto en clase
     val reservasPorCobrar: Flow<List<ReservaEntity>> = combine(
         repositorio.observarTodasLasReservas(),
         repositorio.observarPagos()

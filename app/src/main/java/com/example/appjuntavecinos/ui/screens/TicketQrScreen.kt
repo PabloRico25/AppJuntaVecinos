@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.utils.armarCodigoCorto
 import com.example.appjuntavecinos.utils.armarContenidoQr
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.utils.generarQr
 import com.example.appjuntavecinos.utils.ventanaIngreso
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
@@ -65,7 +66,7 @@ fun TicketQrScreen(
                 fontWeight = FontWeight.Bold
             )
             Text(dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "")
-            Text("${reserva.fecha}, de ${reserva.horaInicio} a ${reserva.horaFin}")
+            Text("${fechaParaMostrar(reserva.fecha)}, de ${reserva.horaInicio} a ${reserva.horaFin}")
             Image(
                 bitmap = imagen,
                 contentDescription = "Código QR de la reserva",

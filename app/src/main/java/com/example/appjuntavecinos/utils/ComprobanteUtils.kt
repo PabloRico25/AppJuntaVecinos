@@ -9,7 +9,7 @@ fun crearUriCamara(context: Context): Uri {
     val carpeta = File(context.cacheDir, "camera")
     carpeta.mkdirs()
     val archivo = File.createTempFile("comprobante_", ".jpg", carpeta)
-    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)
+    return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)//fileprovider Entrega una dirección temporal y segura a otra app (la cámara) para un archivo nuestro.
 }
 
 // No visto en clase (lo integramos con permiso del docente): la foto se copia a filesDir para que no se pierda.

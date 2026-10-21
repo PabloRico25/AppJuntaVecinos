@@ -48,7 +48,6 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // NUEVO: el título es el gesto escondido, 7 toques seguidos
         Text(
             "Inicia sesión",
             style = MaterialTheme.typography.headlineMedium,

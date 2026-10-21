@@ -10,32 +10,26 @@ import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
 
-// NUEVO: IngresoEntity en la lista y version = 3
 @Database(entities = [UsuarioEntity::class, DependenciaComunitariaEntity::class, ReservaEntity::class,
     PagoEntity::class, IngresoEntity::class], version = 3 )
-abstract class AppDatabase : RoomDatabase(){
-    abstract fun usuarioDao(): UsuarioDao
+abstract class AppDatabase:RoomDatabase(){
+    abstract fun usuarioDao():UsuarioDao
 
-    abstract fun dependenciaDao(): DependenciaDao
+    abstract fun dependenciaDao():DependenciaDao
 
-    abstract fun reservaDao(): ReservaDao
+    abstract fun reservaDao():ReservaDao
 
-    abstract fun pagoDao(): PagoDao
+    abstract fun pagoDao():PagoDao
 
-    // NUEVO
-    abstract fun ingresoDao(): IngresoDao
-
-    // companion object: lo que va aquí pertenece a la clase, no a cada objeto.
-    // Se usa sin crear un AppDatabase: AppDatabase.obtener(context).
-
+    abstract fun ingresoDao():IngresoDao
 
     companion object {
-        @Volatile
+        @Volatile // hace que todos los hilos vean el valor más reciente.
         private var instancia: AppDatabase? = null
 
-        fun obtener(context: Context): AppDatabase {
-            return instancia ?: synchronized(this) {
-                val nueva = Room.databaseBuilder(
+        fun obtener(context: Context):AppDatabase {
+            return instancia ?:synchronized(this) {
+                val nueva=Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "junta.db"

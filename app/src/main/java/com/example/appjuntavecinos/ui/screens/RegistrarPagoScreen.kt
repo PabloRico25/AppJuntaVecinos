@@ -22,7 +22,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -49,9 +48,9 @@ import coil.compose.AsyncImage
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
 import com.example.appjuntavecinos.utils.crearUriCamara
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.RegistrarPagoViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrarPagoScreen(
     registradoPorId: Int,
@@ -121,7 +120,6 @@ fun RegistrarPagoScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("Registrar pago", style = MaterialTheme.typography.headlineMedium)
-        Text("Es un registro informativo: no se procesa ningún pago real.")
 
         MenuDesplegable(
             etiqueta = "Tipo de pago",
@@ -176,7 +174,7 @@ fun RegistrarPagoScreen(
         )
 
         OutlinedTextField(
-            value = estado.fecha,
+            value = fechaParaMostrar(estado.fecha),
             onValueChange = {},
             readOnly = true,
             label = { Text("Fecha del pago") },
@@ -247,7 +245,7 @@ fun RegistrarPagoScreen(
                 checked = estado.confirma,
                 onCheckedChange = { viewModel.onConfirmaChange(it) }
             )
-            Text("Confirmo que es un registro informativo")
+            Text("Confirmar registro")
         }
         estado.errores.confirma?.let {
             Text(
