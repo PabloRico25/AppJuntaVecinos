@@ -62,7 +62,7 @@ fun DetalleReservaScreen(
             Text("Estado: ${etiquetaEstado(reserva.estado)}")
             Text("Fecha: ${fechaParaMostrar(reserva.fecha)}")
             Text("Horario: ${reserva.horaInicio} a ${reserva.horaFin}")
-            Text("Solicitada el: ${reserva.fechaSolicitud}")
+            Text("Solicitada el: ${fechaParaMostrar(reserva.fechaSolicitud)}")
 
             if (reserva.estado == "PENDIENTE") {
                 Text("Secretaría aún no revisa tu solicitud. Cuando la confirme, podrás ver tu ticket QR aquí.")

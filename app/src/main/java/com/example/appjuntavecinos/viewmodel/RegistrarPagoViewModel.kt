@@ -12,6 +12,7 @@ import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.utils.fechaDeHoy
 import com.example.appjuntavecinos.utils.fechaDesdeMillis
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.utils.guardarComprobante
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,7 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
 
     fun etiquetaReserva(reserva: ReservaEntity): String {
         val nombre = _dependencias.value.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: ""
-        return "$nombre, ${reserva.fecha}, ${reserva.horaInicio} a ${reserva.horaFin}"
+        return "$nombre, ${fechaParaMostrar(reserva.fecha)}, ${reserva.horaInicio} a ${reserva.horaFin}"
     }
 
     fun onTipoChange(valor: String) {
