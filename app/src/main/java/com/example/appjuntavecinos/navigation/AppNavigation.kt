@@ -68,16 +68,24 @@ fun AppNavigation() {
     val scope = rememberCoroutineScope()
     val anchoMaximo = if (rutaActual == Rutas.RESUMEN || rutaActual == Rutas.FINANZAS) Dp.Unspecified else 640.dp
 
-    // NUEVO: pantallas que se abren encima de otra y necesitan flecha para volver.
+    // Pantallas que se abren encima de otra: llevan flecha para volver.
     val rutasInternas = listOf(
         Rutas.NUEVA_RESERVA,
         Rutas.DETALLE_RESERVA,
         Rutas.TICKET_QR,
         Rutas.REGISTRAR_PAGO
     )
-    // NUEVO: la Disponibilidad solo es interna para la directiva; para el vecino es una pestaña.
+    // La Disponibilidad solo es interna para la directiva; para el vecino es una pestaña.
     val esPantallaInterna = rutaActual in rutasInternas ||
             (rutaActual == Rutas.DISPONIBILIDAD && sesion?.rol == "DIRECTIVA")
+
+    // Pestaña de la barra que queda marcada cuando se está en una pantalla interna.
+    val rutaDePestana = when (rutaActual) {
+        Rutas.NUEVA_RESERVA, Rutas.DETALLE_RESERVA, Rutas.TICKET_QR -> Rutas.MIS_RESERVAS
+        Rutas.REGISTRAR_PAGO -> Rutas.PAGOS
+        Rutas.DISPONIBILIDAD -> if (sesion?.rol == "DIRECTIVA") Rutas.RESERVAS else Rutas.DISPONIBILIDAD
+        else -> rutaActual
+    }
 
     val contenido: @Composable () -> Unit = {
         NavHost(navController = navController, startDestination = Rutas.LOGIN) {
@@ -189,9 +197,12 @@ fun AppNavigation() {
                     item(
                         icon = { Icon(destino.icono, contentDescription = destino.etiqueta) },
                         label = { Text(destino.etiqueta) },
-                        selected = rutaActual == destino.ruta,
+                        selected = rutaDePestana == destino.ruta,
                         onClick = {
-                            navController.navigate(destino.ruta) { launchSingleTop = true }
+                            navController.navigate(destino.ruta) {
+                                launchSingleTop = true
+                                popUpTo(destino.ruta)
+                            }
                         }
                     )
                 }
@@ -200,7 +211,7 @@ fun AppNavigation() {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
                     title = { Text(sesion?.nombre ?: "") },
-                    // NUEVO: flecha para volver, solo en las pantallas internas.
+                    // Flecha para volver, solo en las pantallas internas.
                     navigationIcon = {
                         if (esPantallaInterna) {
                             IconButton(onClick = { navController.popBackStack() }) {
