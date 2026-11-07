@@ -134,7 +134,6 @@ fun RegistrarPagoScreen(
             if (reservas.isEmpty()) {
                 Text(
                     "No hay reservas confirmadas por pagar.",
-                    color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
             } else {

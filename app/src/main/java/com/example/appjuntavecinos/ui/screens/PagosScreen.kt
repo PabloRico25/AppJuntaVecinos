@@ -125,7 +125,7 @@ private fun etiquetaPago(pago: PagoEntity): String {
     return if (pago.tipo == "ARRIENDO") {
         "Arriendo"
     } else {
-        "Consumo básico: ${pago.categoria.lowercase()}"
+        "Consumo básico: ${pago.categoria.lowercase().replaceFirstChar { it.uppercase() }}"
     }
 }
 
