@@ -54,7 +54,7 @@ fun NuevaReservaScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("Nueva reserva", style = MaterialTheme.typography.headlineMedium)
-        Text("La sede atiende todos los días de $HORA_APERTURA $HORA_CIERRE")
+        Text("La sede atiende todos los días de $HORA_APERTURA a $HORA_CIERRE")
 
         MenuDesplegable(
             etiqueta = "Dependencia",
