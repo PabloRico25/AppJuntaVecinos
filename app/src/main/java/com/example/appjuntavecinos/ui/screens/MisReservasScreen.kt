@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.theme.FondoRechazada
 import com.example.appjuntavecinos.ui.theme.Gray
 import com.example.appjuntavecinos.ui.theme.Green
 import com.example.appjuntavecinos.ui.theme.LightBlue
@@ -107,6 +108,7 @@ fun colorEstado(estado: String): Color {
     return when (estado) {
         "PENDIENTE" -> LightBlue
         "CONFIRMADA" -> Green
+        "RECHAZADA" -> FondoRechazada
         else -> Gray
     }
 }

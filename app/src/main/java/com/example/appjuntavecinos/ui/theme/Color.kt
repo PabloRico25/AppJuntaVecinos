@@ -29,3 +29,4 @@ val TextoSobreErrorOscuro = Color(0xFF690005)
 val FondoPrimarioOscuro = Color(0xFF1F4E78)
 
 val FondoTarjeta = Color(0xFFE7E0EC)
+val FondoRechazada = Color(0xFFF3D3CF)

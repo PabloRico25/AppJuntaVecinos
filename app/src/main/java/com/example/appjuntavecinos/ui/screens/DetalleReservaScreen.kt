@@ -90,6 +90,14 @@ fun DetalleReservaScreen(
                     Text("Tu reserva está confirmada. El ticket estará disponible cuando Tesorería registre el pago.")
                 }
             }
+
+            if (reserva.estado == "RECHAZADA") {
+                Text("La Secretaría rechazó esta solicitud.")
+            }
+
+            if (reserva.estado == "CANCELADA") {
+                Text("Cancelaste esta solicitud.")
+            }
         }
     }
 
