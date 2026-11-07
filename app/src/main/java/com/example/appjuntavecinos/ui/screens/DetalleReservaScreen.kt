@@ -37,6 +37,7 @@ fun DetalleReservaScreen(
     val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
     val reservas by flujoDeReservas.collectAsState(initial = null)
     val dependencias by viewModel.dependencias.collectAsState()
+    val usuarios by viewModel.usuarios.collectAsState()
     val pagadas by viewModel.reservasPagadas.collectAsState(initial = null)
     val reserva = reservas?.firstOrNull { it.id == reservaId }
     var confirmandoCancelar by remember { mutableStateOf(false) }
@@ -63,6 +64,9 @@ fun DetalleReservaScreen(
             Text("Fecha: ${fechaParaMostrar(reserva.fecha)}")
             Text("Horario: ${reserva.horaInicio} a ${reserva.horaFin}")
             Text("Solicitada el: ${fechaParaMostrar(reserva.fechaSolicitud)}")
+            if (reserva.gestionadaPorId != null) {
+                Text("Gestionada por ${usuarios.firstOrNull { it.id == reserva.gestionadaPorId }?.nombre ?: ""}")
+            }
 
             if (reserva.estado == "PENDIENTE") {
                 Text("Secretaría aún no revisa tu solicitud. Cuando la confirme, podrás ver tu ticket QR aquí.")

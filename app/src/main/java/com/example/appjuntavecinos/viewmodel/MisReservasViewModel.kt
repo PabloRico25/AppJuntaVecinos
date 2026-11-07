@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
+import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,11 +20,15 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
     private val _dependencias = MutableStateFlow<List<DependenciaComunitariaEntity>>(emptyList())
     val dependencias: StateFlow<List<DependenciaComunitariaEntity>> = _dependencias.asStateFlow()
 
+    private val _usuarios = MutableStateFlow<List<UsuarioEntity>>(emptyList())
+    val usuarios: StateFlow<List<UsuarioEntity>> = _usuarios.asStateFlow()
+
     val reservasPagadas: Flow<List<Int>> = repositorio.observarReservasPagadas()
 
     init {
         viewModelScope.launch {
             _dependencias.value = repositorio.obtenerDependencias()
+            _usuarios.value = repositorio.obtenerUsuarios()
         }
     }
 
