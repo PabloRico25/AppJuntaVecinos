@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
+import com.example.appjuntavecinos.utils.HORA_APERTURA
+import com.example.appjuntavecinos.utils.HORA_CIERRE
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.NuevaReservaViewModel
 
@@ -52,6 +54,7 @@ fun NuevaReservaScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("Nueva reserva", style = MaterialTheme.typography.headlineMedium)
+        Text("La sede atiende todos los días de $HORA_APERTURA $HORA_CIERRE")
 
         MenuDesplegable(
             etiqueta = "Dependencia",
