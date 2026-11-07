@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(application) {
@@ -18,6 +19,7 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
     private val repositorio = JuntaRepository(application)
 
     val reservas: Flow<List<ReservaEntity>> = repositorio.observarTodasLasReservas()
+        .map { lista -> lista.sortedBy { if (it.estado == "PENDIENTE") 0 else 1 } }
 
     private val _dependencias = MutableStateFlow<List<DependenciaComunitariaEntity>>(emptyList())
     val dependencias: StateFlow<List<DependenciaComunitariaEntity>> = _dependencias.asStateFlow()
