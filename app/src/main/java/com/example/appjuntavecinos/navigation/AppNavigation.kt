@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DropdownMenu
@@ -66,6 +67,17 @@ fun AppNavigation() {
     val avisos = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val anchoMaximo = if (rutaActual == Rutas.RESUMEN || rutaActual == Rutas.FINANZAS) Dp.Unspecified else 640.dp
+
+    // NUEVO: pantallas que se abren encima de otra y necesitan flecha para volver.
+    val rutasInternas = listOf(
+        Rutas.NUEVA_RESERVA,
+        Rutas.DETALLE_RESERVA,
+        Rutas.TICKET_QR,
+        Rutas.REGISTRAR_PAGO
+    )
+    // NUEVO: la Disponibilidad solo es interna para la directiva; para el vecino es una pestaña.
+    val esPantallaInterna = rutaActual in rutasInternas ||
+            (rutaActual == Rutas.DISPONIBILIDAD && sesion?.rol == "DIRECTIVA")
 
     val contenido: @Composable () -> Unit = {
         NavHost(navController = navController, startDestination = Rutas.LOGIN) {
@@ -188,6 +200,14 @@ fun AppNavigation() {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
                     title = { Text(sesion?.nombre ?: "") },
+                    // NUEVO: flecha para volver, solo en las pantallas internas.
+                    navigationIcon = {
+                        if (esPantallaInterna) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                            }
+                        }
+                    },
                     actions = {
                         if (sesion?.rol == "DIRECTIVA" && rutaActual == Rutas.RESERVAS) {
                             IconButton(onClick = { navController.navigate(Rutas.DISPONIBILIDAD) }) {
