@@ -65,6 +65,11 @@ fun LoginScreen(
                 }
             }
         )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Entra con tu correo y tu clave. Datos ficticios.",
+            style = MaterialTheme.typography.bodyMedium
+        )
         Spacer(Modifier.height(24.dp))
 
         OutlinedTextField(
