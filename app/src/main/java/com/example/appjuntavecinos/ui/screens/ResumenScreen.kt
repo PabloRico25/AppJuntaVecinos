@@ -37,6 +37,7 @@ import com.example.appjuntavecinos.viewmodel.ResumenViewModel
 
 @Composable
 fun ResumenScreen(
+    titulo: String,
     viewModel: ResumenViewModel = viewModel()
 ) {
     val resumen by viewModel.resumen.collectAsState(
@@ -53,7 +54,7 @@ fun ResumenScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Resumen financiero", style = MaterialTheme.typography.headlineMedium)
+        Text(titulo, style = MaterialTheme.typography.headlineMedium)
 
         Row(
             modifier = Modifier.fillMaxWidth(),

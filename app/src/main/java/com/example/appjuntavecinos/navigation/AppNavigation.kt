@@ -161,10 +161,10 @@ fun AppNavigation() {
                 EscanearScreen()
             }
             composable(Rutas.RESUMEN) {
-                ResumenScreen()
+                ResumenScreen(titulo = "Resumen")
             }
             composable(Rutas.FINANZAS) {
-                ResumenScreen()
+                ResumenScreen(titulo = "Finanzas")
             }
             composable(Rutas.DISPONIBILIDAD) {
                 DisponibilidadScreen(
