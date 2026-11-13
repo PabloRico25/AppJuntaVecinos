@@ -16,9 +16,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class NuevaReservaViewModel(application: Application) : AndroidViewModel(application) {
+class NuevaReservaViewModel(
+    application: Application,
+    private val repositorio: JuntaRepository
+) : AndroidViewModel(application) {
 
-    private val repositorio = JuntaRepository(application)
+    constructor(application: Application) : this(application, JuntaRepository(application))
 
     private val _estado = MutableStateFlow(NuevaReservaUiState())
     val estado: StateFlow<NuevaReservaUiState> = _estado.asStateFlow()

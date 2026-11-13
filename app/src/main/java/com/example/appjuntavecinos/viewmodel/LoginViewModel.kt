@@ -1,7 +1,6 @@
 package com.example.appjuntavecinos.viewmodel
 
 import android.app.Application
-import android.util.Patterns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.LoginErrores
@@ -10,15 +9,19 @@ import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.data.remote.SesionToken
 import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
+import com.example.appjuntavecinos.utils.correoEsValido
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class LoginViewModel(application: Application) : AndroidViewModel(application) {
+class LoginViewModel(
+    application: Application,
+    private val repositorio: JuntaRepository
+) : AndroidViewModel(application) {
 
-    private val repositorio = JuntaRepository(application)
+    constructor(application: Application) : this(application, JuntaRepository(application))
 
     private val _estado = MutableStateFlow(LoginUiState())
     val estado: StateFlow<LoginUiState> = _estado.asStateFlow()
@@ -50,8 +53,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         val nuevosErrores = LoginErrores(
             correo = when {
                 actual.correo.isBlank() -> "Escribe tu correo"
-                // No visto en clase (lo integramos con permiso del docente): Patterns.EMAIL_ADDRESS de Android valida el correo.
-                !Patterns.EMAIL_ADDRESS.matcher(actual.correo).matches() -> "Escribe un correo válido"
+                !correoEsValido(actual.correo) -> "Escribe un correo válido"
                 else -> null
             },
             clave = when {
