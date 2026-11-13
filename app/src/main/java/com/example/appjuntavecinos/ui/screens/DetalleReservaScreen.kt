@@ -2,12 +2,17 @@ package com.example.appjuntavecinos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,15 +21,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.ui.components.BannerError
 import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.EsqueletoDetalle
 import com.example.appjuntavecinos.ui.components.EstadoDeError
+import com.example.appjuntavecinos.ui.components.EtiquetaEstado
+import com.example.appjuntavecinos.ui.components.FichaIcono
+import com.example.appjuntavecinos.ui.components.FilaDato
 import com.example.appjuntavecinos.ui.components.FranjaAviso
+import com.example.appjuntavecinos.ui.components.TarjetaBlanca
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
@@ -52,7 +63,7 @@ fun DetalleReservaScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Detalle de reserva", style = MaterialTheme.typography.headlineMedium)
+        Text("Detalle de reserva", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
         if (reservas == null) {
             EsqueletoDetalle()
@@ -74,17 +85,31 @@ fun DetalleReservaScreen(
                     onReintentar = { viewModel.reintentar() }
                 )
             }
-            Text(
-                text = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text("Estado: ${etiquetaEstado(reserva.estado)}")
-            Text("Fecha: ${fechaParaMostrar(reserva.fecha)}")
-            Text("Horario: ${reserva.horaInicio} a ${reserva.horaFin}")
-            Text("Solicitada el: ${fechaParaMostrar(reserva.fechaSolicitud)}")
-            if (reserva.gestionadaPorId != null) {
-                Text("Gestionada por ${usuarios.firstOrNull { it.id == reserva.gestionadaPorId }?.nombre ?: ""}")
+            TarjetaBlanca(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        FichaIcono { Icon(Icons.Filled.Home, contentDescription = null) }
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                            EtiquetaEstado(reserva.estado, etiquetaEstado(reserva.estado))
+                        }
+                    }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                    FilaDato(R.drawable.ic_nav_calendario, "Fecha", fechaParaMostrar(reserva.fecha))
+                    FilaDato(R.drawable.ic_reloj, "Horario", "${reserva.horaInicio} a ${reserva.horaFin}")
+                    FilaDato(R.drawable.ic_documento, "Solicitada el", fechaParaMostrar(reserva.fechaSolicitud))
+                    if (reserva.gestionadaPorId != null) {
+                        Text(
+                            "Gestionada por ${usuarios.firstOrNull { it.id == reserva.gestionadaPorId }?.nombre ?: ""}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             if (reserva.estado == "PENDIENTE") {

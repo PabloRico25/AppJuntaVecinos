@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -100,6 +102,65 @@ fun TarjetaReserva(
                 Text(detalle, style = MaterialTheme.typography.bodyMedium)
                 EtiquetaEstado(estado, textoEstado)
             }
+        }
+    }
+}
+
+// Fila de la ficha de detalle: ícono, etiqueta pequeña y valor en negrita.
+@Composable
+fun FilaDato(icono: Int, etiqueta: String, valor: String, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        Icon(painterResource(icono), contentDescription = null, modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+        Column {
+            Text(etiqueta, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(valor, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+        }
+    }
+}
+
+// Etiqueta de un bloque de horario: "Libre" va con contorno, los demás con su color de estado.
+@Composable
+fun EtiquetaBloque(tipo: String, modifier: Modifier = Modifier) {
+    when (tipo) {
+        "CONFIRMADA" -> EtiquetaEstado("CONFIRMADA", "Confirmada", modifier)
+        "SOLICITADA" -> EtiquetaEstado("PENDIENTE", "Solicitada", modifier)
+        else -> Surface(
+            modifier = modifier,
+            shape = RoundedCornerShape(50),
+            color = Color.Transparent,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        ) {
+            Text("Libre", modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+// Tarjeta blanca con borde suave: base de las fichas de Detalle, Disponibilidad y Finanzas.
+@Composable
+fun TarjetaBlanca(modifier: Modifier = Modifier, contenido: @Composable () -> Unit) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) { contenido() }
+}
+
+// Franja de aviso con candado: se usa cuando el cargo de la persona no permite una acción.
+@Composable
+fun AvisoInformativo(texto: String, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = JuntaTheme.colores.canceladaContenedor,
+        contentColor = JuntaTheme.colores.sobreCancelada
+    ) {
+        Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Icon(Icons.Filled.Lock, contentDescription = null, modifier = Modifier.size(18.dp))
+            Text(texto, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

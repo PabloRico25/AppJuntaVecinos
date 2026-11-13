@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,6 +39,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.appjuntavecinos.data.remote.EventosSesion
+import com.example.appjuntavecinos.ui.components.CabeceraSesion
 import com.example.appjuntavecinos.ui.components.ContenidoCentrado
 import com.example.appjuntavecinos.ui.components.animacionesActivas
 import com.example.appjuntavecinos.ui.screens.DetalleReservaScreen
@@ -54,6 +56,7 @@ import com.example.appjuntavecinos.ui.screens.ResumenScreen
 import com.example.appjuntavecinos.ui.screens.SesionVencidaScreen
 import com.example.appjuntavecinos.ui.screens.SolicitudEnviadaScreen
 import com.example.appjuntavecinos.ui.screens.TicketQrScreen
+import com.example.appjuntavecinos.utils.nombreDelCargo
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.launch
@@ -254,7 +257,7 @@ fun AppNavigation() {
             navigationSuiteItems = {
                 destinos.forEach { destino ->
                     item(
-                        icon = { Icon(destino.icono, contentDescription = destino.etiqueta) },
+                        icon = { Icon(painterResource(destino.icono), contentDescription = destino.etiqueta) },
                         label = { Text(destino.etiqueta) },
                         selected = rutaDePestana == destino.ruta,
                         onClick = {
@@ -269,7 +272,7 @@ fun AppNavigation() {
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
-                    title = { Text(sesion?.nombre ?: "") },
+                    title = { CabeceraSesion(nombre = sesion?.nombre ?: "", rol = nombreDelCargo(sesion?.cargo)) },
                     // Flecha para volver, solo en las pantallas internas.
                     navigationIcon = {
                         if (esPantallaInterna) {
