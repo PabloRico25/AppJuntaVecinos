@@ -23,6 +23,7 @@ android {
 
         // Dirección del servidor. Por defecto es la del emulador (10.0.2.2 es el computador visto desde él).
         // Para un teléfono real se compila con: gradlew assembleDebug -PurlServidor=http://IP-DEL-COMPUTADOR:9090/
+        // No visto en clase: buildConfigField crea una constante en BuildConfig a partir de una propiedad de Gradle.
         val urlServidor = (project.findProperty("urlServidor") as String?) ?: "http://10.0.2.2:9090/"
         buildConfigField("String", "URL_SERVIDOR", "\"$urlServidor\"")
     }
@@ -77,6 +78,7 @@ dependencies {
     implementation(libs.zxing.core)
     implementation(libs.play.services.code.scanner)
     testImplementation(libs.junit)
+    // No visto en clase: Kotest (pruebas escritas como frases), MockK (objetos falsos) y coroutines-test (probar código con corrutinas).
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.mockk)

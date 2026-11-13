@@ -35,6 +35,7 @@ import com.example.appjuntavecinos.utils.DURACION_SOLICITUD_MS
 import com.example.appjuntavecinos.utils.estadoSinConexion
 import com.example.appjuntavecinos.utils.estadoSolicitudEnviada
 
+// No visto en clase: Canvas dibuja formas por código y PathParser convierte un trazo escrito como texto (el del SVG) en una figura.
 // Dos ilustraciones del kit de diseño (sin_conexion y solicitud_enviada) dibujadas con Canvas, sin librerías
 // extra. Todo está en una escala de 240 x 240 y se amplía al tamaño pedido. Los tiempos de cada pieza están en
 // MovimientoUtils.kt. Con "Reducir animaciones" se ve el cuadro final, quieto.

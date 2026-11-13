@@ -96,6 +96,7 @@ fun LoginScreen(
             onValueChange = { viewModel.onCorreoChange(it) },
             label = { Text("Correo") },
             singleLine = true,
+            // No visto en clase: KeyboardOptions elige el tipo de teclado y su tecla de confirmar; KeyboardActions dice qué hace esa tecla.
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             isError = estado.errores.correo != null,
             supportingText = { estado.errores.correo?.let { Text(it) } },
