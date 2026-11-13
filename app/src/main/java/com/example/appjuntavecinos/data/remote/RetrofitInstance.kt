@@ -1,5 +1,6 @@
 package com.example.appjuntavecinos.data.remote
 
+import com.example.appjuntavecinos.BuildConfig
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -7,9 +8,9 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitInstance {
 
-    // 10.0.2.2 es el computador visto desde el emulador. Con un teléfono real se usa la IP del
-    // computador en la red local (también permitida en network_security_config.xml).
-    private const val URL_BASE = "http://10.0.2.2:9090/"
+    // La dirección sale de build.gradle.kts (propiedad urlServidor): 10.0.2.2 para el emulador, y para un
+    // teléfono real la IP del computador en la red local, que también debe estar en network_security_config.xml.
+    private const val URL_BASE = BuildConfig.URL_SERVIDOR
 
     // Si el servidor no responde, la app falla en segundos en vez de quedarse esperando
     private val cliente = OkHttpClient.Builder()
