@@ -56,7 +56,6 @@ class JuntaRepository(private val db: AppDatabase, private val api: ApiService) 
                 dependenciaDao.insertarTodas(lista)
             }
         } catch (e: Exception) {
-            // Sin conexión: se usa lo guardado
         }
         return dependenciaDao.obtenerTodas()
     }
@@ -71,7 +70,6 @@ class JuntaRepository(private val db: AppDatabase, private val api: ApiService) 
                 usuarioDao.insertarTodos(lista)
             }
         } catch (e: Exception) {
-            // Sin conexión: se usa lo guardado
         }
         return usuarioDao.obtenerTodos()
     }
@@ -150,7 +148,6 @@ class JuntaRepository(private val db: AppDatabase, private val api: ApiService) 
                 pagoDao.insertarTodos(lista)
             }
         } catch (e: Exception) {
-            // Sin conexión o sesión vencida: se queda lo guardado
         }
     }
 

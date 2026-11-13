@@ -148,5 +148,5 @@ private fun etiquetaPago(pago: PagoEntity): String {
 }
 
 fun formatoPesos(monto: Int): String {
-    return "$" + NumberFormat.getIntegerInstance(Locale("es", "CL")).format(monto)
+    return "$" + NumberFormat.getIntegerInstance(Locale.forLanguageTag("es-CL")).format(monto)
 }

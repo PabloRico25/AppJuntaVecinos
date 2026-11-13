@@ -17,7 +17,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-// Cada función es una ruta del gateway (CONTRATO_API.md). Son suspend, como en el ejemplo del docente.
+// Cada función es una ruta del gateway (CONTRATO_API.md, en el repositorio del backend). Son suspend, como en el ejemplo del docente.
 // Los métodos POST y PUT no se vieron en clase: la guía 14 pide investigarlos.
 interface ApiService {
 

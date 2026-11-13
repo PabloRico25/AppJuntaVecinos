@@ -6,7 +6,7 @@ import com.example.appjuntavecinos.R
 data class Destino(
     val ruta: String,
     val etiqueta: String,
-    @DrawableRes val icono: Int
+    @param:DrawableRes val icono: Int
 )
 
 val destinosVecino = listOf(

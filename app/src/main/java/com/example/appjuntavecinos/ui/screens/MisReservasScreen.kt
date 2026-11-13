@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,7 +22,6 @@ import com.example.appjuntavecinos.ui.components.EstadoDeError
 import com.example.appjuntavecinos.ui.components.FranjaAviso
 import com.example.appjuntavecinos.ui.components.TarjetaReserva
 import com.example.appjuntavecinos.ui.components.aparecerEscalonado
-import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
@@ -99,16 +97,5 @@ fun etiquetaEstado(estado: String): String {
         "RECHAZADA" -> "Rechazada"
         "CANCELADA" -> "Cancelada"
         else -> estado
-    }
-}
-
-@Composable
-fun colorEstado(estado: String): Color {
-    val colores = JuntaTheme.colores
-    return when (estado) {
-        "PENDIENTE" -> colores.pendienteContenedor
-        "CONFIRMADA" -> colores.confirmadaContenedor
-        "RECHAZADA" -> colores.rechazadaContenedor
-        else -> colores.canceladaContenedor
     }
 }
