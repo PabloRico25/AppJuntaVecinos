@@ -24,7 +24,11 @@ data class ColoresJunta(
     val sobreAviso: Color,
     val puertaAbierta: Color,
     val puertaCerrada: Color,
-    val sobrePuerta: Color
+    val sobrePuerta: Color,
+    val esqueleto: Color,
+    val brilloEsqueleto: Color,
+    val franjaContenedor: Color,
+    val sobreFranja: Color
 )
 
 val ColoresJuntaClaros = ColoresJunta(
@@ -40,7 +44,11 @@ val ColoresJuntaClaros = ColoresJunta(
     sobreAviso = Color(0xFF6B4A00),
     puertaAbierta = Color(0xFF2A7A3E),
     puertaCerrada = Color(0xFF9E2F22),
-    sobrePuerta = Color(0xFFFFFFFF)
+    sobrePuerta = Color(0xFFFFFFFF),
+    esqueleto = Color(0xFFF0E2D0),
+    brilloEsqueleto = Color(0x8CFFFFFF),
+    franjaContenedor = Color(0xFFF3E4D0),
+    sobreFranja = Color(0xFF5E4636)
 )
 
 val ColoresJuntaOscuros = ColoresJunta(
@@ -57,7 +65,11 @@ val ColoresJuntaOscuros = ColoresJunta(
     // La puerta se ve igual en claro y en oscuro: es un aviso a distancia
     puertaAbierta = Color(0xFF2A7A3E),
     puertaCerrada = Color(0xFF9E2F22),
-    sobrePuerta = Color(0xFFFFFFFF)
+    sobrePuerta = Color(0xFFFFFFFF),
+    esqueleto = Color(0xFF3A2B20),
+    brilloEsqueleto = Color(0x12FFFFFF),
+    franjaContenedor = Color(0xFF3A2B20),
+    sobreFranja = Color(0xFFCDB8A0)
 )
 
 val LocalColoresJunta = staticCompositionLocalOf { ColoresJuntaClaros }
