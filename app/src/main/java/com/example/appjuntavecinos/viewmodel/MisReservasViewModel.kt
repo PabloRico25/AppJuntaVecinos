@@ -30,6 +30,9 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
             _dependencias.value = repositorio.obtenerDependencias()
             _usuarios.value = repositorio.obtenerUsuarios()
         }
+        viewModelScope.launch {
+            repositorio.refrescarReservas()
+        }
     }
 
     fun reservas(vecinoId: Int): Flow<List<ReservaEntity>> {
@@ -40,7 +43,11 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
         if (reserva.estado != "PENDIENTE") return
 
         viewModelScope.launch {
-            repositorio.cancelarReserva(reserva)
+            try {
+                repositorio.cancelarReserva(reserva)
+            } catch (e: Exception) {
+                // El mensaje de error en pantalla llega en B6 (estados de carga y de error)
+            }
         }
     }
 }

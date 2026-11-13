@@ -2,6 +2,7 @@ package com.example.appjuntavecinos.data.repository
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.appjuntavecinos.data.model.ReservaEntity
@@ -12,6 +13,13 @@ interface ReservaDao {
 
     @Insert
     suspend fun insertar(reserva: ReservaEntity)
+
+    // Guarda las reservas que entrega el servidor; si ya existía una con el mismo id, la reemplaza
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarTodas(reservas: List<ReservaEntity>)
+
+    @Query("DELETE FROM ReservaEntity")
+    suspend fun borrarTodas()
 
     @Query("SELECT * FROM ReservaEntity WHERE id = :id")
     suspend fun obtenerPorId(id: Int): ReservaEntity?

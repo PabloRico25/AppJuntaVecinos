@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
+import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,8 +33,12 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
             _dependencias.value = repositorio.obtenerDependencias()
             _usuarios.value = repositorio.obtenerUsuarios()
         }
+        viewModelScope.launch {
+            repositorio.refrescarReservas()
+        }
     }
 
+    // gestionadaPorId ya no se usa: el servidor toma quién confirma desde el token
     fun confirmar(
         reserva: ReservaEntity,
         gestionadaPorId: Int,
@@ -47,10 +52,11 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
         if (reserva.estado != "PENDIENTE") return
 
         viewModelScope.launch {
-            if (repositorio.confirmarReserva(reserva, gestionadaPorId)) {
+            try {
+                repositorio.confirmarReserva(reserva)
                 onResultado("Reserva confirmada")
-            } else {
-                onResultado("No se puede confirmar: ese horario ya está ocupado por una reserva confirmada")
+            } catch (e: Exception) {
+                onResultado(mensajeDeError(e))
             }
         }
     }
@@ -68,8 +74,12 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
         if (reserva.estado != "PENDIENTE") return
 
         viewModelScope.launch {
-            repositorio.rechazarReserva(reserva, gestionadaPorId)
-            onResultado("Reserva rechazada")
+            try {
+                repositorio.rechazarReserva(reserva)
+                onResultado("Reserva rechazada")
+            } catch (e: Exception) {
+                onResultado(mensajeDeError(e))
+            }
         }
     }
 }

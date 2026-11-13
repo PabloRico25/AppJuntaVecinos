@@ -1,9 +1,11 @@
 package com.example.appjuntavecinos.data.repository
 
 import android.content.Context
+import androidx.room.withTransaction
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.IngresoEntity
 import com.example.appjuntavecinos.data.model.LoginRequest
+import com.example.appjuntavecinos.data.model.NuevaReservaRequest
 import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
@@ -44,45 +46,79 @@ class JuntaRepository(context: Context) {
         )
     }
 
+    // Dependencias y usuarios: se piden al servidor y se guardan en Room. Si no hay conexión o la sesión
+    // venció, se queda con lo ya guardado (esa es la función de Room como caché).
+    // No visto en clase: withTransaction agrupa varias operaciones de Room para que se hagan todas o ninguna.
     suspend fun obtenerDependencias(): List<DependenciaComunitariaEntity> {
+        try {
+            val lista = RetrofitInstance.api.obtenerDependencias()
+            db.withTransaction {
+                dependenciaDao.borrarTodas()
+                dependenciaDao.insertarTodas(lista)
+            }
+        } catch (e: Exception) {
+            // Sin conexión: se usa lo guardado
+        }
         return dependenciaDao.obtenerTodas()
     }
 
-    suspend fun crearReserva(reserva: ReservaEntity) {
-        reservaDao.insertar(reserva)
-    }
-
-    suspend fun hayChoque(dependenciaId:Int,fecha:String,horaInicio:String,horaFin:String):Boolean
-    {val confirmadas=reservaDao.obtenerConfirmadas(dependenciaId,fecha)
-        return confirmadas.any { it.horaInicio < horaFin && horaInicio < it.horaFin }
-    }
-
-    fun observarReservas(vecinoId:Int):Flow<List<ReservaEntity>>{
-        return reservaDao.observarPorVecino(vecinoId)
-    }
-
-    suspend fun cancelarReserva(reserva:ReservaEntity){
-        reservaDao.actualizar(reserva.copy(estado ="CANCELADA"))
-    }
-
-    fun observarTodasLasReservas():Flow<List<ReservaEntity>>{
-        return reservaDao.observarTodas()
-    }
-
-    suspend fun obtenerUsuarios():List<UsuarioEntity>{
+    suspend fun obtenerUsuarios(): List<UsuarioEntity> {
+        try {
+            val lista = RetrofitInstance.api.obtenerUsuarios().map {
+                UsuarioEntity(id = it.id, nombre = it.nombre, correo = it.correo, clave = "", rol = it.rol, cargo = it.cargo)
+            }
+            db.withTransaction {
+                usuarioDao.borrarTodos()
+                usuarioDao.insertarTodos(lista)
+            }
+        } catch (e: Exception) {
+            // Sin conexión: se usa lo guardado
+        }
         return usuarioDao.obtenerTodos()
     }
 
-    suspend fun confirmarReserva(reserva:ReservaEntity,gestionadaPorId:Int):Boolean {
-        if (hayChoque(reserva.dependenciaId,reserva.fecha,reserva.horaInicio,reserva.horaFin)){
-            return false
+    // Las pantallas observan Room: al reemplazar las reservas guardadas, se actualizan solas.
+    // El servidor decide qué reservas ve cada uno: el vecino recibe las suyas y la directiva, todas.
+    suspend fun refrescarReservas() {
+        try {
+            val lista = RetrofitInstance.api.obtenerReservas()
+            db.withTransaction {
+                reservaDao.borrarTodas()
+                reservaDao.insertarTodas(lista)
+            }
+        } catch (e: Exception) {
+            // Sin conexión o sesión vencida: se queda lo guardado
         }
-        reservaDao.actualizar(reserva.copy(estado="CONFIRMADA",gestionadaPorId=gestionadaPorId))
-        return true
     }
 
-    suspend fun rechazarReserva(reserva:ReservaEntity,gestionadaPorId:Int){
-        reservaDao.actualizar(reserva.copy(estado="RECHAZADA",gestionadaPorId=gestionadaPorId))
+    fun observarReservas(vecinoId: Int): Flow<List<ReservaEntity>> {
+        return reservaDao.observarPorVecino(vecinoId)
+    }
+
+    fun observarTodasLasReservas(): Flow<List<ReservaEntity>> {
+        return reservaDao.observarTodas()
+    }
+
+    // Las escrituras SÍ lanzan el error: el ViewModel muestra el mensaje del servidor
+    // (horario ocupado, falta de permiso...). Después se refrescan las reservas guardadas.
+    suspend fun crearReserva(dependenciaId: Int, fecha: String, horaInicio: String, horaFin: String) {
+        RetrofitInstance.api.crearReserva(NuevaReservaRequest(dependenciaId, fecha, horaInicio, horaFin))
+        refrescarReservas()
+    }
+
+    suspend fun cancelarReserva(reserva: ReservaEntity) {
+        RetrofitInstance.api.cancelarReserva(reserva.id)
+        refrescarReservas()
+    }
+
+    suspend fun confirmarReserva(reserva: ReservaEntity) {
+        RetrofitInstance.api.confirmarReserva(reserva.id)
+        refrescarReservas()
+    }
+
+    suspend fun rechazarReserva(reserva: ReservaEntity) {
+        RetrofitInstance.api.rechazarReserva(reserva.id)
+        refrescarReservas()
     }
 
     fun observarPagos():Flow<List<PagoEntity>>{

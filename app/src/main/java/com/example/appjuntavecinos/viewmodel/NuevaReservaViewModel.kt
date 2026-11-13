@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.NuevaReservaErrores
 import com.example.appjuntavecinos.data.model.NuevaReservaUiState
-import com.example.appjuntavecinos.data.model.ReservaEntity
+import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.utils.fechaDeHoy
 import com.example.appjuntavecinos.utils.fechaDesdeMillis
@@ -104,6 +104,8 @@ class NuevaReservaViewModel(application: Application) : AndroidViewModel(applica
         return nuevosErrores == NuevaReservaErrores()
     }
 
+    // Ya no se calcula el choque de horario aquí: lo decide el servidor, que ve todas las reservas
+    // (un vecino solo tiene las suyas). Si responde con error, se muestra su mensaje.
     fun guardar(vecinoId: Int, onExito: () -> Unit) {
         if (!validarFormulario()) return
 
@@ -111,29 +113,14 @@ class NuevaReservaViewModel(application: Application) : AndroidViewModel(applica
             val actual = _estado.value
             val dependencia = actual.dependencia ?: return@launch
 
-            if (repositorio.hayChoque(dependencia.id, actual.fecha, actual.horaInicio, actual.horaFin)) {
+            try {
+                repositorio.crearReserva(dependencia.id, actual.fecha, actual.horaInicio, actual.horaFin)
+                onExito()
+            } catch (e: Exception) {
                 _estado.update {
-                    it.copy(
-                        errores = it.errores.copy(
-                            general = "Ese horario ya está ocupado por una reserva confirmada"
-                        )
-                    )
+                    it.copy(errores = it.errores.copy(general = mensajeDeError(e)))
                 }
-                return@launch
             }
-
-            repositorio.crearReserva(
-                ReservaEntity(
-                    dependenciaId = dependencia.id,
-                    vecinoId = vecinoId,
-                    fecha = actual.fecha,
-                    horaInicio = actual.horaInicio,
-                    horaFin = actual.horaFin,
-                    estado = "PENDIENTE",
-                    fechaSolicitud = fechaDeHoy()
-                )
-            )
-            onExito()
         }
     }
 }
