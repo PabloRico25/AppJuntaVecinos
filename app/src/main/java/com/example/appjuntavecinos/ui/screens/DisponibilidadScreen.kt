@@ -13,10 +13,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,14 +23,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.BotonContorno
+import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
-import com.example.appjuntavecinos.ui.theme.Green
-import com.example.appjuntavecinos.ui.theme.LightBlue
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.HORA_APERTURA
 import com.example.appjuntavecinos.utils.HORA_CIERRE
 import com.example.appjuntavecinos.utils.fechaParaMostrar
@@ -78,7 +75,7 @@ fun DisponibilidadScreen(
             label = { Text("Fecha") },
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedButton(
+        BotonContorno(
             onClick = { mostrarCalendario = true },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -96,9 +93,9 @@ fun DisponibilidadScreen(
 
         bloques.forEach { bloque ->
             val colorTarjeta = when (bloque.tipo) {
-                "CONFIRMADA" -> Green
-                "SOLICITADA" -> LightBlue
-                else -> Color.White
+                "CONFIRMADA" -> JuntaTheme.colores.confirmadaContenedor
+                "SOLICITADA" -> JuntaTheme.colores.pendienteContenedor
+                else -> MaterialTheme.colorScheme.surfaceContainerHighest
             }
             val etiqueta = when (bloque.tipo) {
                 "CONFIRMADA" -> "Confirmada"
@@ -109,7 +106,7 @@ fun DisponibilidadScreen(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = colorTarjeta,
-                    contentColor = TextoPrincipal
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
@@ -135,7 +132,7 @@ fun DisponibilidadScreen(
         DatePickerDialog(
             onDismissRequest = { mostrarCalendario = false },
             confirmButton = {
-                TextButton(
+                BotonTexto(
                     onClick = {
                         viewModel.onFechaChange(calendario.selectedDateMillis)
                         mostrarCalendario = false
@@ -145,7 +142,7 @@ fun DisponibilidadScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarCalendario = false }) {
+                BotonTexto(onClick = { mostrarCalendario = false }) {
                     Text("Cancelar")
                 }
             }

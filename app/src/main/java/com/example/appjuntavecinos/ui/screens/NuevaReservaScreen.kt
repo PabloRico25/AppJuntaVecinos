@@ -13,10 +13,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.BotonContorno
+import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
 import com.example.appjuntavecinos.utils.HORA_APERTURA
@@ -75,7 +75,7 @@ fun NuevaReservaScreen(
             supportingText = { estado.errores.fecha?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedButton(
+        BotonContorno(
             onClick = { mostrarCalendario = true },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -137,7 +137,7 @@ fun NuevaReservaScreen(
         DatePickerDialog(
             onDismissRequest = { mostrarCalendario = false },
             confirmButton = {
-                TextButton(
+                BotonTexto(
                     onClick = {
                         viewModel.onFechaChange(calendario.selectedDateMillis)
                         mostrarCalendario = false
@@ -147,7 +147,7 @@ fun NuevaReservaScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarCalendario = false }) {
+                BotonTexto(onClick = { mostrarCalendario = false }) {
                     Text("Cancelar")
                 }
             }

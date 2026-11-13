@@ -13,7 +13,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,11 +24,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.appjuntavecinos.ui.theme.ErrorRojo
-import com.example.appjuntavecinos.ui.theme.FondoSaldo
-import com.example.appjuntavecinos.ui.theme.FondoTarjeta
-import com.example.appjuntavecinos.ui.theme.IngresoVerde
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.ResumenFinanciero
 import com.example.appjuntavecinos.utils.anchoDeVentana
 import com.example.appjuntavecinos.utils.nombreDelMes
@@ -61,7 +57,7 @@ fun ResumenScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(
+            BotonTexto(
                 onClick = { viewModel.cambiarMes(-1) },
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
             ) {
@@ -72,7 +68,7 @@ fun ResumenScreen(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            TextButton(
+            BotonTexto(
                 onClick = { viewModel.cambiarMes(1) },
                 enabled = mes < viewModel.mesActual,
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
@@ -113,8 +109,8 @@ fun ResumenScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = FondoTarjeta,
-                contentColor = TextoPrincipal
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                contentColor = MaterialTheme.colorScheme.onSurface
             )
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
@@ -140,8 +136,8 @@ private fun TarjetaIngresos(resumen: ResumenFinanciero, modifier: Modifier = Mod
     TarjetaMonto(
         titulo = "Ingresos (arriendos)",
         monto = resumen.ingresos,
-        colorMonto = IngresoVerde,
-        colorFondo = FondoTarjeta,
+        colorMonto = JuntaTheme.colores.sobreConfirmada,
+        colorFondo = MaterialTheme.colorScheme.surfaceContainerHighest,
         estilo = MaterialTheme.typography.titleLarge,
         modifier = modifier
     )
@@ -152,8 +148,8 @@ private fun TarjetaGastos(resumen: ResumenFinanciero, modifier: Modifier = Modif
     TarjetaMonto(
         titulo = "Gastos (consumos básicos)",
         monto = resumen.gastos,
-        colorMonto = ErrorRojo,
-        colorFondo = FondoTarjeta,
+        colorMonto = MaterialTheme.colorScheme.error,
+        colorFondo = MaterialTheme.colorScheme.surfaceContainerHighest,
         estilo = MaterialTheme.typography.titleLarge,
         modifier = modifier
     )
@@ -164,8 +160,8 @@ private fun TarjetaSaldo(resumen: ResumenFinanciero, modifier: Modifier = Modifi
     TarjetaMonto(
         titulo = "Saldo",
         monto = resumen.saldo,
-        colorMonto = if (resumen.saldo < 0) ErrorRojo else IngresoVerde,
-        colorFondo = FondoSaldo,
+        colorMonto = if (resumen.saldo < 0) MaterialTheme.colorScheme.error else JuntaTheme.colores.sobreConfirmada,
+        colorFondo = JuntaTheme.colores.confirmadaContenedor,
         estilo = MaterialTheme.typography.headlineMedium,
         modifier = modifier
     )
@@ -184,7 +180,7 @@ private fun TarjetaMonto(
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = colorFondo,
-            contentColor = TextoPrincipal
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Column(modifier = Modifier.padding(12.dp)) {

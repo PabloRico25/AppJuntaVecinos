@@ -25,7 +25,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,18 +38,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.LectorQrFrontal
-import com.example.appjuntavecinos.ui.theme.ErrorRojo
-import com.example.appjuntavecinos.ui.theme.Green
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.EstadoPuerta
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.delay
@@ -171,11 +168,12 @@ fun PuertaScreen(
 
         resultado?.let { r ->
             val abierta = r.estado == EstadoPuerta.ABIERTA
-            val colorTexto = if (abierta) TextoPrincipal else Color.White
+            val colores = JuntaTheme.colores
+            val colorTexto = colores.sobrePuerta
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(if (abierta) Green else ErrorRojo)
+                    .background(if (abierta) colores.puertaAbierta else colores.puertaCerrada)
                     .clickable { viewModel.limpiarResultado() }
                     .padding(24.dp),
                 verticalArrangement = Arrangement.Center,
@@ -224,7 +222,7 @@ fun PuertaScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                BotonTexto(
                     onClick = {
                         viewModel.desactivar(claveSalida) { correcta ->
                             if (correcta) {
@@ -239,7 +237,7 @@ fun PuertaScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarSalida = false }) {
+                BotonTexto(onClick = { mostrarSalida = false }) {
                     Text("Cancelar")
                 }
             }

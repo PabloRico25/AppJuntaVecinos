@@ -23,11 +23,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.appjuntavecinos.ui.components.BotonContorno
+import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
 import com.example.appjuntavecinos.utils.crearUriCamara
@@ -182,7 +182,7 @@ fun RegistrarPagoScreen(
             supportingText = { estado.errores.fecha?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedButton(
+        BotonContorno(
             onClick = { mostrarCalendario = true },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -212,10 +212,10 @@ fun RegistrarPagoScreen(
         AnimatedVisibility(visible = estado.adjuntarComprobante) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = { tomarFotografia() }) {
+                    BotonContorno(onClick = { tomarFotografia() }) {
                         Text("Tomar fotografía")
                     }
-                    OutlinedButton(onClick = { galeriaLauncher.launch("image/*") }) {
+                    BotonContorno(onClick = { galeriaLauncher.launch("image/*") }) {
                         Text("Elegir de la galería")
                     }
                 }
@@ -285,7 +285,7 @@ fun RegistrarPagoScreen(
         DatePickerDialog(
             onDismissRequest = { mostrarCalendario = false },
             confirmButton = {
-                TextButton(
+                BotonTexto(
                     onClick = {
                         viewModel.onFechaChange(calendario.selectedDateMillis)
                         mostrarCalendario = false
@@ -295,7 +295,7 @@ fun RegistrarPagoScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarCalendario = false }) {
+                BotonTexto(onClick = { mostrarCalendario = false }) {
                     Text("Cancelar")
                 }
             }

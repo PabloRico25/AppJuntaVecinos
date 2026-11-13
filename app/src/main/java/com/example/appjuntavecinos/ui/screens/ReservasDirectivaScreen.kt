@@ -19,12 +19,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.appjuntavecinos.ui.theme.ErrorRojo
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.ReservasDirectivaViewModel
 
@@ -68,7 +65,7 @@ fun ReservasDirectivaScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
                             containerColor = colorTarjeta,
-                            contentColor = TextoPrincipal
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -93,8 +90,8 @@ fun ReservasDirectivaScreen(
                                             viewModel.rechazar(reserva, gestionadaPorId, puedeConfirmar, onAviso)
                                         },
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = ErrorRojo,
-                                            contentColor = Color.White
+                                            containerColor = MaterialTheme.colorScheme.error,
+                                            contentColor = MaterialTheme.colorScheme.onError
                                         )
                                     ) {
                                         Text("Rechazar", fontWeight = FontWeight.Bold)

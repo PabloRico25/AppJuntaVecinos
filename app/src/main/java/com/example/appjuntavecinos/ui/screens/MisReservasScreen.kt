@@ -22,11 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.appjuntavecinos.ui.theme.FondoRechazada
-import com.example.appjuntavecinos.ui.theme.Gray
-import com.example.appjuntavecinos.ui.theme.Green
-import com.example.appjuntavecinos.ui.theme.LightBlue
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
@@ -80,7 +76,7 @@ fun MisReservasScreen(
                             .clickable { onDetalle(reserva.id) },
                         colors = CardDefaults.cardColors(
                             containerColor = colorTarjeta,
-                            contentColor = TextoPrincipal
+                            contentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -109,11 +105,13 @@ fun etiquetaEstado(estado: String): String {
     }
 }
 
+@Composable
 fun colorEstado(estado: String): Color {
+    val colores = JuntaTheme.colores
     return when (estado) {
-        "PENDIENTE" -> LightBlue
-        "CONFIRMADA" -> Green
-        "RECHAZADA" -> FondoRechazada
-        else -> Gray
+        "PENDIENTE" -> colores.pendienteContenedor
+        "CONFIRMADA" -> colores.confirmadaContenedor
+        "RECHAZADA" -> colores.rechazadaContenedor
+        else -> colores.canceladaContenedor
     }
 }
