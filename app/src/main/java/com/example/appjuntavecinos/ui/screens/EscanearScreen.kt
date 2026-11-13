@@ -32,7 +32,7 @@ import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.ui.components.BotonContorno
 import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.IconoDeError
-import com.example.appjuntavecinos.ui.components.IlustracionDeKit
+import com.example.appjuntavecinos.ui.components.IlustracionQrScan
 import com.example.appjuntavecinos.ui.components.sacudirSiHayError
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.EstadoIngreso
@@ -77,7 +77,7 @@ fun EscanearScreen(
         // Mientras no hay nada que mostrar, el marco con el QR del diseño (kit: sin_resultados_qr)
         if (estado.resultado == null) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                IlustracionDeKit(R.drawable.ilus_sin_resultados_qr, alto = 130.dp)
+                IlustracionQrScan(tamano = 150.dp)
             }
         }
 

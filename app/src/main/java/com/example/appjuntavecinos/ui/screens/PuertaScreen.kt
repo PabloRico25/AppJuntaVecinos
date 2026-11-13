@@ -50,6 +50,7 @@ import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.IlustracionDeKit
 import com.example.appjuntavecinos.ui.components.IndicadorDeCarga
 import com.example.appjuntavecinos.ui.components.LectorQrFrontal
+import com.example.appjuntavecinos.ui.components.MarcoDeLecturaQr
 import com.example.appjuntavecinos.ui.components.ResultadoDePuerta
 import com.example.appjuntavecinos.ui.components.sacudirSiHayError
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
@@ -150,15 +151,23 @@ fun PuertaScreen(
 
             if (tienePermiso) {
 
-                LectorQrFrontal(
-                    activo = resultado == null,
-                    onQrLeido = { texto -> viewModel.validar(texto) },
+                Box(
                     modifier = Modifier
                         .widthIn(max = 420.dp)
                         .fillMaxWidth()
                         .aspectRatio(3f / 4f)
                         .clip(RoundedCornerShape(16.dp))
-                )
+                ) {
+                    LectorQrFrontal(
+                        activo = resultado == null,
+                        onQrLeido = { texto -> viewModel.validar(texto) },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    // El marco con la línea que sube y baja: se ve mientras la puerta espera un QR
+                    if (resultado == null && !validando) {
+                        MarcoDeLecturaQr(modifier = Modifier.fillMaxSize())
+                    }
+                }
             } else {
 
                 EstadoCompleto(

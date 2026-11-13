@@ -124,3 +124,20 @@ fun opacidadCuadritoCargando(tiempoMs: Float, inicioMs: Float, periodoMs: Float 
         else -> 0f
     }
 }
+
+private val CurvaSuave = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
+
+// Animación "qr_scan": la línea sube y baja sobre el QR. Va de 0 (arriba) a 1 (abajo) en 1800 ms y vuelve en otros 1800,
+// siempre con arranque y llegada suaves (ease-in-out). Devuelve la posición de la línea, de 0 a 1.
+fun barridoQr(tiempoMs: Float, mitadMs: Float = DURACION_BUCLE_MS.toFloat()): Float {
+    val vuelta = (tiempoMs % (2f * mitadMs)) / mitadMs
+    val fase = if (vuelta <= 1f) vuelta else 2f - vuelta
+    return CurvaSuave.transform(fase.coerceIn(0f, 1f))
+}
+
+// Los módulos del QR parpadean suave: pleno brillo al inicio, la mitad a mitad de vuelta y otra vez pleno al cerrarla.
+fun parpadeoQr(tiempoMs: Float, periodoMs: Float = DURACION_BUCLE_MS.toFloat()): Float {
+    val p = (tiempoMs % periodoMs) / periodoMs
+    val triangulo = if (p < 0.5f) p / 0.5f else (1f - p) / 0.5f
+    return 1f - 0.5f * CurvaSuave.transform(triangulo)
+}

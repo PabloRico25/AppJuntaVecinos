@@ -32,9 +32,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.Animatable
 import com.example.appjuntavecinos.utils.DURACION_SOLICITUD_MS
+import com.example.appjuntavecinos.utils.barridoQr
 import com.example.appjuntavecinos.utils.estadoSinConexion
 import com.example.appjuntavecinos.utils.estadoSolicitudEnviada
 import com.example.appjuntavecinos.utils.opacidadCuadritoCargando
+import com.example.appjuntavecinos.utils.parpadeoQr
 
 // No visto en clase: Canvas dibuja formas por código y PathParser convierte un trazo escrito como texto (el del SVG) en una figura.
 // Dos ilustraciones del kit de diseño (sin_conexion y solicitud_enviada) dibujadas con Canvas, sin librerías
@@ -211,5 +213,74 @@ fun IndicadorDeCarga(modifier: Modifier = Modifier, tamano: Dp = 120.dp) {
             drawRoundRect(apagado, Offset(130f, 160f), Size(12f, 12f), CornerRadius(3f))
             drawLine(suelo, Offset(22f, 208f), Offset(218f, 208f), strokeWidth = 7f, cap = StrokeCap.Round)
         }
+    }
+}
+
+// Animación "qr_scan" completa (Designer: 02_animaciones/svg/qr_scan.svg): las cuatro esquinas del marco, los módulos de un QR
+// que parpadean suave, los tres cuadrados de posición y una línea naranja que sube y baja. Con "Reducir animaciones" queda
+// quieta, con la línea a mitad de camino.
+@Composable
+fun IlustracionQrScan(modifier: Modifier = Modifier, tamano: Dp = 150.dp) {
+    val oscuro = isSystemInDarkTheme()
+    val animar = animacionesActivas()
+    val tiempo = tiempoEnBucle(animar)
+
+    val tinta = if (oscuro) Color(0xFFF6E9D8) else Color(0xFF3A2A1A)
+    val papel = if (oscuro) Color(0xFF241A13) else Color(0xFFFFFFFF)
+    val naranja = if (oscuro) Color(0xFFFF8A1F) else Color(0xFFFF7900)
+    val esquinas = remember {
+        listOf("M36 66V44a8 8 0 0 1 8-8h22", "M174 36h22a8 8 0 0 1 8 8v22", "M36 174v22a8 8 0 0 0 8 8h22", "M204 174v22a8 8 0 0 1-8 8h-22").map { trazo(it) }
+    }
+    val modulos = remember {
+        listOf(112f to 64f, 136f to 64f, 112f to 88f, 148f to 100f, 88f to 112f, 112f to 124f, 136f to 124f,
+            160f to 124f, 88f to 148f, 124f to 148f, 148f to 160f, 172f to 148f, 112f to 172f)
+    }
+    val posiciones = listOf(52f to 52f, 148f to 52f, 52f to 148f)
+
+    Canvas(modifier = modifier.size(tamano)) {
+        scale(size.width / 240f, size.width / 240f, pivot = Offset.Zero) {
+            esquinas.forEach { drawPath(it, naranja, style = Stroke(8f, cap = StrokeCap.Round)) }
+            val brillo = if (animar) parpadeoQr(tiempo.value) else 1f
+            modulos.forEach { (x, y) -> drawRoundRect(tinta.copy(alpha = brillo), Offset(x, y), Size(12f, 12f), CornerRadius(2f)) }
+            posiciones.forEach { (x, y) ->
+                drawRoundRect(papel, Offset(x, y), Size(40f, 40f), CornerRadius(8f))
+                drawRoundRect(tinta, Offset(x, y), Size(40f, 40f), CornerRadius(8f), style = Stroke(5f))
+                drawRoundRect(tinta, Offset(x + 12f, y + 12f), Size(16f, 16f), CornerRadius(3f))
+            }
+            val avance = if (animar) barridoQr(tiempo.value) else 0.5f
+            val y = 52f + 118f * avance
+            drawRect(naranja.copy(alpha = 0.18f), Offset(44f, y - 12f), Size(152f, 12f))
+            drawRoundRect(naranja, Offset(44f, y), Size(152f, 6f), CornerRadius(3f))
+        }
+    }
+}
+
+// El marco de lectura que se pone encima de la cámara de la puerta: cuatro esquinas naranjas y la misma línea que
+// sube y baja (kit: "qr_scan"). No lleva los módulos del QR, para dejar ver la cámara. Con "Reducir animaciones" la línea queda quieta.
+@Composable
+fun MarcoDeLecturaQr(modifier: Modifier = Modifier) {
+    val oscuro = isSystemInDarkTheme()
+    val animar = animacionesActivas()
+    val tiempo = tiempoEnBucle(animar)
+    val naranja = if (oscuro) Color(0xFFFF8A1F) else Color(0xFFFF7900)
+
+    Canvas(modifier = modifier) {
+        val lado = minOf(size.width, size.height) * 0.72f
+        val izquierda = (size.width - lado) / 2f
+        val arriba = (size.height - lado) / 2f
+        val largo = lado * 0.2f
+        val grosor = 6.dp.toPx()
+        fun codo(x: Float, y: Float, dx: Float, dy: Float) {
+            drawLine(naranja, Offset(x, y), Offset(x + dx * largo, y), strokeWidth = grosor, cap = StrokeCap.Round)
+            drawLine(naranja, Offset(x, y), Offset(x, y + dy * largo), strokeWidth = grosor, cap = StrokeCap.Round)
+        }
+        codo(izquierda, arriba, 1f, 1f)
+        codo(izquierda + lado, arriba, -1f, 1f)
+        codo(izquierda, arriba + lado, 1f, -1f)
+        codo(izquierda + lado, arriba + lado, -1f, -1f)
+        val avance = if (animar) barridoQr(tiempo.value) else 0.5f
+        val y = arriba + (lado - 4.dp.toPx()) * avance
+        drawRect(naranja.copy(alpha = 0.18f), Offset(izquierda, y - 18.dp.toPx()), Size(lado, 18.dp.toPx()))
+        drawRoundRect(naranja, Offset(izquierda, y), Size(lado, 4.dp.toPx()), CornerRadius(2.dp.toPx()))
     }
 }
