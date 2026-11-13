@@ -23,13 +23,15 @@ fun EstadoDeError(
         mensaje.contains("servidor") -> R.drawable.ic_servidor
         else -> R.drawable.ic_alerta
     }
+    val sinConexion = mensaje.contains("conectar")
     EstadoCompleto(
-        icono = { IconoGrande(icono) },
+        icono = { if (sinConexion) IlustracionSinConexion() else IconoGrande(icono) },
         titulo = titulo,
         modifier = modifier,
         mensaje = detalle,
         textoBoton = if (onReintentar != null) textoBoton else null,
         iconoBoton = iconoBoton,
+        circulo = !sinConexion,
         onBoton = onReintentar
     )
 }

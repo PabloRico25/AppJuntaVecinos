@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.ui.components.EsqueletoListaReservas
 import com.example.appjuntavecinos.ui.components.EstadoDeError
 import com.example.appjuntavecinos.ui.components.FranjaAviso
+import com.example.appjuntavecinos.ui.components.aparecerEscalonado
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
@@ -87,6 +88,7 @@ fun MisReservasScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .aparecerEscalonado(indice)
                             .clickable { onDetalle(reserva.id) },
                         colors = CardDefaults.cardColors(
                             containerColor = colorTarjeta,

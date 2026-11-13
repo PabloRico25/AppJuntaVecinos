@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.data.model.PagoEntity
+import com.example.appjuntavecinos.ui.components.aparecerEscalonado
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.PagosViewModel
@@ -89,7 +90,7 @@ fun PagosScreen(
                 items(count = pagos.size, key = { indice -> pagos[indice].id }) { indice ->
                     val pago = pagos[indice]
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().aparecerEscalonado(indice),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                             contentColor = MaterialTheme.colorScheme.onSurface

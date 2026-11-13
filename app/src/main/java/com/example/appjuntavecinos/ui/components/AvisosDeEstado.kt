@@ -1,5 +1,8 @@
 package com.example.appjuntavecinos.ui.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,10 +24,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -37,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
+import com.example.appjuntavecinos.utils.DURACION_NORMAL_MS
+import com.example.appjuntavecinos.utils.desplazamientoSacudida
 
 // Las cuatro piezas que comunican lo que pasa con el servidor. Los textos cambian según el caso;
 // el aspecto es siempre el mismo (kit de diseño, entrega de estados con servidor).
@@ -47,9 +56,22 @@ import com.example.appjuntavecinos.ui.theme.JuntaTheme
 fun BannerError(texto: String, modifier: Modifier = Modifier) {
     val colores = JuntaTheme.colores
     val forma = RoundedCornerShape(14.dp)
+    // Al aparecer, o al cambiar de mensaje, el banner se sacude una vez: 6 dp a cada lado, en 320 ms
+    val sacudida = remember { Animatable(0f) }
+    val animar = animacionesActivas()
+    LaunchedEffect(texto) {
+        if (animar) {
+            sacudida.snapTo(0f)
+            sacudida.animateTo(1f, tween(DURACION_NORMAL_MS, easing = LinearEasing))
+        }
+    }
+    val dp = with(LocalDensity.current) { 1.dp.toPx() }
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .graphicsLayer {
+                translationX = desplazamientoSacudida(sacudida.value, listOf(0f, -6f, 6f, -4f, 3f, 0f)) * dp
+            }
             .clip(forma)
             .background(colores.rechazadaContenedor)
             .border(BorderStroke(1.5.dp, colores.sobreRechazada.copy(alpha = 0.4f)), forma)
@@ -141,6 +163,7 @@ fun EstadoCompleto(
     mensaje: String? = null,
     textoBoton: String? = null,
     iconoBoton: Int? = R.drawable.ic_reintentar,
+    circulo: Boolean = true,
     onBoton: (() -> Unit)? = null
 ) {
     Column(
@@ -150,13 +173,18 @@ fun EstadoCompleto(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(112.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
+        if (circulo) {
+            Box(
+                modifier = Modifier
+                    .size(112.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                icono()
+            }
+        } else {
+            // Una ilustración grande va directo sobre el fondo, sin círculo
             icono()
         }
         Spacer(Modifier.height(20.dp))

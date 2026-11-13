@@ -31,6 +31,7 @@ import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.EsqueletoDisponibilidad
 import com.example.appjuntavecinos.ui.components.EstadoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
+import com.example.appjuntavecinos.ui.components.aparecerEscalonado
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.HORA_APERTURA
 import com.example.appjuntavecinos.utils.HORA_CIERRE
@@ -102,7 +103,7 @@ fun DisponibilidadScreen(
             }
         }
 
-        bloques.forEach { bloque ->
+        bloques.forEachIndexed { indice, bloque ->
             val colorTarjeta = when (bloque.tipo) {
                 "CONFIRMADA" -> JuntaTheme.colores.confirmadaContenedor
                 "SOLICITADA" -> JuntaTheme.colores.pendienteContenedor
@@ -114,7 +115,7 @@ fun DisponibilidadScreen(
                 else -> "Libre"
             }
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().aparecerEscalonado(indice),
                 colors = CardDefaults.cardColors(
                     containerColor = colorTarjeta,
                     contentColor = MaterialTheme.colorScheme.onSurface

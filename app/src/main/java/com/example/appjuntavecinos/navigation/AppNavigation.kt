@@ -27,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,6 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.appjuntavecinos.data.remote.EventosSesion
 import com.example.appjuntavecinos.ui.components.ContenidoCentrado
+import com.example.appjuntavecinos.ui.components.animacionesActivas
 import com.example.appjuntavecinos.ui.screens.DetalleReservaScreen
 import com.example.appjuntavecinos.ui.screens.DisponibilidadScreen
 import com.example.appjuntavecinos.ui.screens.EscanearScreen
@@ -104,8 +106,27 @@ fun AppNavigation() {
         else -> rutaActual
     }
 
+    // Movimiento entre pantallas (ver Transiciones.kt). Con "Reducir animaciones" no hay desplazamiento.
+    val animar = animacionesActivas()
+    val desplazamiento = with(LocalDensity.current) { 24.dp.roundToPx() }
+
     val contenido: @Composable () -> Unit = {
-        NavHost(navController = navController, startDestination = Rutas.LOGIN) {
+        NavHost(
+            navController = navController,
+            startDestination = Rutas.LOGIN,
+            enterTransition = {
+                entradaAlAvanzar(tipoAlAvanzar(initialState.destination.route, targetState.destination.route), animar, desplazamiento)
+            },
+            exitTransition = {
+                salidaAlAvanzar(tipoAlAvanzar(initialState.destination.route, targetState.destination.route), animar, desplazamiento)
+            },
+            popEnterTransition = {
+                entradaAlVolver(tipoAlVolver(initialState.destination.route, targetState.destination.route), animar, desplazamiento)
+            },
+            popExitTransition = {
+                salidaAlVolver(tipoAlVolver(initialState.destination.route, targetState.destination.route), animar, desplazamiento)
+            }
+        ) {
             composable(Rutas.LOGIN) {
                 LoginScreen(
                     viewModel = loginViewModel,

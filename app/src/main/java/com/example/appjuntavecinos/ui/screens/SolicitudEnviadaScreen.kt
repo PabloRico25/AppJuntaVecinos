@@ -1,6 +1,5 @@
 package com.example.appjuntavecinos.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.IlustracionSolicitudEnviada
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 
 // Lo que ve el vecino al enviar una reserva: confirma que salió y explica qué pasa ahora.
@@ -40,11 +40,7 @@ fun SolicitudEnviadaScreen(onVerMisReservas: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = painterResource(R.drawable.ic_solicitud_enviada),
-            contentDescription = null,
-            modifier = Modifier.size(190.dp)
-        )
+        IlustracionSolicitudEnviada()
         Spacer(Modifier.height(24.dp))
         Text(
             text = "Solicitud enviada",

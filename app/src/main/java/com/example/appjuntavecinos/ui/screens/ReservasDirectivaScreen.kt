@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.aparecerEscalonado
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.ReservasDirectivaViewModel
 
@@ -62,7 +63,7 @@ fun ReservasDirectivaScreen(
                         label = "colorTarjeta"
                     )
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().aparecerEscalonado(indice),
                         colors = CardDefaults.cardColors(
                             containerColor = colorTarjeta,
                             contentColor = MaterialTheme.colorScheme.onSurface

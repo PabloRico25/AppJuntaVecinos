@@ -1,5 +1,8 @@
 package com.example.appjuntavecinos.ui.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +18,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -28,9 +35,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
+import com.example.appjuntavecinos.utils.CurvaJunta
+import com.example.appjuntavecinos.utils.DURACION_ENFASIS_MS
 import com.example.appjuntavecinos.utils.EstadoPuerta
 import com.example.appjuntavecinos.utils.MotivoPuerta
 import com.example.appjuntavecinos.utils.ResultadoPuerta
+import com.example.appjuntavecinos.utils.desplazamientoSacudida
+import com.example.appjuntavecinos.utils.escalaPop
 
 // Lo que muestra la puerta después de leer un código: pantalla completa, verde si abre y roja si no. Se lee desde
 // lejos, por eso el estado no va solo en el color: lleva un ícono según el motivo y el texto. Tocarla la cierra.
@@ -49,6 +60,19 @@ fun ResultadoDePuerta(resultado: ResultadoPuerta, onToque: () -> Unit) {
         MotivoPuerta.SIN_CONEXION -> R.drawable.ic_nube_tachada
         MotivoPuerta.ERROR_SERVIDOR -> R.drawable.ic_servidor
     }
+
+    // La puerta que abre aparece con un "pop"; la que no abre se sacude una vez (kit: acceso_autorizado y acceso_denegado)
+    val animar = animacionesActivas()
+    val progreso = remember(resultado) { Animatable(if (animar) 0f else 1f) }
+    LaunchedEffect(resultado) {
+        if (animar) {
+            progreso.animateTo(
+                1f,
+                if (abierta) tween(DURACION_ENFASIS_MS, easing = CurvaJunta) else tween(450, easing = LinearEasing)
+            )
+        }
+    }
+    val dp = with(LocalDensity.current) { 1.dp.toPx() }
 
     Box(
         modifier = Modifier
@@ -81,7 +105,19 @@ fun ResultadoDePuerta(resultado: ResultadoPuerta, onToque: () -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
             Box(
-                modifier = Modifier.size(132.dp).clip(CircleShape).background(colores.sobrePuerta),
+                modifier = Modifier
+                    .graphicsLayer {
+                        if (abierta) {
+                            val escala = escalaPop(progreso.value)
+                            scaleX = escala
+                            scaleY = escala
+                        } else {
+                            translationX = desplazamientoSacudida(progreso.value) * dp
+                        }
+                    }
+                    .size(132.dp)
+                    .clip(CircleShape)
+                    .background(colores.sobrePuerta),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
