@@ -2,7 +2,7 @@ package com.example.appjuntavecinos.data.remote
 
 import com.example.appjuntavecinos.data.model.BloqueDto
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
-import com.example.appjuntavecinos.data.model.IngresoEntity
+import com.example.appjuntavecinos.data.model.IngresoDto
 import com.example.appjuntavecinos.data.model.LoginRequest
 import com.example.appjuntavecinos.data.model.LoginResponse
 import com.example.appjuntavecinos.data.model.NuevaReservaRequest
@@ -59,8 +59,7 @@ interface ApiService {
     suspend fun obtenerReservasUsadas(): List<Int>
 
     @POST("accesos")
-    suspend fun registrarIngreso(@Body ingreso: IngresoEntity): IngresoEntity
-
+    suspend fun registrarIngreso(@Body ingreso: IngresoDto): IngresoDto
     @GET("pagos")
     suspend fun obtenerPagos(): List<PagoEntity>
 

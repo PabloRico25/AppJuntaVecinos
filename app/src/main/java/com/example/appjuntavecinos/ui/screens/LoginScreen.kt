@@ -41,6 +41,8 @@ fun LoginScreen(
 ) {
     val estado by viewModel.estado.collectAsState()
     val dependencias by puertaViewModel.dependencias.collectAsState()
+    val activando by puertaViewModel.activando.collectAsState()
+    val errorActivacion by puertaViewModel.errorActivacion.collectAsState()
     var toques by remember { mutableIntStateOf(0) }
     var ultimoToque by remember { mutableLongStateOf(0L) }
     var mostrarActivacion by remember { mutableStateOf(false) }
@@ -62,6 +64,7 @@ fun LoginScreen(
                 ultimoToque = ahora
                 if (toques >= 7) {
                     toques = 0
+                    puertaViewModel.limpiarErrorActivacion()
                     puertaViewModel.cargarDependencias()
                     mostrarActivacion = true
                 }
@@ -121,11 +124,15 @@ fun LoginScreen(
     if (mostrarActivacion) {
         ActivarPuertaDialog(
             dependencias = dependencias,
-            onActivar = { salaId, clave ->
-                puertaViewModel.activar(salaId, clave)
-                mostrarActivacion = false
+            activando = activando,
+            errorServidor = errorActivacion,
+            onActivar = { salaId, correo, clave ->
+                puertaViewModel.activar(salaId, correo, clave) { mostrarActivacion = false }
             },
-            onCancelar = { mostrarActivacion = false }
+            onCancelar = {
+                puertaViewModel.limpiarErrorActivacion()
+                mostrarActivacion = false
+            }
         )
     }
 }

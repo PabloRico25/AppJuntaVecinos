@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.withTransaction
 import com.example.appjuntavecinos.data.model.BloqueDto
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
-import com.example.appjuntavecinos.data.model.IngresoEntity
+import com.example.appjuntavecinos.data.model.IngresoDto
 import com.example.appjuntavecinos.data.model.LoginRequest
 import com.example.appjuntavecinos.data.model.NuevaReservaRequest
 import com.example.appjuntavecinos.data.model.NuevoPagoRequest
@@ -13,11 +13,7 @@ import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.data.remote.RetrofitInstance
 import com.example.appjuntavecinos.data.remote.SesionToken
-import com.example.appjuntavecinos.utils.hashClave
 import kotlinx.coroutines.flow.Flow
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 class JuntaRepository(context: Context) {
     private val db = AppDatabase.obtener(context)
@@ -25,12 +21,6 @@ class JuntaRepository(context: Context) {
     private val pagoDao = db.pagoDao()
     private val reservaDao = db.reservaDao()
     private val dependenciaDao = db.dependenciaDao()
-    private val ingresoDao = db.ingresoDao()
-
-    suspend fun buscarUsuarioPorCorreo(correo: String): UsuarioEntity? {
-        return usuarioDao.buscarPorCorreo(correo)
-    }
-
 
     // Inicia sesión en el servidor: guarda el token para las peticiones siguientes y devuelve el usuario.
     // El servidor nunca envía la clave, por eso queda vacía en el UsuarioEntity de la sesión.
@@ -81,15 +71,17 @@ class JuntaRepository(context: Context) {
 
     // Las pantallas observan Room: al reemplazar las reservas guardadas, se actualizan solas.
     // El servidor decide qué reservas ve cada uno: el vecino recibe las suyas y la directiva, todas.
-    suspend fun refrescarReservas() {
-        try {
+    suspend fun refrescarReservas(): Boolean {
+        return try {
             val lista = RetrofitInstance.api.obtenerReservas()
             db.withTransaction {
                 reservaDao.borrarTodas()
                 reservaDao.insertarTodas(lista)
             }
+            true
         } catch (e: Exception) {
-            // Sin conexión o sesión vencida: se queda lo guardado
+            // Sin conexión o sesión vencida: se queda lo guardado y se avisa a quien llamó
+            false
         }
     }
 
@@ -131,10 +123,6 @@ class JuntaRepository(context: Context) {
 
     fun observarPagos():Flow<List<PagoEntity>>{
         return pagoDao.observarTodos()
-    }
-
-    fun observarReservasPagadas():Flow<List<Int>> {
-        return pagoDao.observarReservasPagadas()
     }
 
     suspend fun buscarReserva(id:Int):ReservaEntity?{
@@ -193,85 +181,19 @@ class JuntaRepository(context: Context) {
         refrescarPagos()
     }
 
-    suspend fun obtenerReservasUsadas():Set<Int>{
-        return ingresoDao.obtenerReservasUsadas().toSet()
+    // Inicia sesión en el servidor para activar la puerta. Solo la directiva puede: si no lo es, el servidor
+    // responde 403. El token que entrega dura 7 días, porque la puerta queda activa sin que nadie la toque.
+    suspend fun activarPuerta(correo: String, clave: String): String {
+        return RetrofitInstance.api.login(LoginRequest(correo, clave, "PUERTA")).token
     }
 
-    suspend fun registrarIngreso(ingreso:IngresoEntity){
-        ingresoDao.insertar(ingreso)
+    // Los accesos los lleva el servidor: así un código usado en una puerta no sirve en otra.
+    // Si no hay conexión, estas funciones lanzan el error y la puerta no abre.
+    suspend fun obtenerReservasUsadas(): Set<Int> {
+        return RetrofitInstance.api.obtenerReservasUsadas().toSet()
     }
 
-    suspend fun cargarDatosDeEjemplo() {
-        if (dependenciaDao.obtenerTodas().isNotEmpty()) return
-
-        dependenciaDao.insertar(DependenciaComunitariaEntity(nombre = "Salón Principal"))
-        dependenciaDao.insertar(DependenciaComunitariaEntity(nombre = "Sala Multiuso"))
-        val clave = hashClave("1234")
-        val usuarios = listOf(
-            UsuarioEntity(nombre="Juan Pérez",correo ="juan.perez@zaror.test",clave=clave,
-                rol="VECINO"),
-            UsuarioEntity(nombre="Ana Muñoz",correo="ana.munoz@zaror.test",clave=clave,
-                rol="VECINO"),
-            UsuarioEntity(nombre="Pedro Soto",correo="pedro.soto@zaror.test",clave=clave,
-                rol="VECINO"),
-            UsuarioEntity(nombre="María Torres",correo="maria.torres@zaror.test",clave=clave,
-                rol="DIRECTIVA",cargo="SECRETARIA"),
-            UsuarioEntity(nombre="Luis Rojas",correo="luis.rojas@zaror.test",clave=clave,
-                rol="DIRECTIVA",cargo="TESORERIA"),
-            UsuarioEntity(nombre="Carmen Vidal",correo="carmen.vidal@zaror.test",clave=clave,
-                rol="DIRECTIVA",cargo="PRESIDENCIA")
-        )
-        usuarios.forEach { usuarioDao.insertar(it) }
-
-        val reservas = listOf(
-            ReservaEntity(dependenciaId=1,vecinoId=1,fecha = fechaEn(11),
-                horaInicio = "18:00", horaFin = "21:00", estado = "CONFIRMADA",
-                fechaSolicitud = fechaEn(-5), gestionadaPorId = 4),
-            ReservaEntity(dependenciaId = 2, vecinoId = 1, fecha = fechaEn(12),
-                horaInicio = "11:00", horaFin = "14:00", estado = "PENDIENTE",
-                fechaSolicitud = fechaEn(-2)),
-            ReservaEntity(dependenciaId = 1, vecinoId = 3, fecha = fechaEn(11),
-                horaInicio = "19:00", horaFin = "21:00", estado = "PENDIENTE",
-                fechaSolicitud = fechaEn(-1)),
-            ReservaEntity(dependenciaId = 2, vecinoId = 3, fecha = fechaEn(25),
-                horaInicio = "10:00", horaFin = "13:00", estado = "PENDIENTE",
-                fechaSolicitud = fechaEn(-1)),
-            ReservaEntity(dependenciaId = 1, vecinoId = 1, fecha = fechaEn(18),
-                horaInicio = "15:00", horaFin = "18:00", estado = "RECHAZADA",
-                fechaSolicitud = fechaEn(-9), gestionadaPorId = 4),
-            ReservaEntity(dependenciaId = 2, vecinoId = 1, fecha = fechaEn(4),
-                horaInicio = "10:00", horaFin = "12:00", estado = "CANCELADA",
-                fechaSolicitud = fechaEn(-8)),
-            ReservaEntity(dependenciaId = 2, vecinoId = 3, fecha = fechaEn(-3),
-                horaInicio = "10:00", horaFin = "13:00", estado = "CONFIRMADA",
-                fechaSolicitud = fechaEn(-10), gestionadaPorId = 4),
-            ReservaEntity(dependenciaId = 1, vecinoId = 3, fecha = fechaEn(-3),
-                horaInicio = "12:00", horaFin = "16:00", estado = "CONFIRMADA",
-                fechaSolicitud = fechaEn(-10), gestionadaPorId = 4)
-        )
-        reservas.forEach { reservaDao.insertar(it) }
-
-        val pagos = listOf(
-            PagoEntity(reservaId = 8, tipo = "ARRIENDO", monto = 60000,
-                fecha = fechaEn(-2), registradoPorId = 5),
-            PagoEntity(tipo = "CONSUMO_BASICO", categoria = "ELECTRICIDAD", monto = 38500,
-                fecha = fechaEn(-2), registradoPorId = 5),
-            PagoEntity(reservaId = 7, tipo = "ARRIENDO", monto = 40000,
-                fecha = fechaEn(-3), registradoPorId = 5),
-            PagoEntity(tipo = "CONSUMO_BASICO", categoria = "AGUA", monto = 24200,
-                fecha = fechaEn(-4), registradoPorId = 5),
-            PagoEntity(tipo = "CONSUMO_BASICO", categoria = "GAS", monto = 24000,
-                fecha = fechaEn(-5), registradoPorId = 5),
-            PagoEntity(reservaId = 1, tipo = "ARRIENDO", monto = 45000,
-                fecha = fechaEn(-1), registradoPorId = 5)
-        )
-        pagos.forEach { pagoDao.insertar(it) }
-    }
-
-    private fun fechaEn(dias: Int): String {
-        val calendario = Calendar.getInstance()
-        calendario.add(Calendar.DAY_OF_YEAR, dias)
-        return SimpleDateFormat("yyyy-MM-dd",
-            Locale.getDefault()).format(calendario.time)
+    suspend fun registrarIngreso(ingreso: IngresoDto) {
+        RetrofitInstance.api.registrarIngreso(ingreso)
     }
 }

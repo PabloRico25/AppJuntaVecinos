@@ -21,10 +21,13 @@ import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 @Composable
 fun ActivarPuertaDialog(
     dependencias: List<DependenciaComunitariaEntity>,
-    onActivar: (salaId: Int, clave: String) -> Unit,
+    activando: Boolean,
+    errorServidor: String?,
+    onActivar: (salaId: Int, correo: String, clave: String) -> Unit,
     onCancelar: () -> Unit
 ) {
     var sala by remember { mutableStateOf<DependenciaComunitariaEntity?>(null) }
+    var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
 
@@ -42,33 +45,46 @@ fun ActivarPuertaDialog(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                 )
                 OutlinedTextField(
+                    value = correo,
+                    onValueChange = {
+                        correo = it
+                        error = null
+                    },
+                    label = { Text("Correo de la directiva") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                )
+                OutlinedTextField(
                     value = clave,
                     onValueChange = {
                         clave = it
                         error = null
                     },
-                    label = { Text("Clave para salir") },
+                    label = { Text("Clave (también sirve para salir)") },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                 )
-                error?.let {
+                // El error de esta pantalla (falta un dato) o el que responde el servidor
+                (error ?: errorServidor)?.let {
                     Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
                 }
             }
         },
         confirmButton = {
             TextButton(
+                enabled = !activando,
                 onClick = {
                     val elegida = sala
                     when {
                         elegida == null -> error = "Elige la sala de esta puerta"
+                        correo.isBlank() -> error = "Escribe el correo de la directiva"
                         clave.length < 4 -> error = "La clave debe tener al menos 4 caracteres"
-                        else -> onActivar(elegida.id, clave)
+                        else -> onActivar(elegida.id, correo.trim(), clave)
                     }
                 }
             ) {
-                Text("Activar")
+                Text(if (activando) "Activando..." else "Activar")
             }
         },
         dismissButton = {

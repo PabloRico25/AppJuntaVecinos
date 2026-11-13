@@ -6,13 +6,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 
-
-
 @Dao
 interface DependenciaDao {
-    @Insert
-    suspend fun insertar(dependencia: DependenciaComunitariaEntity)
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarTodas(dependencias: List<DependenciaComunitariaEntity>)
 

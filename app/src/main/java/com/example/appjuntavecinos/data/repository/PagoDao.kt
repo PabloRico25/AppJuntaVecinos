@@ -12,9 +12,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PagoDao {
 
-    @Insert
-    suspend fun insertar(pago: PagoEntity)
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarTodos(pagos: List<PagoEntity>)
 
@@ -26,9 +23,6 @@ interface PagoDao {
 
     @Query("SELECT * FROM PagoEntity ORDER BY fecha DESC, id DESC")
     fun observarTodos(): Flow<List<PagoEntity>>
-
-    @Query("SELECT reservaId FROM PagoEntity WHERE tipo = 'ARRIENDO' AND reservaId IS NOT NULL")
-    fun observarReservasPagadas(): Flow<List<Int>>
 
     @Query("SELECT COUNT(*) FROM PagoEntity WHERE tipo = 'ARRIENDO' AND reservaId = :reservaId")
     suspend fun contarPagosDeArriendo(reservaId: Int): Int

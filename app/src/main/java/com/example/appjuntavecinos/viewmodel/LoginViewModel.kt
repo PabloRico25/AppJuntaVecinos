@@ -10,7 +10,6 @@ import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.data.remote.SesionToken
 import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
-import com.example.appjuntavecinos.utils.hashClave
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,12 +25,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _sesion = MutableStateFlow<UsuarioEntity?>(null)
     val sesion: StateFlow<UsuarioEntity?> = _sesion.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            repositorio.cargarDatosDeEjemplo()
-        }
-    }
 
     fun onCorreoChange(valor: String) {
         _estado.update {

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
+import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,10 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
     private val _usuarios = MutableStateFlow<List<UsuarioEntity>>(emptyList())
     val usuarios: StateFlow<List<UsuarioEntity>> = _usuarios.asStateFlow()
 
+    // Un mensaje para mostrar en pantalla: falló cancelar o no se pudo actualizar desde el servidor
+    private val _aviso = MutableStateFlow<String?>(null)
+    val aviso: StateFlow<String?> = _aviso.asStateFlow()
+
     // Las reservas con arriendo pagado las informa el servidor (un vecino no tiene el detalle en Room).
     // Se emite una vez, cuando llega la respuesta: mientras tanto las pantallas ven null (cargando).
     val reservasPagadas: Flow<List<Int>> = flow { emit(repositorio.obtenerReservasPagadas()) }
@@ -34,7 +39,9 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
             _usuarios.value = repositorio.obtenerUsuarios()
         }
         viewModelScope.launch {
-            repositorio.refrescarReservas()
+            if (!repositorio.refrescarReservas()) {
+                _aviso.value = "No se pudo actualizar. Se muestran las reservas guardadas en este equipo"
+            }
         }
     }
 
@@ -47,9 +54,10 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
 
         viewModelScope.launch {
             try {
+                _aviso.value = null
                 repositorio.cancelarReserva(reserva)
             } catch (e: Exception) {
-                // El mensaje de error en pantalla llega en B6 (estados de carga y de error)
+                _aviso.value = mensajeDeError(e)
             }
         }
     }

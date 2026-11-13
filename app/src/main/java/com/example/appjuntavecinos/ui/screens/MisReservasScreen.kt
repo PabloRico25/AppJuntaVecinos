@@ -40,6 +40,7 @@ fun MisReservasScreen(
     val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
     val reservas by flujoDeReservas.collectAsState(initial = emptyList())
     val dependencias by viewModel.dependencias.collectAsState()
+    val aviso by viewModel.aviso.collectAsState()
 
     Column(
         modifier = Modifier
@@ -54,6 +55,10 @@ fun MisReservasScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Nueva reserva")
+        }
+
+        aviso?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
         }
 
         if (reservas.isEmpty()) {

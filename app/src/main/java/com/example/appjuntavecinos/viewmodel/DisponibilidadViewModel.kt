@@ -5,12 +5,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
+import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.utils.BloqueHorario
 import com.example.appjuntavecinos.utils.calcularBloques
 import com.example.appjuntavecinos.utils.fechaDeHoy
 import com.example.appjuntavecinos.utils.fechaDesdeMillis
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +38,12 @@ class DisponibilidadViewModel(application: Application) : AndroidViewModel(appli
     private val _bloques = MutableStateFlow<List<BloqueHorario>>(emptyList())
     val bloques: StateFlow<List<BloqueHorario>> = _bloques.asStateFlow()
 
+    private val _cargando = MutableStateFlow(false)
+    val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
     // La carga de bloques que está en curso; si el usuario cambia de sala o de fecha, se cancela
     private var cargaEnCurso: Job? = null
 
@@ -46,6 +55,8 @@ class DisponibilidadViewModel(application: Application) : AndroidViewModel(appli
             if (lista.isNotEmpty()) {
                 _dependenciaId.value = lista.first().id
                 cargarBloques()
+            } else {
+                _error.value = "No se pudieron cargar las salas. Revisa tu conexión"
             }
         }
     }
@@ -68,12 +79,19 @@ class DisponibilidadViewModel(application: Application) : AndroidViewModel(appli
 
         cargaEnCurso?.cancel()
         cargaEnCurso = viewModelScope.launch {
+            _cargando.value = true
+            _error.value = null
             try {
                 val ocupados = repositorio.obtenerBloquesOcupados(dependenciaId, fecha)
                 _bloques.value = calcularBloques(ocupados)
             } catch (e: Exception) {
-                // El mensaje de error en pantalla llega en B6; mientras tanto se quedan los bloques anteriores
+                // Si la carga se canceló porque el usuario cambió de sala o de fecha, no es un error
+                currentCoroutineContext().ensureActive()
+                // Se vacían los bloques: mostrar los de otra sala o fecha como si fueran los actuales engañaría
+                _bloques.value = emptyList()
+                _error.value = mensajeDeError(e)
             }
+            _cargando.value = false
         }
     }
 }

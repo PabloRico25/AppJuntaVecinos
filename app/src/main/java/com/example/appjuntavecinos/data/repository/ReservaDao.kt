@@ -11,9 +11,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ReservaDao {
 
-    @Insert
-    suspend fun insertar(reserva: ReservaEntity)
-
     // Guarda las reservas que entrega el servidor; si ya existía una con el mismo id, la reemplaza
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarTodas(reservas: List<ReservaEntity>)

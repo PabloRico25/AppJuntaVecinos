@@ -8,9 +8,6 @@ import com.example.appjuntavecinos.data.model.UsuarioEntity
 
 @Dao
 interface UsuarioDao {
-    @Query("SELECT * FROM UsuarioEntity WHERE correo = :correo")
-    suspend fun buscarPorCorreo(correo: String): UsuarioEntity?
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertarTodos(usuarios: List<UsuarioEntity>)
 
@@ -19,7 +16,4 @@ interface UsuarioDao {
 
     @Query("SELECT * FROM UsuarioEntity")
     suspend fun obtenerTodos(): List<UsuarioEntity>
-
-    @Insert
-    suspend fun insertar(usuario: UsuarioEntity)
 }

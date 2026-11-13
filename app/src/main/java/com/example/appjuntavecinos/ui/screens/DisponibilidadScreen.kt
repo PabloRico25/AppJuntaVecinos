@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +48,8 @@ fun DisponibilidadScreen(
     val dependenciaId by viewModel.dependenciaId.collectAsState()
     val fecha by viewModel.fecha.collectAsState()
     val bloques by viewModel.bloques.collectAsState(initial = emptyList())
+    val cargando by viewModel.cargando.collectAsState()
+    val error by viewModel.error.collectAsState()
     var mostrarCalendario by remember { mutableStateOf(false) }
 
     Column(
@@ -83,6 +86,13 @@ fun DisponibilidadScreen(
         }
 
         Text("Horario de la sede: $HORA_APERTURA a $HORA_CIERRE")
+
+        if (cargando) {
+            CircularProgressIndicator()
+        }
+        error?.let {
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
 
         bloques.forEach { bloque ->
             val colorTarjeta = when (bloque.tipo) {

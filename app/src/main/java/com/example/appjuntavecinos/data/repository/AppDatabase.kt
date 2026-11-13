@@ -5,13 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
-import com.example.appjuntavecinos.data.model.IngresoEntity
 import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
 
 @Database(entities = [UsuarioEntity::class, DependenciaComunitariaEntity::class, ReservaEntity::class,
-    PagoEntity::class, IngresoEntity::class], version = 3 )
+    PagoEntity::class], version = 4 )
 abstract class AppDatabase:RoomDatabase(){
     abstract fun usuarioDao():UsuarioDao
 
@@ -20,8 +19,6 @@ abstract class AppDatabase:RoomDatabase(){
     abstract fun reservaDao():ReservaDao
 
     abstract fun pagoDao():PagoDao
-
-    abstract fun ingresoDao():IngresoDao
 
     companion object {
         @Volatile // hace que todos los hilos vean el valor más reciente.
@@ -33,7 +30,11 @@ abstract class AppDatabase:RoomDatabase(){
                     context.applicationContext,
                     AppDatabase::class.java,
                     "junta.db"
-                ).build()
+                )
+                    // Room es solo una copia de lo que tiene el servidor: si cambia el esquema,
+                    // se borra y se vuelve a llenar en vez de migrar.
+                    .fallbackToDestructiveMigration(dropAllTables = true)
+                    .build()
                 instancia = nueva
                 nueva
             }

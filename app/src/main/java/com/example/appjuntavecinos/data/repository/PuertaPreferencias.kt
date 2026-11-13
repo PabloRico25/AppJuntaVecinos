@@ -20,16 +20,21 @@ class PuertaPreferencias(context: Context) {
     private val modoPuertaKey = booleanPreferencesKey("modo_puerta")
     private val salaIdKey = intPreferencesKey("sala_id")
     private val claveHashKey = stringPreferencesKey("clave_hash")
+    private val tokenKey = stringPreferencesKey("token_puerta")
 
     val modoPuerta: Flow<Boolean> = almacen.data.map { it[modoPuertaKey] ?: false }
     val salaId: Flow<Int> = almacen.data.map { it[salaIdKey] ?: 0 }
     val claveHash: Flow<String> = almacen.data.map { it[claveHashKey] ?: "" }
 
-    suspend fun activar(salaId: Int, claveHash: String) {
+    // El token de 7 días que el servidor entrega al activar la puerta; vacío si la puerta no está activa
+    val token: Flow<String> = almacen.data.map { it[tokenKey] ?: "" }
+
+    suspend fun activar(salaId: Int, claveHash: String, token: String) {
         almacen.edit { preferencias ->
             preferencias[modoPuertaKey] = true
             preferencias[salaIdKey] = salaId
             preferencias[claveHashKey] = claveHash
+            preferencias[tokenKey] = token
         }
     }
 
@@ -38,6 +43,7 @@ class PuertaPreferencias(context: Context) {
             preferencias[modoPuertaKey] = false
             preferencias.remove(salaIdKey)
             preferencias.remove(claveHashKey)
+            preferencias.remove(tokenKey)
         }
     }
 }

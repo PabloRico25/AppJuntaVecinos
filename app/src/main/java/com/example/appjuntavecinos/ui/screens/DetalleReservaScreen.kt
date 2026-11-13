@@ -39,6 +39,7 @@ fun DetalleReservaScreen(
     val dependencias by viewModel.dependencias.collectAsState()
     val usuarios by viewModel.usuarios.collectAsState()
     val pagadas by viewModel.reservasPagadas.collectAsState(initial = null)
+    val aviso by viewModel.aviso.collectAsState()
     val reserva = reservas?.firstOrNull { it.id == reservaId }
     var confirmandoCancelar by remember { mutableStateOf(false) }
 
@@ -79,6 +80,9 @@ fun DetalleReservaScreen(
                     )
                 ) {
                     Text("Cancelar solicitud", fontWeight = FontWeight.Bold)
+                }
+                aviso?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
                 }
             }
 
