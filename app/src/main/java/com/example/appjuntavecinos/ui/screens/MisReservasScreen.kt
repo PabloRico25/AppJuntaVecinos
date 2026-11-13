@@ -1,7 +1,5 @@
 package com.example.appjuntavecinos.ui.screens
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.ui.components.EsqueletoListaReservas
 import com.example.appjuntavecinos.ui.components.EstadoDeError
 import com.example.appjuntavecinos.ui.components.FranjaAviso
+import com.example.appjuntavecinos.ui.components.TarjetaReserva
 import com.example.appjuntavecinos.ui.components.aparecerEscalonado
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.fechaParaMostrar
@@ -49,7 +46,7 @@ fun MisReservasScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Mis reservas", style = MaterialTheme.typography.headlineMedium)
+        Text("Mis reservas", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
         Button(
             onClick = onNuevaReserva,
@@ -81,30 +78,14 @@ fun MisReservasScreen(
             ) {
                 items(count = reservas.size, key = { indice -> reservas[indice].id }) { indice ->
                     val reserva = reservas[indice]
-                    val colorTarjeta by animateColorAsState(
-                        targetValue = colorEstado(reserva.estado),
-                        label = "colorTarjeta"
+                    TarjetaReserva(
+                        nombre = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "",
+                        detalle = "${fechaParaMostrar(reserva.fecha)}, de ${reserva.horaInicio} a ${reserva.horaFin}",
+                        estado = reserva.estado,
+                        textoEstado = etiquetaEstado(reserva.estado),
+                        onClick = { onDetalle(reserva.id) },
+                        modifier = Modifier.fillMaxWidth().aparecerEscalonado(indice)
                     )
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aparecerEscalonado(indice)
-                            .clickable { onDetalle(reserva.id) },
-                        colors = CardDefaults.cardColors(
-                            containerColor = colorTarjeta,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        )
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(
-                                text = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text("${fechaParaMostrar(reserva.fecha)}, de ${reserva.horaInicio} a ${reserva.horaFin}")
-                            Text("Estado: ${etiquetaEstado(reserva.estado)}")
-                        }
-                    }
                 }
             }
         }
