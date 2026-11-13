@@ -10,6 +10,7 @@ import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.data.repository.PuertaPreferencias
 import com.example.appjuntavecinos.utils.EstadoPuerta
+import com.example.appjuntavecinos.utils.MotivoPuerta
 import com.example.appjuntavecinos.utils.ResultadoPuerta
 import com.example.appjuntavecinos.utils.evaluarPuerta
 import com.example.appjuntavecinos.utils.fechaDeHoy
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 class PuertaViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -121,7 +123,9 @@ class PuertaViewModel(application: Application) : AndroidViewModel(application) 
                 }
                 _resultado.value = resultado
             } catch (e: Exception) {
-                _resultado.value = ResultadoPuerta(EstadoPuerta.CERRADA, mensajeDeError(e))
+                // Sin red no se puede saber si el código ya se usó, así que la puerta no abre
+                val motivo = if (e is IOException) MotivoPuerta.SIN_CONEXION else MotivoPuerta.ERROR_SERVIDOR
+                _resultado.value = ResultadoPuerta(EstadoPuerta.CERRADA, mensajeDeError(e), motivo = motivo)
             } finally {
                 // Pase lo que pase, se libera para poder atender el siguiente QR.
                 procesando = false

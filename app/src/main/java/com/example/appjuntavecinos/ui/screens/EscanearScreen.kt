@@ -2,25 +2,33 @@ package com.example.appjuntavecinos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.ui.components.BotonContorno
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
@@ -98,6 +106,11 @@ fun EscanearScreen(
                 EstadoIngreso.FUERA_DE_HORARIO -> colores.sobreAviso
                 EstadoIngreso.NO_VALIDO -> colores.sobreRechazada
             }
+            val icono = when (resultado.estado) {
+                EstadoIngreso.VALIDO -> R.drawable.ic_escaner_permitido
+                EstadoIngreso.FUERA_DE_HORARIO -> R.drawable.ic_escaner_horario
+                EstadoIngreso.NO_VALIDO -> R.drawable.ic_escaner_no_valido
+            }
             val titulo = when (resultado.estado) {
                 EstadoIngreso.VALIDO -> "Acceso permitido"
                 EstadoIngreso.FUERA_DE_HORARIO -> "Fuera de horario"
@@ -112,12 +125,21 @@ fun EscanearScreen(
                 )
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = titulo,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = colorTexto,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(icono),
+                            contentDescription = null,
+                            tint = colorTexto,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = titulo,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = colorTexto,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                     val datos = resultado.datos
                     if (datos != null) {
                         Text("Vecino: ${datos.nombreVecino}")

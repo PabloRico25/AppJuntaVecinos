@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -47,8 +46,7 @@ import androidx.core.content.ContextCompat
 import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.LectorQrFrontal
-import com.example.appjuntavecinos.ui.theme.JuntaTheme
-import com.example.appjuntavecinos.utils.EstadoPuerta
+import com.example.appjuntavecinos.ui.components.ResultadoDePuerta
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.delay
 
@@ -167,31 +165,7 @@ fun PuertaScreen(
 
 
         resultado?.let { r ->
-            val abierta = r.estado == EstadoPuerta.ABIERTA
-            val colores = JuntaTheme.colores
-            val colorTexto = colores.sobrePuerta
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(if (abierta) colores.puertaAbierta else colores.puertaCerrada)
-                    .clickable { viewModel.limpiarResultado() }
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = if (abierta) "Puerta abierta" else "Puerta cerrada",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = colorTexto
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = r.mensaje,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = colorTexto
-                )
-            }
+            ResultadoDePuerta(resultado = r, onToque = { viewModel.limpiarResultado() })
         }
     }
 
