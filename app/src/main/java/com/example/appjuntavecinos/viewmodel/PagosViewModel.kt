@@ -41,5 +41,9 @@ class PagosViewModel(application: Application) : AndroidViewModel(application) {
             _dependencias.value = repositorio.obtenerDependencias()
             _usuarios.value = repositorio.obtenerUsuarios()
         }
+        viewModelScope.launch {
+            repositorio.refrescarReservas()
+            repositorio.refrescarPagos()
+        }
     }
 }

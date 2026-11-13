@@ -1,5 +1,6 @@
 package com.example.appjuntavecinos.utils
 
+import com.example.appjuntavecinos.data.model.BloqueDto
 import com.example.appjuntavecinos.data.model.ReservaEntity
 
 const val HORA_APERTURA = "09:00"
@@ -12,27 +13,36 @@ data class BloqueHorario(
     val vecinoId: Int? = null
 )
 
+// Con las reservas guardadas en Room (la directiva las tiene todas; un vecino solo las suyas).
 fun calcularBloques(
     reservas: List<ReservaEntity>,
     dependenciaId: Int,
     fecha: String
 ): List<BloqueHorario> {
-    val activas = reservas
+    val ocupados = reservas
         .filter { it.dependenciaId == dependenciaId && it.fecha == fecha }
+        .map { BloqueDto(it.horaInicio, it.horaFin, it.estado, it.vecinoId) }
+    return calcularBloques(ocupados)
+}
+
+// Con los bloques ocupados que entrega el servidor para una sala y un día. El servidor ve las reservas
+// de todos, por eso es la fuente correcta para la disponibilidad.
+fun calcularBloques(ocupados: List<BloqueDto>): List<BloqueHorario> {
+    val activos = ocupados
         .filter { it.estado == "CONFIRMADA" || it.estado == "PENDIENTE" }
         .sortedBy { it.horaInicio }
 
     val bloques = mutableListOf<BloqueHorario>()
     var cursor = HORA_APERTURA
-    for (reserva in activas) {
-        if (reserva.horaInicio > cursor) {
-            bloques.add(BloqueHorario(cursor, reserva.horaInicio, "LIBRE"))
+    for (ocupado in activos) {
+        if (ocupado.horaInicio > cursor) {
+            bloques.add(BloqueHorario(cursor, ocupado.horaInicio, "LIBRE"))
         }
-        if (reserva.horaFin > cursor) {
-            cursor = reserva.horaFin
+        if (ocupado.horaFin > cursor) {
+            cursor = ocupado.horaFin
         }
-        val tipo = if (reserva.estado == "CONFIRMADA") "CONFIRMADA" else "SOLICITADA"
-        bloques.add(BloqueHorario(reserva.horaInicio, reserva.horaFin, tipo, reserva.vecinoId))
+        val tipo = if (ocupado.estado == "CONFIRMADA") "CONFIRMADA" else "SOLICITADA"
+        bloques.add(BloqueHorario(ocupado.horaInicio, ocupado.horaFin, tipo, ocupado.vecinoId))
     }
     if (cursor < HORA_CIERRE) {
         bloques.add(BloqueHorario(cursor, HORA_CIERRE, "LIBRE"))

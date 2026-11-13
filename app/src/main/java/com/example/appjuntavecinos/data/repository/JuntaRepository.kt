@@ -2,10 +2,12 @@ package com.example.appjuntavecinos.data.repository
 
 import android.content.Context
 import androidx.room.withTransaction
+import com.example.appjuntavecinos.data.model.BloqueDto
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.IngresoEntity
 import com.example.appjuntavecinos.data.model.LoginRequest
 import com.example.appjuntavecinos.data.model.NuevaReservaRequest
+import com.example.appjuntavecinos.data.model.NuevoPagoRequest
 import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
@@ -99,6 +101,12 @@ class JuntaRepository(context: Context) {
         return reservaDao.observarTodas()
     }
 
+    // Los bloques ocupados de una sala en un día los entrega el servidor, que ve las reservas de todos
+    // (un vecino solo tiene las suyas en Room). A un vecino no le llega quién reservó.
+    suspend fun obtenerBloquesOcupados(dependenciaId: Int, fecha: String): List<BloqueDto> {
+        return RetrofitInstance.api.obtenerOcupacion(dependenciaId, fecha)
+    }
+
     // Las escrituras SÍ lanzan el error: el ViewModel muestra el mensaje del servidor
     // (horario ocupado, falta de permiso...). Después se refrescan las reservas guardadas.
     suspend fun crearReserva(dependenciaId: Int, fecha: String, horaInicio: String, horaFin: String) {
@@ -137,12 +145,52 @@ class JuntaRepository(context: Context) {
         return pagoDao.contarPagosDeArriendo(id)>0
     }
 
-    suspend fun obtenerReservasPorPagar():List<ReservaEntity>{
+    // Igual que las reservas: los pagos se piden al servidor y reemplazan lo guardado en Room.
+    // Un vecino recibe los montos, pero no la reserva, el comprobante ni quién registró cada pago.
+    suspend fun refrescarPagos() {
+        try {
+            val lista = RetrofitInstance.api.obtenerPagos()
+            db.withTransaction {
+                pagoDao.borrarTodos()
+                pagoDao.insertarTodos(lista)
+            }
+        } catch (e: Exception) {
+            // Sin conexión o sesión vencida: se queda lo guardado
+        }
+    }
+
+    // Ids de las reservas con el arriendo pagado. Lo informa el servidor, porque un vecino no tiene en
+    // Room la reserva de cada pago; sin conexión se usa lo guardado.
+    suspend fun obtenerReservasPagadas(): List<Int> {
+        return try {
+            RetrofitInstance.api.obtenerReservasPagadas()
+        } catch (e: Exception) {
+            pagoDao.obtenerTodos().filter { it.tipo == "ARRIENDO" }.mapNotNull { it.reservaId }
+        }
+    }
+
+    // Antes de calcular cuáles reservas faltan por cobrar se actualizan reservas y pagos desde el servidor
+    suspend fun obtenerReservasPorPagar(): List<ReservaEntity> {
+        refrescarReservas()
+        refrescarPagos()
         return reservaDao.obtenerConfirmadasSinPago()
     }
 
-    suspend fun crearPago(pago:PagoEntity){
-        pagoDao.insertar(pago)
+    // Quién registra el pago lo toma el servidor del token, y solo Tesorería puede hacerlo.
+    // Si responde con error (reserva sin confirmar, ya pagada...), se lanza para mostrar su mensaje.
+    suspend fun crearPago(
+        reservaId: Int?,
+        tipo: String,
+        categoria: String,
+        monto: Int,
+        fecha: String,
+        comprobanteUri: String?,
+        descripcion: String
+    ) {
+        RetrofitInstance.api.registrarPago(
+            NuevoPagoRequest(reservaId, tipo, categoria, monto, fecha, comprobanteUri, descripcion)
+        )
+        refrescarPagos()
     }
 
     suspend fun obtenerReservasUsadas():Set<Int>{

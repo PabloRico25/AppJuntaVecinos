@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class MisReservasViewModel(application: Application) : AndroidViewModel(application) {
@@ -23,7 +24,9 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
     private val _usuarios = MutableStateFlow<List<UsuarioEntity>>(emptyList())
     val usuarios: StateFlow<List<UsuarioEntity>> = _usuarios.asStateFlow()
 
-    val reservasPagadas: Flow<List<Int>> = repositorio.observarReservasPagadas()
+    // Las reservas con arriendo pagado las informa el servidor (un vecino no tiene el detalle en Room).
+    // Se emite una vez, cuando llega la respuesta: mientras tanto las pantallas ven null (cargando).
+    val reservasPagadas: Flow<List<Int>> = flow { emit(repositorio.obtenerReservasPagadas()) }
 
     init {
         viewModelScope.launch {

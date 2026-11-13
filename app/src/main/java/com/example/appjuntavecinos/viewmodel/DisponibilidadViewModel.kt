@@ -10,11 +10,10 @@ import com.example.appjuntavecinos.utils.BloqueHorario
 import com.example.appjuntavecinos.utils.calcularBloques
 import com.example.appjuntavecinos.utils.fechaDeHoy
 import com.example.appjuntavecinos.utils.fechaDesdeMillis
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class DisponibilidadViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,14 +32,11 @@ class DisponibilidadViewModel(application: Application) : AndroidViewModel(appli
     private val _fecha = MutableStateFlow(fechaDeHoy())
     val fecha: StateFlow<String> = _fecha.asStateFlow()
 
-    // No visto en clase (lo integramos con permiso del docente): combine junta varios Flow en uno.
-    val bloques: Flow<List<BloqueHorario>> = combine(
-        repositorio.observarTodasLasReservas(),
-        _dependenciaId,
-        _fecha
-    ) { reservas, dependenciaId, fecha ->
-        calcularBloques(reservas, dependenciaId, fecha)
-    }
+    private val _bloques = MutableStateFlow<List<BloqueHorario>>(emptyList())
+    val bloques: StateFlow<List<BloqueHorario>> = _bloques.asStateFlow()
+
+    // La carga de bloques que está en curso; si el usuario cambia de sala o de fecha, se cancela
+    private var cargaEnCurso: Job? = null
 
     init {
         viewModelScope.launch {
@@ -49,16 +45,35 @@ class DisponibilidadViewModel(application: Application) : AndroidViewModel(appli
             _usuarios.value = repositorio.obtenerUsuarios()
             if (lista.isNotEmpty()) {
                 _dependenciaId.value = lista.first().id
+                cargarBloques()
             }
         }
     }
 
     fun onDependenciaChange(id: Int) {
         _dependenciaId.value = id
+        cargarBloques()
     }
 
     fun onFechaChange(millis: Long?) {
         if (millis == null) return
         _fecha.value = fechaDesdeMillis(millis)
+        cargarBloques()
+    }
+
+    // Pide al servidor los bloques ocupados de la sala y el día elegidos y arma los tramos libres
+    private fun cargarBloques() {
+        val dependenciaId = _dependenciaId.value
+        val fecha = _fecha.value
+
+        cargaEnCurso?.cancel()
+        cargaEnCurso = viewModelScope.launch {
+            try {
+                val ocupados = repositorio.obtenerBloquesOcupados(dependenciaId, fecha)
+                _bloques.value = calcularBloques(ocupados)
+            } catch (e: Exception) {
+                // El mensaje de error en pantalla llega en B6; mientras tanto se quedan los bloques anteriores
+            }
+        }
     }
 }

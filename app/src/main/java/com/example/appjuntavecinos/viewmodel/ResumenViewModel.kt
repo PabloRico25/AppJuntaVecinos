@@ -2,6 +2,7 @@ package com.example.appjuntavecinos.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.utils.ResumenFinanciero
 import com.example.appjuntavecinos.utils.calcularResumen
@@ -13,12 +14,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class ResumenViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repositorio = JuntaRepository(application)
 
     val mesActual: String = fechaDeHoy().take(7)
+
+    init {
+        viewModelScope.launch {
+            repositorio.refrescarPagos()
+        }
+    }
 
     private val _mes = MutableStateFlow(mesActual)
     val mes: StateFlow<String> = _mes.asStateFlow()

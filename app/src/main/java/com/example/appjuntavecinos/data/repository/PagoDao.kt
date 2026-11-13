@@ -3,6 +3,7 @@ package com.example.appjuntavecinos.data.repository
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.appjuntavecinos.data.model.PagoEntity
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,12 @@ interface PagoDao {
 
     @Insert
     suspend fun insertar(pago: PagoEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarTodos(pagos: List<PagoEntity>)
+
+    @Query("DELETE FROM PagoEntity")
+    suspend fun borrarTodos()
 
     @Query("SELECT * FROM PagoEntity ORDER BY fecha DESC")
     suspend fun obtenerTodos(): List<PagoEntity>

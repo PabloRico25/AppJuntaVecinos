@@ -5,10 +5,10 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
-import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.RegistrarPagoErrores
 import com.example.appjuntavecinos.data.model.RegistrarPagoUiState
 import com.example.appjuntavecinos.data.model.ReservaEntity
+import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.utils.fechaDeHoy
 import com.example.appjuntavecinos.utils.fechaDesdeMillis
@@ -150,6 +150,7 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
         return nuevosErrores == RegistrarPagoErrores()
     }
 
+    // registradoPorId ya no se envía: el servidor lo toma del token
     fun guardar(registradoPorId: Int, puedeRegistrar: Boolean, onExito: () -> Unit) {
         if (_estado.value.guardando) return
         if (!puedeRegistrar) {
@@ -179,19 +180,22 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
                 }
             }
 
-            repositorio.crearPago(
-                PagoEntity(
+            try {
+                repositorio.crearPago(
                     reservaId = if (actual.tipo == "ARRIENDO") actual.reserva?.id else null,
                     tipo = actual.tipo,
                     categoria = if (actual.tipo == "CONSUMO_BASICO") actual.categoria else "",
                     monto = actual.monto.toInt(),
                     fecha = actual.fecha,
                     comprobanteUri = comprobanteGuardado,
-                    registradoPorId = registradoPorId,
                     descripcion = actual.descripcion.trim()
                 )
-            )
-            onExito()
+                onExito()
+            } catch (e: Exception) {
+                _estado.update {
+                    it.copy(guardando = false, errores = it.errores.copy(general = mensajeDeError(e)))
+                }
+            }
         }
     }
 }
