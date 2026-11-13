@@ -9,19 +9,23 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -38,17 +42,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.ui.components.BannerError
 import com.example.appjuntavecinos.ui.components.BotonContorno
+import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
+import com.example.appjuntavecinos.ui.components.sacudirSiHayError
 import com.example.appjuntavecinos.utils.crearUriCamara
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.RegistrarPagoViewModel
@@ -171,24 +180,28 @@ fun RegistrarPagoScreen(
             isError = estado.errores.monto != null,
             trailingIcon = { if (estado.errores.monto != null) IconoDeError() },
             supportingText = { estado.errores.monto?.let { Text(it) } },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().sacudirSiHayError(estado.errores.monto)
         )
 
-        OutlinedTextField(
-            value = fechaParaMostrar(estado.fecha),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Fecha del pago") },
-            isError = estado.errores.fecha != null,
-            trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
-            supportingText = { estado.errores.fecha?.let { Text(it) } },
-            modifier = Modifier.fillMaxWidth()
-        )
-        BotonContorno(
-            onClick = { mostrarCalendario = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Elegir fecha")
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedTextField(
+                value = fechaParaMostrar(estado.fecha),
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Fecha del pago") },
+                isError = estado.errores.fecha != null,
+                trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
+                supportingText = { estado.errores.fecha?.let { Text(it) } },
+                modifier = Modifier.weight(1f).sacudirSiHayError(estado.errores.fecha)
+            )
+            BotonContorno(
+                onClick = { mostrarCalendario = true },
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Icon(painterResource(R.drawable.ic_nav_calendario), contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Elegir fecha")
+            }
         }
 
         OutlinedTextField(
@@ -241,11 +254,17 @@ fun RegistrarPagoScreen(
             }
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = estado.confirma,
-                onCheckedChange = { viewModel.onConfirmaChange(it) }
-            )
+        // No visto en clase: toggleable hace que tocar el texto también marque la casilla, y Role.Checkbox lo anuncia como casilla a un lector de pantalla.
+        Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
+                value = estado.confirma,
+                role = Role.Checkbox,
+                onValueChange = { viewModel.onConfirmaChange(it) }
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(checked = estado.confirma, onCheckedChange = null)
+            Spacer(Modifier.width(12.dp))
             Text("Confirmar registro")
         }
         estado.errores.confirma?.let {
@@ -259,7 +278,7 @@ fun RegistrarPagoScreen(
 
         estado.errores.general?.let { BannerError(it) }
 
-        Button(
+        BotonJunta(
             onClick = { viewModel.guardar(registradoPorId, puedeRegistrar, onPagoRegistrado) },
             enabled = !estado.guardando,
             modifier = Modifier.fillMaxWidth()

@@ -3,9 +3,9 @@ package com.example.appjuntavecinos.navigation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -272,7 +272,7 @@ fun AppNavigation() {
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
-                    title = { CabeceraSesion(nombre = sesion?.nombre ?: "", rol = nombreDelCargo(sesion?.cargo)) },
+                    title = {},
                     // Flecha para volver, solo en las pantallas internas.
                     navigationIcon = {
                         if (esPantallaInterna) {
@@ -287,23 +287,27 @@ fun AppNavigation() {
                                 Icon(Icons.Filled.DateRange, contentDescription = "Ver disponibilidad")
                             }
                         }
-                        IconButton(onClick = { menuAbierto = true }) {
-                            Icon(Icons.Filled.AccountCircle, contentDescription = "Menú de la cuenta")
-                        }
-                        DropdownMenu(
-                            expanded = menuAbierto,
-                            onDismissRequest = { menuAbierto = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Cerrar sesión") },
-                                onClick = {
-                                    menuAbierto = false
-                                    loginViewModel.cerrarSesion()
-                                    navController.navigate(Rutas.LOGIN) {
-                                        popUpTo(navController.graph.id) { inclusive = true }
-                                    }
-                                }
+                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                            CabeceraSesion(
+                                nombre = sesion?.nombre ?: "",
+                                rol = nombreDelCargo(sesion?.cargo),
+                                onClick = { menuAbierto = true }
                             )
+                            DropdownMenu(
+                                expanded = menuAbierto,
+                                onDismissRequest = { menuAbierto = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Cerrar sesión") },
+                                    onClick = {
+                                        menuAbierto = false
+                                        loginViewModel.cerrarSesion()
+                                        navController.navigate(Rutas.LOGIN) {
+                                            popUpTo(navController.graph.id) { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 )

@@ -19,7 +19,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,14 +29,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.BarraDeGasto
 import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.FichaDeGasto
+import com.example.appjuntavecinos.ui.components.IlustracionDeKit
 import com.example.appjuntavecinos.ui.components.TarjetaBlanca
+import com.example.appjuntavecinos.ui.components.categoriaDeGasto
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.ResumenFinanciero
 import com.example.appjuntavecinos.utils.anchoDeVentana
@@ -120,24 +122,22 @@ fun ResumenScreen(
                     fontWeight = FontWeight.ExtraBold
                 )
                 if (resumen.gastosPorCategoria.isEmpty()) {
-                    Text("No hay gastos en este mes.")
+                    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        IlustracionDeKit(R.drawable.ilus_sin_gastos, alto = 120.dp)
+                        Text("No hay gastos en este mes.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 } else {
                     val mayor = resumen.gastosPorCategoria.values.maxOrNull()?.coerceAtLeast(1) ?: 1
-                    resumen.gastosPorCategoria.forEach { (categoria, monto) ->
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(categoria.lowercase().replaceFirstChar { it.uppercase() }, fontWeight = FontWeight.SemiBold)
-                                Text(formatoPesos(monto), fontWeight = FontWeight.ExtraBold)
+                    resumen.gastosPorCategoria.entries.forEachIndexed { indice, (categoria, monto) ->
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            FichaDeGasto(categoriaDeGasto(categoria))
+                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(categoria.lowercase().replaceFirstChar { it.uppercase() }, fontWeight = FontWeight.SemiBold)
+                                    Text(formatoPesos(monto), fontWeight = FontWeight.ExtraBold)
+                                }
+                                BarraDeGasto(proporcion = monto.toFloat() / mayor, indice = indice, clave = mes)
                             }
-                            LinearProgressIndicator(
-                                progress = { monto.toFloat() / mayor },
-                                modifier = Modifier.fillMaxWidth().height(8.dp),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.outlineVariant,
-                                strokeCap = StrokeCap.Round,
-                                gapSize = 0.dp,
-                                drawStopIndicator = {}
-                            )
                         }
                     }
                 }

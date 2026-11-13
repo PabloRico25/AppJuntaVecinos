@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -35,8 +34,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.appjuntavecinos.ui.components.ActivarPuertaDialog
+import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.LogoJuntaZaror
+import com.example.appjuntavecinos.ui.components.sacudirSiHayError
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 
@@ -101,7 +102,7 @@ fun LoginScreen(
             isError = estado.errores.correo != null,
             supportingText = { estado.errores.correo?.let { Text(it) } },
             trailingIcon = { if (estado.errores.correo != null) IconoDeError() },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().sacudirSiHayError(estado.errores.correo)
         )
         Spacer(Modifier.height(8.dp))
 
@@ -116,7 +117,7 @@ fun LoginScreen(
             isError = estado.errores.clave != null,
             supportingText = { estado.errores.clave?.let { Text(it) } },
             trailingIcon = { if (estado.errores.clave != null) IconoDeError() },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().sacudirSiHayError(estado.errores.clave)
         )
         Spacer(Modifier.height(16.dp))
 
@@ -125,7 +126,7 @@ fun LoginScreen(
             Spacer(Modifier.height(8.dp))
         }
 
-        Button(
+        BotonJunta(
             onClick = { viewModel.iniciarSesion(onLoginValido) },
             enabled = !estado.cargando,
             modifier = Modifier.fillMaxWidth()

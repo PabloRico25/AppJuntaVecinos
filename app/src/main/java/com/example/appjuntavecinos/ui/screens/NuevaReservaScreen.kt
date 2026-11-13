@@ -6,12 +6,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -29,15 +30,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.ui.components.BannerError
 import com.example.appjuntavecinos.ui.components.BotonContorno
+import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
+import com.example.appjuntavecinos.ui.components.sacudirSiHayError
 import com.example.appjuntavecinos.utils.HORA_APERTURA
 import com.example.appjuntavecinos.utils.HORA_CIERRE
 import com.example.appjuntavecinos.utils.fechaParaMostrar
@@ -82,7 +86,7 @@ fun NuevaReservaScreen(
             isError = estado.errores.fecha != null,
             trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
             supportingText = { estado.errores.fecha?.let { Text(it) } },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).sacudirSiHayError(estado.errores.fecha)
         )
         BotonContorno(
             onClick = { mostrarCalendario = true },
@@ -112,11 +116,17 @@ fun NuevaReservaScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = estado.aceptaReglamento,
-                onCheckedChange = { viewModel.onReglamentoChange(it) }
-            )
+        // No visto en clase: toggleable hace que tocar el texto también marque la casilla, y Role.Checkbox lo anuncia como casilla a un lector de pantalla.
+        Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
+                value = estado.aceptaReglamento,
+                role = Role.Checkbox,
+                onValueChange = { viewModel.onReglamentoChange(it) }
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(checked = estado.aceptaReglamento, onCheckedChange = null)
+            Spacer(Modifier.width(12.dp))
             Text("Acepto el reglamento de la sede")
         }
         estado.errores.reglamento?.let {
@@ -130,7 +140,7 @@ fun NuevaReservaScreen(
 
         estado.errores.general?.let { BannerError(it) }
 
-        Button(
+        BotonJunta(
             onClick = { viewModel.guardar(vecinoId, onReservaCreada) },
             modifier = Modifier.fillMaxWidth()
         ) {

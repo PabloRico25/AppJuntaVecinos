@@ -47,7 +47,7 @@ fun MenuDesplegable(
             },
             isError = error != null,
             supportingText = { error?.let { Text(it) } },
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth().sacudirSiHayError(error)
         )
         ExposedDropdownMenu(
             expanded = expandido,

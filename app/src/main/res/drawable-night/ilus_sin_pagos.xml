@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ilustración de un estado vacío del kit de diseño (05_ilustraciones), versión para el modo oscuro. Lleva sus propios colores: no se tiñe al usarla. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="170dp"
+    android:viewportWidth="240"
+    android:viewportHeight="170">
+    <path
+        android:pathData="M65,76a55,55 0 1 0 110,0a55,55 0 1 0 -110,0"
+        android:fillColor="#4A3020" />
+    <path
+        android:pathData="M89,35H151a9,9 0 0 1 9,9V122a9,9 0 0 1 -9,9H89a9,9 0 0 1 -9,-9V44a9,9 0 0 1 9,-9Z"
+        android:fillColor="#2E2118"
+        android:strokeColor="#F6E9D8"
+        android:strokeWidth="3" />
+    <path
+        android:pathData="M96,65H144 M96,82H134 M96,99H140"
+        android:fillColor="#00000000"
+        android:strokeColor="#F6E9D8"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M137,115a21,21 0 1 0 42,0a21,21 0 1 0 -42,0"
+        android:fillColor="#FF8F2A" />
+    <path
+        android:pathData="M158,103.5V108 M158,124V128.5 M163.5,109.5C163.5,106 152.5,106 152.5,111C152.5,116 163.5,115 163.5,120.5C163.5,126 152.5,126 152.5,122"
+        android:fillColor="#00000000"
+        android:strokeColor="#F6E9D8"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

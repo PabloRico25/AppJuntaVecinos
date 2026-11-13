@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.IlustracionSolicitudEnviada
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 
@@ -79,7 +79,7 @@ fun SolicitudEnviadaScreen(onVerMisReservas: () -> Unit) {
             )
         }
         Spacer(Modifier.height(24.dp))
-        Button(
+        BotonJunta(
             onClick = onVerMisReservas,
             modifier = Modifier.fillMaxWidth().height(52.dp)
         ) {

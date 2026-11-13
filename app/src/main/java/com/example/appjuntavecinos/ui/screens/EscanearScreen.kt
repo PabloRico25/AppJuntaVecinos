@@ -1,6 +1,7 @@
 package com.example.appjuntavecinos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -30,7 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.ui.components.BotonContorno
+import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.IconoDeError
+import com.example.appjuntavecinos.ui.components.IlustracionDeKit
+import com.example.appjuntavecinos.ui.components.sacudirSiHayError
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.EstadoIngreso
 import com.example.appjuntavecinos.utils.fechaParaMostrar
@@ -71,7 +74,14 @@ fun EscanearScreen(
         Text("Escanear QR", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
         Text("Escanea el código del vecino para ver si puede entrar.")
 
-        Button(
+        // Mientras no hay nada que mostrar, el marco con el QR del diseño (kit: sin_resultados_qr)
+        if (estado.resultado == null) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                IlustracionDeKit(R.drawable.ilus_sin_resultados_qr, alto = 130.dp)
+            }
+        }
+
+        BotonJunta(
             onClick = { abrirLector() },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -85,7 +95,7 @@ fun EscanearScreen(
             isError = estado.error != null,
             trailingIcon = { if (estado.error != null) IconoDeError() },
             supportingText = { estado.error?.let { Text(it) } },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().sacudirSiHayError(estado.error)
         )
         BotonContorno(
             onClick = { viewModel.validarEscrito() },

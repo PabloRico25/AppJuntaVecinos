@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -43,10 +42,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.EstadoCompleto
 import com.example.appjuntavecinos.ui.components.IconoDeError
+import com.example.appjuntavecinos.ui.components.IlustracionDeKit
 import com.example.appjuntavecinos.ui.components.LectorQrFrontal
 import com.example.appjuntavecinos.ui.components.ResultadoDePuerta
+import com.example.appjuntavecinos.ui.components.sacudirSiHayError
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.delay
 
@@ -155,11 +159,15 @@ fun PuertaScreen(
                 )
             } else {
 
-                Text("La puerta necesita la cámara para leer los códigos QR.")
-                Spacer(Modifier.height(16.dp))
-                Button(onClick = { pedirPermiso.launch(Manifest.permission.CAMERA) }) {
-                    Text("Dar permiso de cámara")
-                }
+                EstadoCompleto(
+                    icono = { IlustracionDeKit(R.drawable.ilus_camara_sin_permiso) },
+                    titulo = "Sin permiso de cámara",
+                    mensaje = "La puerta necesita la cámara para leer los códigos QR.",
+                    textoBoton = "Dar permiso de cámara",
+                    iconoBoton = null,
+                    circulo = false,
+                    onBoton = { pedirPermiso.launch(Manifest.permission.CAMERA) }
+                )
             }
         }
 
@@ -188,7 +196,7 @@ fun PuertaScreen(
                         isError = errorSalida != null,
                         trailingIcon = { if (errorSalida != null) IconoDeError() },
                         visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp).sacudirSiHayError(errorSalida)
                     )
                     errorSalida?.let {
                         Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

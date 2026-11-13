@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,11 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.EsqueletoListaReservas
 import com.example.appjuntavecinos.ui.components.EstadoDeError
+import com.example.appjuntavecinos.ui.components.EstadoVacio
 import com.example.appjuntavecinos.ui.components.FranjaAviso
 import com.example.appjuntavecinos.ui.components.TarjetaReserva
 import com.example.appjuntavecinos.ui.components.aparecerEscalonado
+import com.example.appjuntavecinos.ui.components.fotoDeSala
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
@@ -46,7 +49,7 @@ fun MisReservasScreen(
     ) {
         Text("Mis reservas", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
-        Button(
+        BotonJunta(
             onClick = onNuevaReserva,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -68,7 +71,7 @@ fun MisReservasScreen(
                 onReintentar = { viewModel.reintentar() }
             )
         } else if (reservas.isEmpty()) {
-            Text("Todavía no tienes reservas. Pide la primera con el botón Nueva reserva.")
+            EstadoVacio(R.drawable.ilus_sin_reservas, "Todavía no tienes reservas", mensaje = "Pide la primera con el botón Nueva reserva.")
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -76,8 +79,10 @@ fun MisReservasScreen(
             ) {
                 items(count = reservas.size, key = { indice -> reservas[indice].id }) { indice ->
                     val reserva = reservas[indice]
+                    val nombreSala = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: ""
                     TarjetaReserva(
-                        nombre = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "",
+                        nombre = nombreSala,
+                        foto = fotoDeSala(nombreSala),
                         detalle = "${fechaParaMostrar(reserva.fecha)}, de ${reserva.horaInicio} a ${reserva.horaFin}",
                         estado = reserva.estado,
                         textoEstado = etiquetaEstado(reserva.estado),

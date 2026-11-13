@@ -206,7 +206,7 @@ fun EstadoCompleto(
         }
         if (textoBoton != null && onBoton != null) {
             Spacer(Modifier.height(20.dp))
-            Button(
+            BotonJunta(
                 onClick = onBoton,
                 modifier = Modifier.fillMaxWidth().height(52.dp)
             ) {

@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -29,6 +28,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.ui.components.AvisoInformativo
+import com.example.appjuntavecinos.ui.components.BotonJunta
+import com.example.appjuntavecinos.ui.components.EstadoVacio
 import com.example.appjuntavecinos.ui.components.FichaIcono
 import com.example.appjuntavecinos.ui.components.TarjetaBlanca
 import com.example.appjuntavecinos.ui.components.aparecerEscalonado
@@ -58,7 +59,7 @@ fun PagosScreen(
         Text("Pagos", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
         if (puedeRegistrar) {
-            Button(
+            BotonJunta(
                 onClick = onRegistrarPago,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -100,7 +101,7 @@ fun PagosScreen(
         }
 
         if (pagos.isEmpty()) {
-            Text("Todavía no hay pagos registrados.")
+            EstadoVacio(R.drawable.ilus_sin_pagos, "Todavía no hay pagos registrados")
         } else {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),

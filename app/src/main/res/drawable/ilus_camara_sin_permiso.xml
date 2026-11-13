@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ilustración de un estado vacío del kit de diseño (05_ilustraciones). Lleva sus propios colores: no se tiñe al usarla. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="170dp"
+    android:viewportWidth="240"
+    android:viewportHeight="170">
+    <path
+        android:pathData="M64,80a56,56 0 1 0 112,0a56,56 0 1 0 -112,0"
+        android:fillColor="#FFE3C6" />
+    <path
+        android:pathData="M80,54H160a14,14 0 0 1 14,14V110a14,14 0 0 1 -14,14H80a14,14 0 0 1 -14,-14V68a14,14 0 0 1 14,-14Z"
+        android:fillColor="#FFF5CC"
+        android:strokeColor="#3A2A1A"
+        android:strokeWidth="4" />
+    <path
+        android:pathData="M90,54L99,41H141L150,54"
+        android:fillColor="#00000000"
+        android:strokeColor="#3A2A1A"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M97,89a23,23 0 1 0 46,0a23,23 0 1 0 -46,0"
+        android:fillColor="#FFE3C6"
+        android:strokeColor="#3A2A1A"
+        android:strokeWidth="3" />
+    <path
+        android:pathData="M110,89a10,10 0 1 0 20,0a10,10 0 1 0 -20,0"
+        android:fillColor="#FF7A00" />
+    <path
+        android:pathData="M154,47a18,18 0 1 0 36,0a18,18 0 1 0 -36,0"
+        android:fillColor="#C95746" />
+    <path
+        android:pathData="M172,37V48 M172,55V56"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>
