@@ -19,9 +19,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class DisponibilidadViewModel(application: Application) : AndroidViewModel(application) {
+class DisponibilidadViewModel(
+    application: Application,
+    private val repositorio: JuntaRepository
+) : AndroidViewModel(application) {
 
-    private val repositorio = JuntaRepository(application)
+    constructor(application: Application) : this(application, JuntaRepository(application))
 
     private val _dependencias = MutableStateFlow<List<DependenciaComunitariaEntity>>(emptyList())
     val dependencias: StateFlow<List<DependenciaComunitariaEntity>> = _dependencias.asStateFlow()
@@ -38,26 +41,50 @@ class DisponibilidadViewModel(application: Application) : AndroidViewModel(appli
     private val _bloques = MutableStateFlow<List<BloqueHorario>>(emptyList())
     val bloques: StateFlow<List<BloqueHorario>> = _bloques.asStateFlow()
 
-    private val _cargando = MutableStateFlow(false)
+    // Empieza en true: la pantalla muestra el esqueleto desde que se abre, mientras llegan las salas
+    private val _cargando = MutableStateFlow(true)
     val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
 
+    // El mensaje cuando fallan los bloques de la sala y el día elegidos
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    // Distinto del anterior: no hay salas que elegir (ni guardadas ni del servidor)
+    private val _errorSalas = MutableStateFlow<String?>(null)
+    val errorSalas: StateFlow<String?> = _errorSalas.asStateFlow()
 
     // La carga de bloques que está en curso; si el usuario cambia de sala o de fecha, se cancela
     private var cargaEnCurso: Job? = null
 
     init {
+        cargarSalas()
+    }
+
+    private fun cargarSalas() {
         viewModelScope.launch {
+            _cargando.value = true
+            _errorSalas.value = null
             val lista = repositorio.obtenerDependencias()
             _dependencias.value = lista
             _usuarios.value = repositorio.obtenerUsuarios()
             if (lista.isNotEmpty()) {
-                _dependenciaId.value = lista.first().id
+                if (_dependenciaId.value == 0) {
+                    _dependenciaId.value = lista.first().id
+                }
                 cargarBloques()
             } else {
-                _error.value = "No se pudieron cargar las salas. Revisa tu conexión"
+                _errorSalas.value = "No se pudieron cargar las salas. Revisa tu conexión"
+                _cargando.value = false
             }
+        }
+    }
+
+    // Si no hay salas se vuelven a pedir; si las hay, se vuelven a pedir los bloques del día
+    fun reintentar() {
+        if (_dependencias.value.isEmpty()) {
+            cargarSalas()
+        } else {
+            cargarBloques()
         }
     }
 

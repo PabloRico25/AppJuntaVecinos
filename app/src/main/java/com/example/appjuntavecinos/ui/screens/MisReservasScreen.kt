@@ -22,6 +22,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.EsqueletoListaReservas
+import com.example.appjuntavecinos.ui.components.EstadoDeError
+import com.example.appjuntavecinos.ui.components.FranjaAviso
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
@@ -36,7 +39,8 @@ fun MisReservasScreen(
     val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
     val reservas by flujoDeReservas.collectAsState(initial = emptyList())
     val dependencias by viewModel.dependencias.collectAsState()
-    val aviso by viewModel.aviso.collectAsState()
+    val cargando by viewModel.cargando.collectAsState()
+    val sinActualizar by viewModel.sinActualizar.collectAsState()
 
     Column(
         modifier = Modifier
@@ -53,11 +57,21 @@ fun MisReservasScreen(
             Text("Nueva reserva")
         }
 
-        aviso?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
+        if (sinActualizar && reservas.isNotEmpty()) {
+            FranjaAviso(
+                texto = "No se pudo actualizar. Se muestran las reservas guardadas en este equipo",
+                onReintentar = { viewModel.reintentar() }
+            )
         }
 
-        if (reservas.isEmpty()) {
+        if (reservas.isEmpty() && cargando) {
+            EsqueletoListaReservas()
+        } else if (reservas.isEmpty() && sinActualizar) {
+            EstadoDeError(
+                mensaje = "No se pudo conectar con el servidor. Revisa que esté encendido",
+                onReintentar = { viewModel.reintentar() }
+            )
+        } else if (reservas.isEmpty()) {
             Text("Todavía no tienes reservas. Pide la primera con el botón Nueva reserva.")
         } else {
             LazyColumn(

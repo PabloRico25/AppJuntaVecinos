@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.MaterialTheme
@@ -26,8 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.BannerError
 import com.example.appjuntavecinos.ui.components.BotonContorno
 import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.EsqueletoDisponibilidad
+import com.example.appjuntavecinos.ui.components.EstadoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
 import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.HORA_APERTURA
@@ -47,6 +49,7 @@ fun DisponibilidadScreen(
     val bloques by viewModel.bloques.collectAsState(initial = emptyList())
     val cargando by viewModel.cargando.collectAsState()
     val error by viewModel.error.collectAsState()
+    val errorSalas by viewModel.errorSalas.collectAsState()
     var mostrarCalendario by remember { mutableStateOf(false) }
 
     Column(
@@ -61,7 +64,7 @@ fun DisponibilidadScreen(
 
         MenuDesplegable(
             etiqueta = "Dependencia",
-            valor = dependencias.firstOrNull { it.id == dependenciaId }?.nombre ?: "",
+            valor = dependencias.firstOrNull { it.id == dependenciaId }?.nombre ?: if (errorSalas != null) "Sin salas" else "",
             opciones = dependencias.map { it.nombre },
             onSeleccion = { viewModel.onDependenciaChange(dependencias[it].id) },
             error = null,
@@ -84,11 +87,19 @@ fun DisponibilidadScreen(
 
         Text("Horario de la sede: $HORA_APERTURA a $HORA_CIERRE")
 
-        if (cargando) {
-            CircularProgressIndicator()
+        errorSalas?.let {
+            BannerError(it)
+            BotonContorno(onClick = { viewModel.reintentar() }, modifier = Modifier.fillMaxWidth()) {
+                Text("Reintentar")
+            }
         }
-        error?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
+        if (errorSalas == null && cargando) {
+            EsqueletoDisponibilidad()
+        }
+        if (errorSalas == null && !cargando) {
+            error?.let {
+                EstadoDeError(mensaje = it, onReintentar = { viewModel.reintentar() })
+            }
         }
 
         bloques.forEach { bloque ->

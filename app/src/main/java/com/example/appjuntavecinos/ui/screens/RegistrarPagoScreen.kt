@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.appjuntavecinos.ui.components.BannerError
 import com.example.appjuntavecinos.ui.components.BotonContorno
 import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.IconoDeError
@@ -255,13 +256,7 @@ fun RegistrarPagoScreen(
             )
         }
 
-        estado.errores.general?.let {
-            Text(
-                it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
+        estado.errores.general?.let { BannerError(it) }
 
         Button(
             onClick = { viewModel.guardar(registradoPorId, puedeRegistrar, onPagoRegistrado) },

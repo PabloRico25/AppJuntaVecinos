@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.BannerError
 import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.EsqueletoDetalle
+import com.example.appjuntavecinos.ui.components.EstadoDeError
+import com.example.appjuntavecinos.ui.components.FranjaAviso
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
@@ -37,7 +40,9 @@ fun DetalleReservaScreen(
     val dependencias by viewModel.dependencias.collectAsState()
     val usuarios by viewModel.usuarios.collectAsState()
     val pagadas by viewModel.reservasPagadas.collectAsState(initial = null)
-    val aviso by viewModel.aviso.collectAsState()
+    val cargando by viewModel.cargando.collectAsState()
+    val sinActualizar by viewModel.sinActualizar.collectAsState()
+    val errorCancelar by viewModel.errorCancelar.collectAsState()
     val reserva = reservas?.firstOrNull { it.id == reservaId }
     var confirmandoCancelar by remember { mutableStateOf(false) }
 
@@ -50,10 +55,25 @@ fun DetalleReservaScreen(
         Text("Detalle de reserva", style = MaterialTheme.typography.headlineMedium)
 
         if (reservas == null) {
-            CircularProgressIndicator()
+            EsqueletoDetalle()
         } else if (reserva == null) {
-            Text("Esta reserva no está disponible para tu cuenta.")
+            if (cargando) {
+                EsqueletoDetalle()
+            } else if (sinActualizar) {
+                EstadoDeError(
+                    mensaje = "No se pudo conectar con el servidor. Revisa que esté encendido",
+                    onReintentar = { viewModel.reintentar() }
+                )
+            } else {
+                Text("Esta reserva no está disponible para tu cuenta.")
+            }
         } else {
+            if (sinActualizar) {
+                FranjaAviso(
+                    texto = "No se pudo actualizar. Se muestran las reservas guardadas en este equipo",
+                    onReintentar = { viewModel.reintentar() }
+                )
+            }
             Text(
                 text = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "",
                 style = MaterialTheme.typography.titleLarge,
@@ -79,9 +99,7 @@ fun DetalleReservaScreen(
                 ) {
                     Text("Cancelar solicitud", fontWeight = FontWeight.Bold)
                 }
-                aviso?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error)
-                }
+                errorCancelar?.let { BannerError(it) }
             }
 
             if (reserva.estado == "CONFIRMADA") {

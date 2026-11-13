@@ -15,9 +15,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
-class MisReservasViewModel(application: Application) : AndroidViewModel(application) {
+class MisReservasViewModel(
+    application: Application,
+    private val repositorio: JuntaRepository
+) : AndroidViewModel(application) {
 
-    private val repositorio = JuntaRepository(application)
+    constructor(application: Application) : this(application, JuntaRepository(application))
 
     private val _dependencias = MutableStateFlow<List<DependenciaComunitariaEntity>>(emptyList())
     val dependencias: StateFlow<List<DependenciaComunitariaEntity>> = _dependencias.asStateFlow()
@@ -25,9 +28,17 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
     private val _usuarios = MutableStateFlow<List<UsuarioEntity>>(emptyList())
     val usuarios: StateFlow<List<UsuarioEntity>> = _usuarios.asStateFlow()
 
-    // Un mensaje para mostrar en pantalla: falló cancelar o no se pudo actualizar desde el servidor
-    private val _aviso = MutableStateFlow<String?>(null)
-    val aviso: StateFlow<String?> = _aviso.asStateFlow()
+    // Mientras se piden las reservas al servidor. Las pantallas muestran un esqueleto si no tienen nada guardado.
+    private val _cargando = MutableStateFlow(true)
+    val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
+
+    // El servidor no respondió: la pantalla muestra lo guardado con un aviso, o un estado de error si no hay nada
+    private val _sinActualizar = MutableStateFlow(false)
+    val sinActualizar: StateFlow<Boolean> = _sinActualizar.asStateFlow()
+
+    // El mensaje del servidor cuando falla cancelar una solicitud
+    private val _errorCancelar = MutableStateFlow<String?>(null)
+    val errorCancelar: StateFlow<String?> = _errorCancelar.asStateFlow()
 
     // Las reservas con arriendo pagado las informa el servidor (un vecino no tiene el detalle en Room).
     // Se emite una vez, cuando llega la respuesta: mientras tanto las pantallas ven null (cargando).
@@ -38,10 +49,18 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
             _dependencias.value = repositorio.obtenerDependencias()
             _usuarios.value = repositorio.obtenerUsuarios()
         }
+        cargar()
+    }
+
+    fun reintentar() {
+        cargar()
+    }
+
+    private fun cargar() {
         viewModelScope.launch {
-            if (!repositorio.refrescarReservas()) {
-                _aviso.value = "No se pudo actualizar. Se muestran las reservas guardadas en este equipo"
-            }
+            _cargando.value = true
+            _sinActualizar.value = !repositorio.refrescarReservas()
+            _cargando.value = false
         }
     }
 
@@ -54,10 +73,10 @@ class MisReservasViewModel(application: Application) : AndroidViewModel(applicat
 
         viewModelScope.launch {
             try {
-                _aviso.value = null
+                _errorCancelar.value = null
                 repositorio.cancelarReserva(reserva)
             } catch (e: Exception) {
-                _aviso.value = mensajeDeError(e)
+                _errorCancelar.value = mensajeDeError(e)
             }
         }
     }
