@@ -25,19 +25,7 @@ Los tres cargos de la directiva ven reservas, pagos y resumen financiero, y pued
 
 ## Arquitectura
 
-```mermaid
-flowchart LR
-    subgraph app["App Android (MVVM)"]
-        ui["ui: pantallas y componentes<br/>Jetpack Compose"] --> vm["viewmodel<br/>estado y validaciones"]
-        vm --> repo["JuntaRepository"]
-        repo --> room[("Room<br/>copia local")]
-        repo --> api["Retrofit + OkHttp<br/>TokenInterceptor"]
-    end
-    api -->|"HTTP + Bearer token"| gw["api-gateway :9090"]
-    gw --> auth["auth-service"]
-    gw --> res["reserva-service"]
-    gw --> pago["pago-service"]
-```
+![Arquitectura de Junta Zaror: la app, el gateway, los tres servicios y sus bases de datos](docs/arquitectura_junta_zaror.png)
 
 - **Pantallas** (`ui/screens`) solo dibujan y avisan lo que toca el usuario. **ViewModel** guarda el estado de cada pantalla y valida los formularios. **JuntaRepository** decide de dónde salen los datos.
 - La app pide los datos al servidor y los guarda en **Room**. Si el servidor no responde, muestra lo último guardado y avisa. El servidor es quien manda: la app no inventa datos.
@@ -65,7 +53,7 @@ flowchart LR
 
 **Estados de la conexión.** Las pantallas de listas y detalle muestran tres cosas distintas: un esqueleto mientras carga, una franja con "se muestran los datos guardados" si falla la actualización, y una pantalla con botón Reintentar si no hay nada guardado. Los errores de un formulario se muestran en el campo y los del servidor en un aviso con su mensaje.
 
-**Diseño.** La interfaz sigue el kit de diseño entregado: paleta naranja y crema, tarjetas con ficha de ícono, etiquetas de estado con ícono, cabecera con avatar, nombre y cargo, y barra de navegación con íconos propios. Tiene modo claro y oscuro según el teléfono. En pantallas anchas la barra pasa a un panel lateral y el contenido se centra con un máximo de 640 dp. Hay transiciones entre pantallas, listas que aparecen escalonadas y animaciones en los estados de sin conexión, solicitud enviada y puerta. Todas se saltan si el teléfono tiene activado "Reducir animaciones".
+**Diseño.** La interfaz sigue el kit de diseño entregado: paleta naranja y crema, tarjetas de reserva con la foto de la sala de fondo, etiquetas de estado con ícono, una cabecera con el nombre, el cargo y el avatar (que abre el menú de la cuenta) y una barra de navegación con íconos propios. Tiene modo claro y oscuro según el teléfono. En pantallas anchas la barra pasa a un panel lateral y el contenido se centra con un máximo de 640 dp. Hay transiciones entre pantallas, listas que aparecen escalonadas y animaciones en los estados de sin conexión, solicitud enviada y puerta. Todas se saltan si el teléfono tiene activado "Reducir animaciones".
 
 ## Reglas de negocio
 
@@ -174,6 +162,7 @@ AppJuntaVecinos/
 │     │        │                    SesionToken, EventosSesion y ErroresApi
 │     │        └─ repository/       DAOs, AppDatabase, PuertaPreferencias y JuntaRepository
 │     └─ test/                      pruebas unitarias
+├─ docs/                            diagrama de arquitectura
 ├─ gradle/libs.versions.toml        versiones de todas las dependencias
 ├─ build.gradle.kts, settings.gradle.kts, gradlew y gradlew.bat
 ├─ DECISIONES.md
@@ -219,9 +208,12 @@ Las integramos por nuestra cuenta. Las herramientas externas, con el permiso del
 | `verticalScroll` | Disponibilidad, Escanear, Nueva reserva, Registrar pago, Resumen y Ticket QR | Permite recorrer la pantalla hacia abajo |
 | `imePadding` | `MainActivity.kt` | Deja sitio al teclado para que no tape lo que se escribe |
 | `KeyboardOptions` y `KeyboardActions` | `ui/screens/LoginScreen.kt` | Teclado de correo y tecla de confirmar |
+| `toggleable` | Nueva reserva y Registrar pago | Tocar el texto de una casilla también la marca |
 | `combine` | Resumen | Junta varios flujos de datos en uno |
 | `navArgument` | `navigation/AppNavigation.kt` | Pasa el número de la reserva al Detalle y al Ticket QR |
 | `darkColorScheme` e `isSystemInDarkTheme()` | `ui/theme/Theme.kt` | Definen la paleta oscura y eligen la clara o la oscura según el modo del teléfono |
+| `MutableInteractionSource` y `graphicsLayer` | `ui/components/Botones.kt` y `Movimiento.kt` | El botón se achica al presionarlo y el campo con error se sacude |
+| `Animatable` con retraso | `ui/components/Tarjetas.kt` | Las barras de gastos de Finanzas crecen en secuencia, una tras otra |
 | Colores propios en un `CompositionLocal` | `ui/theme/ColoresJunta.kt` | Colores de estado que Material no trae |
 | Fuente variable | `ui/theme/Type.kt` | Nunito Sans en todos sus pesos desde un solo archivo, y Poppins en el logo |
 | `Canvas` y `PathParser` | `ui/components/Ilustraciones.kt` | Dibujan las ilustraciones por código |
