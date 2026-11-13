@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -120,7 +121,7 @@ fun RegistrarPagoScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Registrar pago", style = MaterialTheme.typography.headlineMedium)
+        Text("Registrar pago", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
         MenuDesplegable(
             etiqueta = "Tipo de pago",

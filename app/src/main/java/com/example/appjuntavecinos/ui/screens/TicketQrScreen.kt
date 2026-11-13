@@ -50,7 +50,7 @@ fun TicketQrScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Ticket QR", style = MaterialTheme.typography.headlineMedium)
+        Text("Ticket QR", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
         if (reservas == null || pagadas == null) {
             CircularProgressIndicator()

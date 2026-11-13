@@ -68,7 +68,7 @@ fun EscanearScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Escanear QR", style = MaterialTheme.typography.headlineMedium)
+        Text("Escanear QR", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
         Text("Escanea el código del vecino para ver si puede entrar.")
 
         Button(
