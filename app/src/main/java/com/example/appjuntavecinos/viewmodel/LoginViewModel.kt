@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.LoginErrores
 import com.example.appjuntavecinos.data.model.LoginUiState
 import com.example.appjuntavecinos.data.model.UsuarioEntity
+import com.example.appjuntavecinos.data.remote.SesionToken
+import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.utils.hashClave
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,20 +77,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             val actual = _estado.value
-            val usuario = repositorio.buscarUsuarioPorCorreo(actual.correo)
-
-            if (usuario != null && usuario.clave == hashClave(actual.clave)) {
-                _sesion.value = usuario
+            _estado.update { it.copy(cargando = true) }
+            try {
+                _sesion.value = repositorio.iniciarSesion(actual.correo, actual.clave)
+                _estado.update { it.copy(cargando = false) }
                 onExito()
-            } else {
+            } catch (e: Exception) {
                 _estado.update {
-                    it.copy(errores = it.errores.copy(general = "Correo o clave incorrectos"))
+                    it.copy(
+                        cargando = false,
+                        errores = it.errores.copy(general = mensajeDeError(e))
+                    )
                 }
             }
         }
     }
 
     fun cerrarSesion() {
+        SesionToken.token = null
         _sesion.value = null
         _estado.value = LoginUiState()
     }

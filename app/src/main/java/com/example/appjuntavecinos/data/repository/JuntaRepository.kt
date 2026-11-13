@@ -3,9 +3,12 @@ package com.example.appjuntavecinos.data.repository
 import android.content.Context
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.IngresoEntity
+import com.example.appjuntavecinos.data.model.LoginRequest
 import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
+import com.example.appjuntavecinos.data.remote.RetrofitInstance
+import com.example.appjuntavecinos.data.remote.SesionToken
 import com.example.appjuntavecinos.utils.hashClave
 import kotlinx.coroutines.flow.Flow
 import java.text.SimpleDateFormat
@@ -22,6 +25,23 @@ class JuntaRepository(context: Context) {
 
     suspend fun buscarUsuarioPorCorreo(correo: String): UsuarioEntity? {
         return usuarioDao.buscarPorCorreo(correo)
+    }
+
+
+    // Inicia sesión en el servidor: guarda el token para las peticiones siguientes y devuelve el usuario.
+    // El servidor nunca envía la clave, por eso queda vacía en el UsuarioEntity de la sesión.
+    suspend fun iniciarSesion(correo: String, clave: String): UsuarioEntity {
+        val respuesta = RetrofitInstance.api.login(LoginRequest(correo, clave))
+        SesionToken.token = respuesta.token
+        val usuario = respuesta.usuario
+        return UsuarioEntity(
+            id = usuario.id,
+            nombre = usuario.nombre,
+            correo = usuario.correo,
+            clave = "",
+            rol = usuario.rol,
+            cargo = usuario.cargo
+        )
     }
 
     suspend fun obtenerDependencias(): List<DependenciaComunitariaEntity> {
