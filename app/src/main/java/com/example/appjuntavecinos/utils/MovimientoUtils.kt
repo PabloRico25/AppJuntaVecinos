@@ -110,3 +110,17 @@ fun estadoSolicitudEnviada(tiempoMs: Float, animar: Boolean = true): EstadoSolic
     val insignia = escalaPop(progresoDeTramo(tiempoMs, 1050f, 500f))
     return EstadoSolicitudEnviada(subida, 24f * (1f - subida), opacidadEstela.coerceIn(0f, 1f), x, y, grados, escala, opacidad, insignia)
 }
+
+// Animación "cargando": cada cuadrito de la puerta se enciende, se mantiene y se apaga, y el siguiente lo imita un
+// poco después (0, 300 y 600 ms). Dentro de cada vuelta de 1800 ms: sube a pleno brillo hasta el 18 %, se mantiene hasta el
+// 55 %, baja a cero hasta el 75 % y queda apagado el resto. Antes de su inicio, el cuadrito está apagado. Devuelve de 0 a 1.
+fun opacidadCuadritoCargando(tiempoMs: Float, inicioMs: Float, periodoMs: Float = DURACION_BUCLE_MS.toFloat()): Float {
+    if (tiempoMs < inicioMs) return 0f
+    val p = ((tiempoMs - inicioMs) % periodoMs) / periodoMs
+    return when {
+        p < 0.18f -> CurvaJunta.transform(p / 0.18f)
+        p < 0.55f -> 1f
+        p < 0.75f -> 1f - CurvaJunta.transform((p - 0.55f) / 0.20f)
+        else -> 0f
+    }
+}

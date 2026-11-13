@@ -34,6 +34,7 @@ import androidx.compose.animation.core.Animatable
 import com.example.appjuntavecinos.utils.DURACION_SOLICITUD_MS
 import com.example.appjuntavecinos.utils.estadoSinConexion
 import com.example.appjuntavecinos.utils.estadoSolicitudEnviada
+import com.example.appjuntavecinos.utils.opacidadCuadritoCargando
 
 // No visto en clase: Canvas dibuja formas por código y PathParser convierte un trazo escrito como texto (el del SVG) en una figura.
 // Dos ilustraciones del kit de diseño (sin_conexion y solicitud_enviada) dibujadas con Canvas, sin librerías
@@ -172,6 +173,43 @@ fun IlustracionSolicitudEnviada(modifier: Modifier = Modifier, tamano: Dp = 190.
                     }
                 }
             }
+        }
+    }
+}
+
+// Indicador de carga con la marca (animación "cargando" de Designer): la casa con la puerta de tres cuadritos tipo QR,
+// que se encienden uno tras otro en un bucle de 1,8 s. La casa, la puerta y el suelo quedan quietos. Con "Reducir
+// animaciones" los tres cuadritos quedan encendidos.
+@Composable
+fun IndicadorDeCarga(modifier: Modifier = Modifier, tamano: Dp = 120.dp) {
+    val oscuro = isSystemInDarkTheme()
+    val animar = animacionesActivas()
+    val tiempo = tiempoEnBucle(animar)
+    val techo = remember { trazo("M34 118 120 52l86 66") }
+
+    val tinta = if (oscuro) Color(0xFFF6E9D8) else Color(0xFF3A2A1A)
+    val pared = if (oscuro) Color(0xFF241A13) else Color(0xFFFFFFFF)
+    val puerta = if (oscuro) Color(0xFF17110C) else Color(0xFFFFF9F2)
+    val apagado = if (oscuro) Color(0xFF4A3A2D) else Color(0xFFE8D7C2)
+    val encendido = if (oscuro) Color(0xFFFF8A1F) else Color(0xFFFF7900)
+    val suelo = if (oscuro) Color(0xFF8CC26A) else Color(0xFF5D843B)
+
+    Canvas(modifier = modifier.size(tamano)) {
+        scale(size.width / 240f, size.width / 240f, pivot = Offset.Zero) {
+            drawPath(techo, tinta, style = Stroke(8f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            drawRoundRect(pared, Offset(50f, 114f), Size(140f, 92f), CornerRadius(0f))
+            drawRoundRect(tinta, Offset(50f, 114f), Size(140f, 92f), CornerRadius(0f), style = Stroke(4f))
+            drawRoundRect(puerta, Offset(88f, 118f), Size(68f, 88f), CornerRadius(6f))
+            drawRoundRect(tinta, Offset(88f, 118f), Size(68f, 88f), CornerRadius(6f), style = Stroke(4f))
+            // Los tres cuadritos: primero apagados y encima el mismo cuadrito en naranja, con el brillo del momento
+            val cuadritos = listOf(Offset(98f, 128f) to 0f, Offset(126f, 128f) to 300f, Offset(98f, 156f) to 600f)
+            cuadritos.forEach { (posicion, inicio) ->
+                drawRoundRect(apagado, posicion, Size(20f, 20f), CornerRadius(5f))
+                val brillo = if (animar) opacidadCuadritoCargando(tiempo.value, inicio) else 1f
+                drawRoundRect(encendido.copy(alpha = brillo), posicion, Size(20f, 20f), CornerRadius(5f))
+            }
+            drawRoundRect(apagado, Offset(130f, 160f), Size(12f, 12f), CornerRadius(3f))
+            drawLine(suelo, Offset(22f, 208f), Offset(218f, 208f), strokeWidth = 7f, cap = StrokeCap.Round)
         }
     }
 }

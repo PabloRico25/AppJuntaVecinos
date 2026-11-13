@@ -48,6 +48,7 @@ import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.EstadoCompleto
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.IlustracionDeKit
+import com.example.appjuntavecinos.ui.components.IndicadorDeCarga
 import com.example.appjuntavecinos.ui.components.LectorQrFrontal
 import com.example.appjuntavecinos.ui.components.ResultadoDePuerta
 import com.example.appjuntavecinos.ui.components.sacudirSiHayError
@@ -61,6 +62,7 @@ fun PuertaScreen(
     val salaId by viewModel.salaId.collectAsState()
     val dependencias by viewModel.dependencias.collectAsState()
     val resultado by viewModel.resultado.collectAsState()
+    val validando by viewModel.validando.collectAsState()
     val contexto = LocalContext.current
     val vista = LocalView.current
 
@@ -171,6 +173,13 @@ fun PuertaScreen(
             }
         }
 
+
+        // Mientras el servidor revisa el QR, la casa de la marca se muestra encima de todo
+        if (validando && resultado == null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                IndicadorDeCarga(tamano = 160.dp)
+            }
+        }
 
         resultado?.let { r ->
             ResultadoDePuerta(resultado = r, onToque = { viewModel.limpiarResultado() })

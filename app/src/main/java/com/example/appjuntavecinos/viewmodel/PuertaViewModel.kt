@@ -53,6 +53,10 @@ class PuertaViewModel(application: Application) : AndroidViewModel(application) 
     // mismo QR varias veces seguidas, y así solo se atiende la primera.
     private var procesando = false
 
+    // Lo mismo, pero visible para la pantalla: mientras es true, la puerta muestra el indicador de carga
+    private val _validando = MutableStateFlow(false)
+    val validando: StateFlow<Boolean> = _validando.asStateFlow()
+
     init {
         // Si esta puerta ya estaba activada, se recupera el token de 7 días guardado:
         // nadie inicia sesión en una puerta, así que sin esto no podría hablar con el servidor.
@@ -110,6 +114,7 @@ class PuertaViewModel(application: Application) : AndroidViewModel(application) 
         // Si ya hay un resultado en pantalla o se está validando otro QR, este se ignora.
         if (procesando || _resultado.value != null) return
         procesando = true
+        _validando.value = true
 
         viewModelScope.launch {
             try {
@@ -129,6 +134,7 @@ class PuertaViewModel(application: Application) : AndroidViewModel(application) 
             } finally {
                 // Pase lo que pase, se libera para poder atender el siguiente QR.
                 procesando = false
+                _validando.value = false
             }
         }
     }

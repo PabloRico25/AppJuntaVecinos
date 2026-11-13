@@ -216,7 +216,7 @@ Las integramos por nuestra cuenta. Las herramientas externas, con el permiso del
 | `Animatable` con retraso | `ui/components/Tarjetas.kt` | Las barras de gastos de Finanzas crecen en secuencia, una tras otra |
 | Colores propios en un `CompositionLocal` | `ui/theme/ColoresJunta.kt` | Colores de estado que Material no trae |
 | Fuente variable | `ui/theme/Type.kt` | Nunito Sans en todos sus pesos desde un solo archivo, y Poppins en el logo |
-| `Canvas` y `PathParser` | `ui/components/Ilustraciones.kt` | Dibujan las ilustraciones por código |
+| `Canvas` y `PathParser` | `ui/components/Ilustraciones.kt` | Dibujan las ilustraciones por código, incluida la casa animada del indicador de carga |
 | "Reducir animaciones" | `ui/components/Esqueletos.kt` | Las animaciones se saltan si el teléfono lo pide |
 | `widthIn` | `ui/components/ContenidoCentrado.kt` | Limita el ancho máximo del contenido en pantallas grandes |
 | Kotest, MockK y coroutines-test | `app/build.gradle.kts` | Pruebas unitarias |

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +20,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.ui.components.IndicadorDeCarga
 import com.example.appjuntavecinos.utils.armarCodigoCorto
 import com.example.appjuntavecinos.utils.armarContenidoQr
 import com.example.appjuntavecinos.utils.fechaParaMostrar
@@ -53,7 +53,7 @@ fun TicketQrScreen(
         Text("Ticket QR", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
         if (reservas == null || pagadas == null) {
-            CircularProgressIndicator()
+            IndicadorDeCarga(modifier = Modifier.padding(top = 32.dp), tamano = 140.dp)
         } else if (reserva == null || reserva.estado != "CONFIRMADA" || reserva.id !in pagadas.orEmpty()) {
             Text("El ticket solo está disponible para tus reservas confirmadas y pagadas.")
         } else {
