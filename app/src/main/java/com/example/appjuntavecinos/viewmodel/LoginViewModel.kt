@@ -92,6 +92,7 @@ class LoginViewModel(
         SesionToken.token = null
         _sesion.value = null
         _estado.value = LoginUiState()
+        viewModelScope.launch { repositorio.borrarDatosLocales() }
     }
 
     fun puedeConfirmarReservas(): Boolean = _sesion.value?.cargo == "SECRETARIA"

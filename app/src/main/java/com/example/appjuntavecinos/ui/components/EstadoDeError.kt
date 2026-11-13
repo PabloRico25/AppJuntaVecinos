@@ -13,6 +13,7 @@ fun EstadoDeError(
     mensaje: String,
     modifier: Modifier = Modifier,
     textoBoton: String = "Reintentar",
+    iconoBoton: Int? = R.drawable.ic_reintentar,
     onReintentar: (() -> Unit)? = null
 ) {
     val (titulo, detalle) = partirMensaje(mensaje)
@@ -28,6 +29,7 @@ fun EstadoDeError(
         modifier = modifier,
         mensaje = detalle,
         textoBoton = if (onReintentar != null) textoBoton else null,
+        iconoBoton = iconoBoton,
         onBoton = onReintentar
     )
 }

@@ -14,7 +14,9 @@ import com.example.appjuntavecinos.data.model.UsuarioEntity
 import com.example.appjuntavecinos.data.remote.ApiService
 import com.example.appjuntavecinos.data.remote.RetrofitInstance
 import com.example.appjuntavecinos.data.remote.SesionToken
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class JuntaRepository(private val db: AppDatabase, private val api: ApiService) {
 
@@ -200,5 +202,13 @@ class JuntaRepository(private val db: AppDatabase, private val api: ApiService) 
 
     suspend fun registrarIngreso(ingreso: IngresoDto) {
         api.registrarIngreso(ingreso)
+    }
+
+    // Room guarda una copia de lo que el servidor entregó a quien inició sesión. Al cerrarla se borra, para que
+    // la persona siguiente en este teléfono no vea reservas ni pagos que no son suyos.
+    suspend fun borrarDatosLocales() {
+        withContext(Dispatchers.IO) {
+            db.clearAllTables()
+        }
     }
 }

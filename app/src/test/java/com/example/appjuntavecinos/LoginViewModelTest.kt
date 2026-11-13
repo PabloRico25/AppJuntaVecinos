@@ -9,7 +9,9 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
+import io.mockk.Runs
 import io.mockk.coVerify
+import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -104,9 +106,10 @@ class LoginViewModelTest : StringSpec({
         vm.estado.value.cargando shouldBe false
     }
 
-    "cerrar la sesión borra el token, el usuario y el formulario" {
+    "cerrar la sesión borra el token, el usuario, el formulario y lo guardado en Room" {
         val repositorio = mockk<JuntaRepository>()
         coEvery { repositorio.iniciarSesion(any(), any()) } returns juan
+        coEvery { repositorio.borrarDatosLocales() } just Runs
         val vm = crear(repositorio)
         vm.escribir("juan.perez@zaror.test", "1234")
         vm.iniciarSesion { }
@@ -117,6 +120,7 @@ class LoginViewModelTest : StringSpec({
         SesionToken.token.shouldBeNull()
         vm.sesion.value.shouldBeNull()
         vm.estado.value.correo shouldBe ""
+        coVerify(exactly = 1) { repositorio.borrarDatosLocales() }
     }
 
     "solo la Secretaría confirma reservas y solo Tesorería registra pagos" {

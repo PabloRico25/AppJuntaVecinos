@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.appjuntavecinos.data.remote.EventosSesion
 import com.example.appjuntavecinos.ui.components.ContenidoCentrado
 import com.example.appjuntavecinos.ui.screens.DetalleReservaScreen
 import com.example.appjuntavecinos.ui.screens.DisponibilidadScreen
@@ -47,6 +49,8 @@ import com.example.appjuntavecinos.ui.screens.PuertaScreen
 import com.example.appjuntavecinos.ui.screens.RegistrarPagoScreen
 import com.example.appjuntavecinos.ui.screens.ReservasDirectivaScreen
 import com.example.appjuntavecinos.ui.screens.ResumenScreen
+import com.example.appjuntavecinos.ui.screens.SesionVencidaScreen
+import com.example.appjuntavecinos.ui.screens.SolicitudEnviadaScreen
 import com.example.appjuntavecinos.ui.screens.TicketQrScreen
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
@@ -68,6 +72,19 @@ fun AppNavigation() {
     val scope = rememberCoroutineScope()
     val anchoMaximo = if (rutaActual == Rutas.RESUMEN || rutaActual == Rutas.FINANZAS) Dp.Unspecified else 640.dp
 
+    // Si el servidor rechaza la sesión en cualquier pantalla, se cierra y se lleva a la pantalla de sesión vencida.
+    // La puerta no cuenta: no tiene una sesión de persona.
+    LaunchedEffect(Unit) {
+        EventosSesion.vencida.collect {
+            if (loginViewModel.sesion.value != null && puertaViewModel.modoPuerta.value != true) {
+                loginViewModel.cerrarSesion()
+                navController.navigate(Rutas.SESION_VENCIDA) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                }
+            }
+        }
+    }
+
     // Pantallas que se abren encima de otra: llevan flecha para volver.
     val rutasInternas = listOf(
         Rutas.NUEVA_RESERVA,
@@ -81,7 +98,7 @@ fun AppNavigation() {
 
     // Pestaña de la barra que queda marcada cuando se está en una pantalla interna.
     val rutaDePestana = when (rutaActual) {
-        Rutas.NUEVA_RESERVA, Rutas.DETALLE_RESERVA, Rutas.TICKET_QR -> Rutas.MIS_RESERVAS
+        Rutas.NUEVA_RESERVA, Rutas.DETALLE_RESERVA, Rutas.TICKET_QR, Rutas.SOLICITUD_ENVIADA -> Rutas.MIS_RESERVAS
         Rutas.REGISTRAR_PAGO -> Rutas.PAGOS
         Rutas.DISPONIBILIDAD -> if (sesion?.rol == "DIRECTIVA") Rutas.RESERVAS else Rutas.DISPONIBILIDAD
         else -> rutaActual
@@ -137,8 +154,27 @@ fun AppNavigation() {
                 NuevaReservaScreen(
                     vecinoId = sesion?.id ?: 0,
                     onReservaCreada = {
-                        navController.popBackStack()
-                        scope.launch { avisos.showSnackbar("Reserva solicitada. Queda pendiente de confirmación") }
+                        navController.navigate(Rutas.SOLICITUD_ENVIADA) {
+                            popUpTo(Rutas.NUEVA_RESERVA) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable(Rutas.SOLICITUD_ENVIADA) {
+                SolicitudEnviadaScreen(
+                    onVerMisReservas = {
+                        navController.navigate(Rutas.MIS_RESERVAS) {
+                            popUpTo(Rutas.MIS_RESERVAS)
+                        }
+                    }
+                )
+            }
+            composable(Rutas.SESION_VENCIDA) {
+                SesionVencidaScreen(
+                    onIniciarSesion = {
+                        navController.navigate(Rutas.LOGIN) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
                     }
                 )
             }
@@ -188,7 +224,9 @@ fun AppNavigation() {
         Box(modifier = Modifier.fillMaxSize())
     } else if (modoPuerta == true) {
         PuertaScreen(viewModel = puertaViewModel)
-    } else if (rutaActual == Rutas.LOGIN || rutaActual == null) {
+    } else if (rutaActual == Rutas.LOGIN || rutaActual == Rutas.SESION_VENCIDA ||
+        rutaActual == Rutas.SOLICITUD_ENVIADA || rutaActual == null
+    ) {
         ContenidoCentrado(anchoMaximo) { contenido() }
     } else {
         NavigationSuiteScaffold(

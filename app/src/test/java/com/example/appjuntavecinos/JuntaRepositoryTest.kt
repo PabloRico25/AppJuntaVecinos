@@ -25,11 +25,14 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkStatic
+import io.mockk.verify
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -48,6 +51,7 @@ class JuntaRepositoryTest : StringSpec({
     // Todo lo que el repositorio necesita, falso: la API y Room con sus cuatro DAO
     class Entorno {
         val api = mockk<ApiService>()
+        val db = mockk<AppDatabase>()
         val usuarioDao = mockk<UsuarioDao>(relaxed = true)
         val pagoDao = mockk<PagoDao>(relaxed = true)
         val reservaDao = mockk<ReservaDao>(relaxed = true)
@@ -55,7 +59,6 @@ class JuntaRepositoryTest : StringSpec({
         val repositorio: JuntaRepository
 
         init {
-            val db = mockk<AppDatabase>()
             every { db.usuarioDao() } returns usuarioDao
             every { db.pagoDao() } returns pagoDao
             every { db.reservaDao() } returns reservaDao
@@ -177,6 +180,15 @@ class JuntaRepositoryTest : StringSpec({
         shouldThrow<HttpException> { e.repositorio.crearReserva(1, "2026-11-20", "18:00", "20:00") }
 
         coVerify(exactly = 0) { e.api.obtenerReservas(any()) }
+    }
+
+    "al cerrar la sesión se borra lo que Room tenía guardado" {
+        val e = Entorno()
+        every { e.db.clearAllTables() } just Runs
+
+        e.repositorio.borrarDatosLocales()
+
+        verify(exactly = 1) { e.db.clearAllTables() }
     }
 
     "registrar un pago lo envía al servidor y refresca los pagos guardados" {
