@@ -3,7 +3,9 @@ package com.example.appjuntavecinos.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -102,9 +104,10 @@ fun ResumenScreen(
             }
             else -> {
                 TarjetaSaldo(resumen, Modifier.fillMaxWidth())
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    TarjetaIngresos(resumen, Modifier.weight(1f))
-                    TarjetaGastos(resumen, Modifier.weight(1f))
+                // IntrinsicSize.Min hace que las dos tarjetas midan lo mismo que la más alta
+                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    TarjetaIngresos(resumen, Modifier.weight(1f).fillMaxHeight())
+                    TarjetaGastos(resumen, Modifier.weight(1f).fillMaxHeight())
                 }
             }
         }
