@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -26,10 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.appjuntavecinos.ui.components.ActivarPuertaDialog
 import com.example.appjuntavecinos.ui.components.IconoDeError
+import com.example.appjuntavecinos.ui.components.LogoJuntaZaror
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 
@@ -48,10 +55,17 @@ fun LoginScreen(
     var mostrarActivacion by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            // Con el teclado abierto o en una pantalla chica, el formulario se desliza en vez de quedar tapado
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        LogoJuntaZaror()
+        Spacer(Modifier.height(32.dp))
         Text(
             "Inicia sesión",
             style = MaterialTheme.typography.headlineMedium,
@@ -82,6 +96,7 @@ fun LoginScreen(
             onValueChange = { viewModel.onCorreoChange(it) },
             label = { Text("Correo") },
             singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             isError = estado.errores.correo != null,
             supportingText = { estado.errores.correo?.let { Text(it) } },
             trailingIcon = { if (estado.errores.correo != null) IconoDeError() },
@@ -95,6 +110,8 @@ fun LoginScreen(
             label = { Text("Clave") },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { viewModel.iniciarSesion(onLoginValido) }),
             isError = estado.errores.clave != null,
             supportingText = { estado.errores.clave?.let { Text(it) } },
             trailingIcon = { if (estado.errores.clave != null) IconoDeError() },

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
@@ -16,7 +17,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // pantalla moderna de Android 15
         setContent {
-            AppJuntaVecinosTheme {Surface(modifier = Modifier.fillMaxSize(),// Surface pinta un fondo
+            AppJuntaVecinosTheme {Surface(modifier = Modifier.fillMaxSize().imePadding(),// Surface pinta un fondo; imePadding deja sitio al teclado
                 color = MaterialTheme.colorScheme.background) {AppNavigation()}
             }
         }

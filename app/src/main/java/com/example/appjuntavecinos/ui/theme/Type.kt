@@ -28,6 +28,13 @@ val NunitoSans = FontFamily(
     nunito(FontWeight.ExtraBold)
 )
 
+// No visto en clase: Poppins es la letra del nombre del logo y solo se usa ahí (kit de diseño, design_tokens.json).
+// Va en dos pesos: Bold para "JUNTA ZAROR" y Medium para las dos líneas de abajo. Licencia SIL OFL en assets/licencias.
+val Poppins = FontFamily(
+    Font(R.font.poppins_medium, FontWeight.Medium),
+    Font(R.font.poppins_bold, FontWeight.Bold)
+)
+
 private val Base = Typography()
 
 // Los 15 estilos de Material usan Nunito Sans; el cuerpo grande conserva su tamaño y su interlineado.
