@@ -13,7 +13,9 @@ android {
     defaultConfig {
         applicationId = "com.example.appjuntavecinos"
         minSdk = 24
-        targetSdk = 37
+        // No visto en clase: con 37 y un emulador Android 17, el sistema bloquea las conexiones a la
+        // red local (10.0.2.2) sin un permiso especial. El ejemplo del docente usa 36.
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
