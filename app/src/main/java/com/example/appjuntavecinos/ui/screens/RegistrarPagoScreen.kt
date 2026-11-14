@@ -55,6 +55,7 @@ import com.example.appjuntavecinos.ui.components.BannerError
 import com.example.appjuntavecinos.ui.components.BotonContorno
 import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.FilaCampoYBoton
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
 import com.example.appjuntavecinos.ui.components.sacudirSiHayError
@@ -183,26 +184,27 @@ fun RegistrarPagoScreen(
             modifier = Modifier.fillMaxWidth().sacudirSiHayError(estado.errores.monto)
         )
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            OutlinedTextField(
-                value = fechaParaMostrar(estado.fecha),
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Fecha del pago") },
-                isError = estado.errores.fecha != null,
-                trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
-                supportingText = { estado.errores.fecha?.let { Text(it) } },
-                modifier = Modifier.weight(1f).sacudirSiHayError(estado.errores.fecha)
-            )
-            BotonContorno(
-                onClick = { mostrarCalendario = true },
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Icon(painterResource(R.drawable.ic_nav_calendario), contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("Elegir fecha")
+        FilaCampoYBoton(
+            campo = { modificador ->
+                OutlinedTextField(
+                    value = fechaParaMostrar(estado.fecha),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Fecha del pago") },
+                    isError = estado.errores.fecha != null,
+                    trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
+                    supportingText = { estado.errores.fecha?.let { Text(it) } },
+                    modifier = modificador.sacudirSiHayError(estado.errores.fecha)
+                )
+            },
+            boton = { modificador ->
+                BotonContorno(onClick = { mostrarCalendario = true }, modifier = modificador) {
+                    Icon(painterResource(R.drawable.ic_nav_calendario), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Elegir fecha")
+                }
             }
-        }
+        )
 
         OutlinedTextField(
             value = estado.descripcion,

@@ -37,6 +37,7 @@ import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.EsqueletoDisponibilidad
 import com.example.appjuntavecinos.ui.components.EstadoDeError
 import com.example.appjuntavecinos.ui.components.EtiquetaBloque
+import com.example.appjuntavecinos.ui.components.FilaCampoYBoton
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
 import com.example.appjuntavecinos.ui.components.TarjetaBlanca
 import com.example.appjuntavecinos.ui.components.aparecerEscalonado
@@ -79,20 +80,24 @@ fun DisponibilidadScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = fechaParaMostrar(fecha),
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Fecha") },
-                modifier = Modifier.weight(1f)
-            )
-            BotonContorno(onClick = { mostrarCalendario = true }) {
-                Icon(painterResource(R.drawable.ic_nav_calendario), contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("Elegir fecha")
+        FilaCampoYBoton(
+            campo = { modificador ->
+                OutlinedTextField(
+                    value = fechaParaMostrar(fecha),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Fecha") },
+                    modifier = modificador
+                )
+            },
+            boton = { modificador ->
+                BotonContorno(onClick = { mostrarCalendario = true }, modifier = modificador) {
+                    Icon(painterResource(R.drawable.ic_nav_calendario), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Elegir fecha")
+                }
             }
-        }
+        )
 
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(painterResource(R.drawable.ic_reloj), contentDescription = null, modifier = Modifier.size(18.dp))

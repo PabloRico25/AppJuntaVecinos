@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.ActualizarAlVolver
 import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.EsqueletoListaReservas
 import com.example.appjuntavecinos.ui.components.EstadoDeError
@@ -35,6 +36,7 @@ fun MisReservasScreen(
     onDetalle: (Int) -> Unit,
     viewModel: MisReservasViewModel = viewModel()
 ) {
+    ActualizarAlVolver { viewModel.reintentar() }
     val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
     val reservas by flujoDeReservas.collectAsState(initial = emptyList())
     val dependencias by viewModel.dependencias.collectAsState()

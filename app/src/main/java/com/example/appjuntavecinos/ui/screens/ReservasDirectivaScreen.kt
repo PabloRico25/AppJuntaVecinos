@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.ActualizarAlVolver
 import com.example.appjuntavecinos.ui.components.AvisoInformativo
 import com.example.appjuntavecinos.ui.components.BloqueConFoto
 import com.example.appjuntavecinos.ui.components.BotonJunta
@@ -46,6 +47,7 @@ fun ReservasDirectivaScreen(
     onAviso: (String) -> Unit,
     viewModel: ReservasDirectivaViewModel = viewModel()
 ) {
+    ActualizarAlVolver { viewModel.actualizar() }
     val reservas by viewModel.reservas.collectAsState(initial = emptyList())
     val dependencias by viewModel.dependencias.collectAsState()
     val usuarios by viewModel.usuarios.collectAsState()

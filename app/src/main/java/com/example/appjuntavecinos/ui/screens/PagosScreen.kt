@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.R
 import com.example.appjuntavecinos.data.model.PagoEntity
+import com.example.appjuntavecinos.ui.components.ActualizarAlVolver
 import com.example.appjuntavecinos.ui.components.AvisoInformativo
 import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.EstadoVacio
@@ -45,6 +46,7 @@ fun PagosScreen(
     onRegistrarPago: () -> Unit,
     viewModel: PagosViewModel = viewModel()
 ) {
+    ActualizarAlVolver { viewModel.actualizar() }
     val pagos by viewModel.pagos.collectAsState(initial = emptyList())
     val reservasPorCobrar by viewModel.reservasPorCobrar.collectAsState(initial = emptyList())
     val dependencias by viewModel.dependencias.collectAsState()

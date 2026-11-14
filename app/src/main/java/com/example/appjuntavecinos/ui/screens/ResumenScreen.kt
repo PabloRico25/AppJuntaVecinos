@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.ActualizarAlVolver
 import com.example.appjuntavecinos.ui.components.BarraDeGasto
 import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.FichaDeGasto
@@ -51,6 +52,7 @@ fun ResumenScreen(
     titulo: String,
     viewModel: ResumenViewModel = viewModel()
 ) {
+    ActualizarAlVolver { viewModel.actualizar() }
     val resumen by viewModel.resumen.collectAsState(
         initial = ResumenFinanciero(0, 0, 0, emptyMap())
     )

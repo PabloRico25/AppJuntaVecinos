@@ -22,7 +22,8 @@ class ResumenViewModel(application: Application) : AndroidViewModel(application)
 
     val mesActual: String = fechaDeHoy().take(7)
 
-    init {
+    // Pide los pagos al servidor. La pantalla lo llama cada vez que se muestra (ver ActualizarAlVolver)
+    fun actualizar() {
         viewModelScope.launch {
             repositorio.refrescarPagos()
         }

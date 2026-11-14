@@ -33,6 +33,10 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
             _dependencias.value = repositorio.obtenerDependencias()
             _usuarios.value = repositorio.obtenerUsuarios()
         }
+    }
+
+    // Pide las reservas al servidor. La pantalla lo llama cada vez que se muestra (ver ActualizarAlVolver)
+    fun actualizar() {
         viewModelScope.launch {
             repositorio.refrescarReservas()
         }

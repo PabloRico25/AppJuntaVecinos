@@ -90,6 +90,17 @@ fun AppNavigation() {
         }
     }
 
+    // Si el sistema mató la app en segundo plano, la pantalla se restaura pero la sesión se perdió: se vuelve al login.
+    // Se mira la pantalla actual en el momento de actuar, para no repetir la navegación cuando se cierra la sesión a mano.
+    LaunchedEffect(sesion, rutaActual, modoPuerta) {
+        val rutaAhora = navController.currentDestination?.route
+        if (debeVolverAlInicioDeSesion(sesion != null, rutaAhora, modoPuerta)) {
+            navController.navigate(Rutas.LOGIN) {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
+        }
+    }
+
     // Pantallas que se abren encima de otra: llevan flecha para volver.
     val rutasInternas = listOf(
         Rutas.NUEVA_RESERVA,

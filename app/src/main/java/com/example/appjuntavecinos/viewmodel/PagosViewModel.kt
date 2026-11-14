@@ -41,6 +41,10 @@ class PagosViewModel(application: Application) : AndroidViewModel(application) {
             _dependencias.value = repositorio.obtenerDependencias()
             _usuarios.value = repositorio.obtenerUsuarios()
         }
+    }
+
+    // Pide las reservas y los pagos al servidor. La pantalla lo llama cada vez que se muestra (ver ActualizarAlVolver)
+    fun actualizar() {
         viewModelScope.launch {
             repositorio.refrescarReservas()
             repositorio.refrescarPagos()

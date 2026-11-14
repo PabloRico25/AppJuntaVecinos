@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -48,6 +49,13 @@ fun LoginScreen(
     onLoginValido: () -> Unit
 ) {
     val estado by viewModel.estado.collectAsState()
+    // Al enviar se oculta el teclado: si no, tapa el mensaje de error y el aviso de carga
+    // No visto en clase: LocalSoftwareKeyboardController permite ocultar el teclado desde el código.
+    val teclado = LocalSoftwareKeyboardController.current
+    fun enviar() {
+        teclado?.hide()
+        viewModel.iniciarSesion(onLoginValido)
+    }
     val dependencias by puertaViewModel.dependencias.collectAsState()
     val activando by puertaViewModel.activando.collectAsState()
     val errorActivacion by puertaViewModel.errorActivacion.collectAsState()
@@ -113,7 +121,7 @@ fun LoginScreen(
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { viewModel.iniciarSesion(onLoginValido) }),
+            keyboardActions = KeyboardActions(onDone = { enviar() }),
             isError = estado.errores.clave != null,
             supportingText = { estado.errores.clave?.let { Text(it) } },
             trailingIcon = { if (estado.errores.clave != null) IconoDeError() },
@@ -127,7 +135,7 @@ fun LoginScreen(
         }
 
         BotonJunta(
-            onClick = { viewModel.iniciarSesion(onLoginValido) },
+            onClick = { enviar() },
             enabled = !estado.cargando,
             modifier = Modifier.fillMaxWidth()
         ) {

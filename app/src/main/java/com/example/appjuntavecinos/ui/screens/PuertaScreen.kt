@@ -1,7 +1,11 @@
 package com.example.appjuntavecinos.ui.screens
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,9 +45,12 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.example.appjuntavecinos.R
-import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.BotonTexto
 import com.example.appjuntavecinos.ui.components.EstadoCompleto
 import com.example.appjuntavecinos.ui.components.IconoDeError
@@ -82,10 +89,34 @@ fun PuertaScreen(
         )
     }
 
+    // Si el permiso se negó y el sistema ya no vuelve a preguntar (pasa al negarlo dos veces), pedirlo de nuevo no hace
+    // nada: lo único posible es que la persona lo active a mano en los ajustes de la app.
+    var soloEnAjustes by remember { mutableStateOf(false) }
+
     val pedirPermiso = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
         tienePermiso = concedido
+        if (!concedido) {
+            // No visto en clase: shouldShowRequestPermissionRationale es false cuando el sistema ya no mostrará el aviso.
+            soloEnAjustes = (contexto as? Activity)?.let {
+                !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
+            } ?: false
+        }
+    }
+
+    // Al volver a la app (por ejemplo desde los ajustes) se vuelve a mirar el permiso, para que la cámara se abra sola
+    // si ahora sí está concedido. Sin esto, la pantalla seguía diciendo "sin permiso".
+    val ciclo = (contexto as? LifecycleOwner)?.lifecycle
+    DisposableEffect(ciclo) {
+        val vigilante = LifecycleEventObserver { _, evento ->
+            if (evento == Lifecycle.Event.ON_RESUME) {
+                tienePermiso = ContextCompat.checkSelfPermission(contexto, Manifest.permission.CAMERA) ==
+                        PackageManager.PERMISSION_GRANTED
+            }
+        }
+        ciclo?.addObserver(vigilante)
+        onDispose { ciclo?.removeObserver(vigilante) }
     }
 
 
@@ -173,11 +204,20 @@ fun PuertaScreen(
                 EstadoCompleto(
                     icono = { IlustracionDeKit(R.drawable.ilus_camara_sin_permiso) },
                     titulo = "Sin permiso de cámara",
-                    mensaje = "La puerta necesita la cámara para leer los códigos QR.",
-                    textoBoton = "Dar permiso de cámara",
+                    mensaje = if (soloEnAjustes) "La puerta necesita la cámara para leer los códigos QR. Actívala en Permisos, Cámara."
+                              else "La puerta necesita la cámara para leer los códigos QR.",
+                    textoBoton = if (soloEnAjustes) "Abrir ajustes de la app" else "Dar permiso de cámara",
                     iconoBoton = null,
                     circulo = false,
-                    onBoton = { pedirPermiso.launch(Manifest.permission.CAMERA) }
+                    onBoton = {
+                        if (soloEnAjustes) {
+                            contexto.startActivity(
+                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", contexto.packageName, null))
+                            )
+                        } else {
+                            pedirPermiso.launch(Manifest.permission.CAMERA)
+                        }
+                    }
                 )
             }
         }
