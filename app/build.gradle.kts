@@ -13,19 +13,30 @@ android {
     defaultConfig {
         applicationId = "com.example.appjuntavecinos"
         minSdk = 24
-        targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        // No visto en clase: con 37 y un emulador Android 17, el sistema bloquea las conexiones a la
+        // red local (10.0.2.2) sin un permiso especial. El ejemplo del docente usa 36.
+        targetSdk = 36
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Dirección del servidor. Por defecto es la del emulador (10.0.2.2 es el computador visto desde él).
+        // Para un teléfono real se compila con: gradlew assembleDebug -PurlServidor=http://IP-DEL-COMPUTADOR:9090/
+        // No visto en clase: buildConfigField crea una constante en BuildConfig a partir de una propiedad de Gradle.
+        val urlServidor = (project.findProperty("urlServidor") as String?) ?: "http://10.0.2.2:9090/"
+        buildConfigField("String", "URL_SERVIDOR", "\"$urlServidor\"")
     }
 
     buildTypes {
         release {
             optimization {
                 enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -34,6 +45,12 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
     }
 }
 
@@ -54,10 +71,18 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
     // No visto en clase (lo integramos con permiso del docente): ZXing, lector de Google, CameraX y ML Kit, para el código QR.
     implementation(libs.zxing.core)
     implementation(libs.play.services.code.scanner)
     testImplementation(libs.junit)
+    // No visto en clase: Kotest (pruebas escritas como frases), MockK (objetos falsos) y coroutines-test (probar código con corrutinas).
+    testImplementation(libs.kotest.runner.junit5)
+    testImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.camera.core)

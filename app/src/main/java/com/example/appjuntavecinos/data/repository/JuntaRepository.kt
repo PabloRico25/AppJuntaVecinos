@@ -1,76 +1,133 @@
 package com.example.appjuntavecinos.data.repository
 
 import android.content.Context
+import androidx.room.withTransaction
+import com.example.appjuntavecinos.data.model.BloqueDto
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
-import com.example.appjuntavecinos.data.model.IngresoEntity
+import com.example.appjuntavecinos.data.model.IngresoDto
+import com.example.appjuntavecinos.data.model.LoginRequest
+import com.example.appjuntavecinos.data.model.NuevaReservaRequest
+import com.example.appjuntavecinos.data.model.NuevoPagoRequest
 import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
-import com.example.appjuntavecinos.utils.hashClave
+import com.example.appjuntavecinos.data.remote.ApiService
+import com.example.appjuntavecinos.data.remote.RetrofitInstance
+import com.example.appjuntavecinos.data.remote.SesionToken
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import kotlinx.coroutines.withContext
 
-class JuntaRepository(context: Context) {
-    private val db = AppDatabase.obtener(context)
+class JuntaRepository(private val db: AppDatabase, private val api: ApiService) {
+
+    // El que usan los ViewModels: abre Room y usa el Retrofit real. Las pruebas usan el constructor
+    // principal, con una base de datos y un ApiService falsos.
+    constructor(context: Context) : this(AppDatabase.obtener(context), RetrofitInstance.api)
+
     private val usuarioDao = db.usuarioDao()
     private val pagoDao = db.pagoDao()
     private val reservaDao = db.reservaDao()
     private val dependenciaDao = db.dependenciaDao()
-    private val ingresoDao = db.ingresoDao()
 
-    suspend fun buscarUsuarioPorCorreo(correo: String): UsuarioEntity? {
-        return usuarioDao.buscarPorCorreo(correo)
+    // Inicia sesión en el servidor: guarda el token para las peticiones siguientes y devuelve el usuario.
+    // El servidor nunca envía la clave, por eso queda vacía en el UsuarioEntity de la sesión.
+    suspend fun iniciarSesion(correo: String, clave: String): UsuarioEntity {
+        val respuesta = api.login(LoginRequest(correo, clave))
+        SesionToken.token = respuesta.token
+        val usuario = respuesta.usuario
+        return UsuarioEntity(
+            id = usuario.id,
+            nombre = usuario.nombre,
+            correo = usuario.correo,
+            clave = "",
+            rol = usuario.rol,
+            cargo = usuario.cargo
+        )
     }
 
+    // Dependencias y usuarios: se piden al servidor y se guardan en Room. Si no hay conexión o la sesión
+    // venció, se queda con lo ya guardado (esa es la función de Room como caché).
+    // No visto en clase: withTransaction agrupa varias operaciones de Room para que se hagan todas o ninguna.
     suspend fun obtenerDependencias(): List<DependenciaComunitariaEntity> {
+        try {
+            val lista = api.obtenerDependencias()
+            db.withTransaction {
+                dependenciaDao.borrarTodas()
+                dependenciaDao.insertarTodas(lista)
+            }
+        } catch (e: Exception) {
+        }
         return dependenciaDao.obtenerTodas()
     }
 
-    suspend fun crearReserva(reserva: ReservaEntity) {
-        reservaDao.insertar(reserva)
-    }
-
-    suspend fun hayChoque(dependenciaId:Int,fecha:String,horaInicio:String,horaFin:String):Boolean
-    {val confirmadas=reservaDao.obtenerConfirmadas(dependenciaId,fecha)
-        return confirmadas.any { it.horaInicio < horaFin && horaInicio < it.horaFin }
-    }
-
-    fun observarReservas(vecinoId:Int):Flow<List<ReservaEntity>>{
-        return reservaDao.observarPorVecino(vecinoId)
-    }
-
-    suspend fun cancelarReserva(reserva:ReservaEntity){
-        reservaDao.actualizar(reserva.copy(estado ="CANCELADA"))
-    }
-
-    fun observarTodasLasReservas():Flow<List<ReservaEntity>>{
-        return reservaDao.observarTodas()
-    }
-
-    suspend fun obtenerUsuarios():List<UsuarioEntity>{
+    suspend fun obtenerUsuarios(): List<UsuarioEntity> {
+        try {
+            val lista = api.obtenerUsuarios().map {
+                UsuarioEntity(id = it.id, nombre = it.nombre, correo = it.correo, clave = "", rol = it.rol, cargo = it.cargo)
+            }
+            db.withTransaction {
+                usuarioDao.borrarTodos()
+                usuarioDao.insertarTodos(lista)
+            }
+        } catch (e: Exception) {
+        }
         return usuarioDao.obtenerTodos()
     }
 
-    suspend fun confirmarReserva(reserva:ReservaEntity,gestionadaPorId:Int):Boolean {
-        if (hayChoque(reserva.dependenciaId,reserva.fecha,reserva.horaInicio,reserva.horaFin)){
-            return false
+    // Las pantallas observan Room: al reemplazar las reservas guardadas, se actualizan solas.
+    // El servidor decide qué reservas ve cada uno: el vecino recibe las suyas y la directiva, todas.
+    suspend fun refrescarReservas(): Boolean {
+        return try {
+            val lista = api.obtenerReservas()
+            db.withTransaction {
+                reservaDao.borrarTodas()
+                reservaDao.insertarTodas(lista)
+            }
+            true
+        } catch (e: Exception) {
+            // Sin conexión o sesión vencida: se queda lo guardado y se avisa a quien llamó
+            false
         }
-        reservaDao.actualizar(reserva.copy(estado="CONFIRMADA",gestionadaPorId=gestionadaPorId))
-        return true
     }
 
-    suspend fun rechazarReserva(reserva:ReservaEntity,gestionadaPorId:Int){
-        reservaDao.actualizar(reserva.copy(estado="RECHAZADA",gestionadaPorId=gestionadaPorId))
+    fun observarReservas(vecinoId: Int): Flow<List<ReservaEntity>> {
+        return reservaDao.observarPorVecino(vecinoId)
+    }
+
+    fun observarTodasLasReservas(): Flow<List<ReservaEntity>> {
+        return reservaDao.observarTodas()
+    }
+
+    // Los bloques ocupados de una sala en un día los entrega el servidor, que ve las reservas de todos
+    // (un vecino solo tiene las suyas en Room). A un vecino no le llega quién reservó.
+    suspend fun obtenerBloquesOcupados(dependenciaId: Int, fecha: String): List<BloqueDto> {
+        return api.obtenerOcupacion(dependenciaId, fecha)
+    }
+
+    // Las escrituras SÍ lanzan el error: el ViewModel muestra el mensaje del servidor
+    // (horario ocupado, falta de permiso...). Después se refrescan las reservas guardadas.
+    suspend fun crearReserva(dependenciaId: Int, fecha: String, horaInicio: String, horaFin: String) {
+        api.crearReserva(NuevaReservaRequest(dependenciaId, fecha, horaInicio, horaFin))
+        refrescarReservas()
+    }
+
+    suspend fun cancelarReserva(reserva: ReservaEntity) {
+        api.cancelarReserva(reserva.id)
+        refrescarReservas()
+    }
+
+    suspend fun confirmarReserva(reserva: ReservaEntity) {
+        api.confirmarReserva(reserva.id)
+        refrescarReservas()
+    }
+
+    suspend fun rechazarReserva(reserva: ReservaEntity) {
+        api.rechazarReserva(reserva.id)
+        refrescarReservas()
     }
 
     fun observarPagos():Flow<List<PagoEntity>>{
         return pagoDao.observarTodos()
-    }
-
-    fun observarReservasPagadas():Flow<List<Int>> {
-        return pagoDao.observarReservasPagadas()
     }
 
     suspend fun buscarReserva(id:Int):ReservaEntity?{
@@ -81,93 +138,74 @@ class JuntaRepository(context: Context) {
         return pagoDao.contarPagosDeArriendo(id)>0
     }
 
-    suspend fun obtenerReservasPorPagar():List<ReservaEntity>{
+    // Igual que las reservas: los pagos se piden al servidor y reemplazan lo guardado en Room.
+    // Un vecino recibe los montos, pero no la reserva, el comprobante ni quién registró cada pago.
+    suspend fun refrescarPagos() {
+        try {
+            val lista = api.obtenerPagos()
+            db.withTransaction {
+                pagoDao.borrarTodos()
+                pagoDao.insertarTodos(lista)
+            }
+        } catch (e: Exception) {
+        }
+    }
+
+    // Ids de las reservas con el arriendo pagado. Lo informa el servidor, porque un vecino no tiene en
+    // Room la reserva de cada pago; sin conexión se usa lo guardado.
+    suspend fun obtenerReservasPagadas(): List<Int> {
+        return try {
+            api.obtenerReservasPagadas()
+        } catch (e: Exception) {
+            pagoDao.obtenerTodos().filter { it.tipo == "ARRIENDO" }.mapNotNull { it.reservaId }
+        }
+    }
+
+    // Antes de calcular cuáles reservas faltan por cobrar se actualizan reservas y pagos desde el servidor
+    suspend fun obtenerReservasPorPagar(): List<ReservaEntity> {
+        refrescarReservas()
+        refrescarPagos()
         return reservaDao.obtenerConfirmadasSinPago()
     }
 
-    suspend fun crearPago(pago:PagoEntity){
-        pagoDao.insertar(pago)
-    }
-
-    suspend fun obtenerReservasUsadas():Set<Int>{
-        return ingresoDao.obtenerReservasUsadas().toSet()
-    }
-
-    suspend fun registrarIngreso(ingreso:IngresoEntity){
-        ingresoDao.insertar(ingreso)
-    }
-
-    suspend fun cargarDatosDeEjemplo() {
-        if (dependenciaDao.obtenerTodas().isNotEmpty()) return
-
-        dependenciaDao.insertar(DependenciaComunitariaEntity(nombre = "Salón Principal"))
-        dependenciaDao.insertar(DependenciaComunitariaEntity(nombre = "Sala Multiuso"))
-        val clave = hashClave("1234")
-        val usuarios = listOf(
-            UsuarioEntity(nombre="Juan Pérez",correo ="juan.perez@zaror.test",clave=clave,
-                rol="VECINO"),
-            UsuarioEntity(nombre="Ana Muñoz",correo="ana.munoz@zaror.test",clave=clave,
-                rol="VECINO"),
-            UsuarioEntity(nombre="Pedro Soto",correo="pedro.soto@zaror.test",clave=clave,
-                rol="VECINO"),
-            UsuarioEntity(nombre="María Torres",correo="maria.torres@zaror.test",clave=clave,
-                rol="DIRECTIVA",cargo="SECRETARIA"),
-            UsuarioEntity(nombre="Luis Rojas",correo="luis.rojas@zaror.test",clave=clave,
-                rol="DIRECTIVA",cargo="TESORERIA"),
-            UsuarioEntity(nombre="Carmen Vidal",correo="carmen.vidal@zaror.test",clave=clave,
-                rol="DIRECTIVA",cargo="PRESIDENCIA")
+    // Quién registra el pago lo toma el servidor del token, y solo Tesorería puede hacerlo.
+    // Si responde con error (reserva sin confirmar, ya pagada...), se lanza para mostrar su mensaje.
+    suspend fun crearPago(
+        reservaId: Int?,
+        tipo: String,
+        categoria: String,
+        monto: Int,
+        fecha: String,
+        comprobanteUri: String?,
+        descripcion: String
+    ) {
+        api.registrarPago(
+            NuevoPagoRequest(reservaId, tipo, categoria, monto, fecha, comprobanteUri, descripcion)
         )
-        usuarios.forEach { usuarioDao.insertar(it) }
-
-        val reservas = listOf(
-            ReservaEntity(dependenciaId=1,vecinoId=1,fecha = fechaEn(11),
-                horaInicio = "18:00", horaFin = "21:00", estado = "CONFIRMADA",
-                fechaSolicitud = fechaEn(-5), gestionadaPorId = 4),
-            ReservaEntity(dependenciaId = 2, vecinoId = 1, fecha = fechaEn(12),
-                horaInicio = "11:00", horaFin = "14:00", estado = "PENDIENTE",
-                fechaSolicitud = fechaEn(-2)),
-            ReservaEntity(dependenciaId = 1, vecinoId = 3, fecha = fechaEn(11),
-                horaInicio = "19:00", horaFin = "21:00", estado = "PENDIENTE",
-                fechaSolicitud = fechaEn(-1)),
-            ReservaEntity(dependenciaId = 2, vecinoId = 3, fecha = fechaEn(25),
-                horaInicio = "10:00", horaFin = "13:00", estado = "PENDIENTE",
-                fechaSolicitud = fechaEn(-1)),
-            ReservaEntity(dependenciaId = 1, vecinoId = 1, fecha = fechaEn(18),
-                horaInicio = "15:00", horaFin = "18:00", estado = "RECHAZADA",
-                fechaSolicitud = fechaEn(-9), gestionadaPorId = 4),
-            ReservaEntity(dependenciaId = 2, vecinoId = 1, fecha = fechaEn(4),
-                horaInicio = "10:00", horaFin = "12:00", estado = "CANCELADA",
-                fechaSolicitud = fechaEn(-8)),
-            ReservaEntity(dependenciaId = 2, vecinoId = 3, fecha = fechaEn(-3),
-                horaInicio = "10:00", horaFin = "13:00", estado = "CONFIRMADA",
-                fechaSolicitud = fechaEn(-10), gestionadaPorId = 4),
-            ReservaEntity(dependenciaId = 1, vecinoId = 3, fecha = fechaEn(-3),
-                horaInicio = "12:00", horaFin = "16:00", estado = "CONFIRMADA",
-                fechaSolicitud = fechaEn(-10), gestionadaPorId = 4)
-        )
-        reservas.forEach { reservaDao.insertar(it) }
-
-        val pagos = listOf(
-            PagoEntity(reservaId = 8, tipo = "ARRIENDO", monto = 60000,
-                fecha = fechaEn(-2), registradoPorId = 5),
-            PagoEntity(tipo = "CONSUMO_BASICO", categoria = "ELECTRICIDAD", monto = 38500,
-                fecha = fechaEn(-2), registradoPorId = 5),
-            PagoEntity(reservaId = 7, tipo = "ARRIENDO", monto = 40000,
-                fecha = fechaEn(-3), registradoPorId = 5),
-            PagoEntity(tipo = "CONSUMO_BASICO", categoria = "AGUA", monto = 24200,
-                fecha = fechaEn(-4), registradoPorId = 5),
-            PagoEntity(tipo = "CONSUMO_BASICO", categoria = "GAS", monto = 24000,
-                fecha = fechaEn(-5), registradoPorId = 5),
-            PagoEntity(reservaId = 1, tipo = "ARRIENDO", monto = 45000,
-                fecha = fechaEn(-1), registradoPorId = 5)
-        )
-        pagos.forEach { pagoDao.insertar(it) }
+        refrescarPagos()
     }
 
-    private fun fechaEn(dias: Int): String {
-        val calendario = Calendar.getInstance()
-        calendario.add(Calendar.DAY_OF_YEAR, dias)
-        return SimpleDateFormat("yyyy-MM-dd",
-            Locale.getDefault()).format(calendario.time)
+    // Inicia sesión en el servidor para activar la puerta. Solo la directiva puede: si no lo es, el servidor
+    // responde 403. El token que entrega dura 7 días, porque la puerta queda activa sin que nadie la toque.
+    suspend fun activarPuerta(correo: String, clave: String): String {
+        return api.login(LoginRequest(correo, clave, "PUERTA")).token
+    }
+
+    // Los accesos los lleva el servidor: así un código usado en una puerta no sirve en otra.
+    // Si no hay conexión, estas funciones lanzan el error y la puerta no abre.
+    suspend fun obtenerReservasUsadas(): Set<Int> {
+        return api.obtenerReservasUsadas().toSet()
+    }
+
+    suspend fun registrarIngreso(ingreso: IngresoDto) {
+        api.registrarIngreso(ingreso)
+    }
+
+    // Room guarda una copia de lo que el servidor entregó a quien inició sesión. Al cerrarla se borra, para que
+    // la persona siguiente en este teléfono no vea reservas ni pagos que no son suyos.
+    suspend fun borrarDatosLocales() {
+        withContext(Dispatchers.IO) {
+            db.clearAllTables()
+        }
     }
 }

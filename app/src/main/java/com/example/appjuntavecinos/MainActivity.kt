@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
@@ -16,7 +17,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // pantalla moderna de Android 15
         setContent {
-            AppJuntaVecinosTheme {Surface(modifier = Modifier.fillMaxSize(),// Surface pinta un fondo
+            AppJuntaVecinosTheme {Surface(modifier = Modifier.fillMaxSize().imePadding(),// Surface pinta un fondo. No visto en clase: imePadding deja sitio al teclado (con la app dibujando de borde a borde, Android ya no redimensiona la ventana)
                 color = MaterialTheme.colorScheme.background) {AppNavigation()}
             }
         }

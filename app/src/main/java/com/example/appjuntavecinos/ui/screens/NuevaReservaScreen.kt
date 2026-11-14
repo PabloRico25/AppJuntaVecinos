@@ -3,20 +3,23 @@ package com.example.appjuntavecinos.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,10 +29,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.BannerError
+import com.example.appjuntavecinos.ui.components.BotonContorno
+import com.example.appjuntavecinos.ui.components.BotonJunta
+import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.FilaCampoYBoton
 import com.example.appjuntavecinos.ui.components.IconoDeError
 import com.example.appjuntavecinos.ui.components.MenuDesplegable
+import com.example.appjuntavecinos.ui.components.sacudirSiHayError
+import com.example.appjuntavecinos.utils.HORA_APERTURA
+import com.example.appjuntavecinos.utils.HORA_CIERRE
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.NuevaReservaViewModel
 
@@ -51,7 +66,8 @@ fun NuevaReservaScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Nueva reserva", style = MaterialTheme.typography.headlineMedium)
+        Text("Nueva reserva", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+        Text("La sede atiende todos los días de $HORA_APERTURA a $HORA_CIERRE")
 
         MenuDesplegable(
             etiqueta = "Dependencia",
@@ -62,22 +78,27 @@ fun NuevaReservaScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = fechaParaMostrar(estado.fecha),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Fecha") },
-            isError = estado.errores.fecha != null,
-            trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
-            supportingText = { estado.errores.fecha?.let { Text(it) } },
-            modifier = Modifier.fillMaxWidth()
+        FilaCampoYBoton(
+            campo = { modificador ->
+                OutlinedTextField(
+                    value = fechaParaMostrar(estado.fecha),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Fecha") },
+                    isError = estado.errores.fecha != null,
+                    trailingIcon = { if (estado.errores.fecha != null) IconoDeError() },
+                    supportingText = { estado.errores.fecha?.let { Text(it) } },
+                    modifier = modificador.sacudirSiHayError(estado.errores.fecha)
+                )
+            },
+            boton = { modificador ->
+                BotonContorno(onClick = { mostrarCalendario = true }, modifier = modificador) {
+                    Icon(painterResource(R.drawable.ic_nav_calendario), contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Elegir fecha")
+                }
+            }
         )
-        OutlinedButton(
-            onClick = { mostrarCalendario = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Elegir fecha")
-        }
 
         MenuDesplegable(
             etiqueta = "Hora de inicio",
@@ -97,11 +118,17 @@ fun NuevaReservaScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = estado.aceptaReglamento,
-                onCheckedChange = { viewModel.onReglamentoChange(it) }
-            )
+        // No visto en clase: toggleable hace que tocar el texto también marque la casilla, y Role.Checkbox lo anuncia como casilla a un lector de pantalla.
+        Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
+                value = estado.aceptaReglamento,
+                role = Role.Checkbox,
+                onValueChange = { viewModel.onReglamentoChange(it) }
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(checked = estado.aceptaReglamento, onCheckedChange = null)
+            Spacer(Modifier.width(12.dp))
             Text("Acepto el reglamento de la sede")
         }
         estado.errores.reglamento?.let {
@@ -113,15 +140,9 @@ fun NuevaReservaScreen(
             )
         }
 
-        estado.errores.general?.let {
-            Text(
-                it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
+        estado.errores.general?.let { BannerError(it) }
 
-        Button(
+        BotonJunta(
             onClick = { viewModel.guardar(vecinoId, onReservaCreada) },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -134,7 +155,7 @@ fun NuevaReservaScreen(
         DatePickerDialog(
             onDismissRequest = { mostrarCalendario = false },
             confirmButton = {
-                TextButton(
+                BotonTexto(
                     onClick = {
                         viewModel.onFechaChange(calendario.selectedDateMillis)
                         mostrarCalendario = false
@@ -144,7 +165,7 @@ fun NuevaReservaScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarCalendario = false }) {
+                BotonTexto(onClick = { mostrarCalendario = false }) {
                     Text("Cancelar")
                 }
             }

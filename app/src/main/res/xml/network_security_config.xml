@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No visto en clase: Android bloquea por defecto el tráfico http. Solo se permite hacia el servidor
+     de desarrollo: 10.0.2.2 (el computador visto desde el emulador) y la IP del computador en la red local. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">192.168.100.48</domain>
+        <!-- Dirección del computador dentro de Tailscale: no cambia con la red en la que esté (casa, instituto, hotspot) -->
+        <domain includeSubdomains="false">100.65.13.28</domain>
+    </domain-config>
+</network-security-config>

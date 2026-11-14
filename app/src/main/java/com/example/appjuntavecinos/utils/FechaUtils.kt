@@ -30,7 +30,7 @@ fun sumarMeses(mes: String, cambio: Int): String {
 
 fun nombreDelMes(mes: String): String {
     val primerDia = SimpleDateFormat("yyyy-MM", Locale.US).parse(mes)!!
-    return SimpleDateFormat("MMMM yyyy", Locale("es", "CL"))
+    return SimpleDateFormat("MMMM yyyy", Locale.forLanguageTag("es-CL"))
         .format(primerDia)
         .replaceFirstChar { it.uppercase() }
 }

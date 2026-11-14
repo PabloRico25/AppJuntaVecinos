@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Simbolo de Junta Zaror (tablero Logo del kit de diseno). Dibujo vectorial. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="567.833dp"
+    android:height="569.583dp"
+    android:viewportWidth="567.833"
+    android:viewportHeight="569.583">
+    <group android:translateX="-4.917" android:translateY="-1.25" android:scaleX="1" android:scaleY="1" android:pivotX="0" android:pivotY="0">
+        <group android:translateX="-350" android:translateY="-95">
+            <path
+                android:pathData="M388 448C352 340 346 230 430 160C520 85 700 80 802 180L768 210C700 150 590 142 505 185C420 230 392 320 388 448Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M625 383C700 362 775 340 833 327C858 322 858 346 842 362L598 628L480 655L520 604L740 378C700 384 660 390 625 383Z"
+                android:fillColor="#FFF7971D" />
+            <path
+                android:pathData="M530 345H598V505C598 570 545 610 470 608C410 606 372 570 374 520C376 495 395 478 420 478L452 480C452 520 470 548 500 540C522 532 530 515 530 490Z"
+                android:fillColor="#00000000"
+                android:strokeColor="#FFFFF9F2"
+                android:strokeWidth="7"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M530 345H598V505C598 570 545 610 470 608C410 606 372 570 374 520C376 495 395 478 420 478L452 480C452 520 470 548 500 540C522 532 530 515 530 490Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M565,200H565A5,5 0 0 1 570,205V243A5,5 0 0 1 565,248H565A5,5 0 0 1 560,243V205A5,5 0 0 1 565,200Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M556,199a9,9 0 1 0 18,0a9,9 0 1 0 -18,0"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M478 280C478 258 520 248 565 248C610 248 652 258 652 280V288H478Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M491,288H639A5,5 0 0 1 644,293V323A5,5 0 0 1 639,328H491A5,5 0 0 1 486,323V293A5,5 0 0 1 491,288Z"
+                android:fillColor="#FFFFF9F2"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="5"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M499,294H523A3,3 0 0 1 526,297V317A3,3 0 0 1 523,320H499A3,3 0 0 1 496,317V297A3,3 0 0 1 499,294Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M535,294H559A3,3 0 0 1 562,297V317A3,3 0 0 1 559,320H535A3,3 0 0 1 532,317V297A3,3 0 0 1 535,294Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M571,294H595A3,3 0 0 1 598,297V317A3,3 0 0 1 595,320H571A3,3 0 0 1 568,317V297A3,3 0 0 1 571,294Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M607,294H631A3,3 0 0 1 634,297V317A3,3 0 0 1 631,320H607A3,3 0 0 1 604,317V297A3,3 0 0 1 607,294Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M492 330H638L624 350H506Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M736 268L902 222L914 236L746 284Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M762 298L902 262L910 274L772 308Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M820 268L850 262L862 292L832 298Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M885 232L905 226L900 250Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M733,262H733A3,3 0 0 1 736,265V285A3,3 0 0 1 733,288H733A3,3 0 0 1 730,285V265A3,3 0 0 1 733,262Z"
+                android:fillColor="#FF4A2A18" />
+            <path
+                android:pathData="M800 276L796 298M860 262L858 282"
+                android:fillColor="#00000000"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="5"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M801 458L804 482"
+                android:fillColor="#00000000"
+                android:strokeColor="#FFF7971D"
+                android:strokeWidth="12"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M842 492L872 454"
+                android:fillColor="#00000000"
+                android:strokeColor="#FFF7971D"
+                android:strokeWidth="12"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M868 518L906 502"
+                android:fillColor="#00000000"
+                android:strokeColor="#FFF7971D"
+                android:strokeWidth="12"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M652 575L740 525L828 575Z"
+                android:fillColor="#FFFFF9F2" />
+            <path
+                android:pathData="M648,575H836V641H648Z"
+                android:fillColor="#FFFFF9F2"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="5"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M628 582L740 514L852 582"
+                android:fillColor="#00000000"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="16"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="round" />
+            <path
+                android:pathData="M666,584H692V614H666Z"
+                android:fillColor="#FFFFF9F2"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="4"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M788,584H814V614H788Z"
+                android:fillColor="#FFFFF9F2"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="4"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M679 584V614M666 599H692M801 584V614M788 599H814"
+                android:fillColor="#00000000"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="3"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M710,574H768V642H710Z"
+                android:fillColor="#FFF9A838"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="5"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M739 574V642M710 596H768"
+                android:fillColor="#00000000"
+                android:strokeColor="#FF4A2A18"
+                android:strokeWidth="3.5"
+                android:strokeLineCap="butt"
+                android:strokeLineJoin="miter" />
+            <path
+                android:pathData="M586,624a34,24 0 1 0 68,0a34,24 0 1 0 -68,0"
+                android:fillColor="#FF6DAA3C" />
+            <path
+                android:pathData="M782,630a56,26 0 1 0 112,0a56,26 0 1 0 -112,0"
+                android:fillColor="#FF6DAA3C" />
+            <path
+                android:pathData="M854,636a30,20 0 1 0 60,0a30,20 0 1 0 -60,0"
+                android:fillColor="#FF6DAA3C" />
+            <path
+                android:pathData="M590 644Q745 662 905 644"
+                android:fillColor="#00000000"
+                android:strokeColor="#FF5E9632"
+                android:strokeWidth="7"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="miter" />
+        </group>
+    </group>
+</vector>

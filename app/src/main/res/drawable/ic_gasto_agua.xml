@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono de gasto del kit de diseño (06_iconos/icons/expenses). Lleva sus propios colores: no se tiñe al usarlo. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M12,2.8C10.1,6.2 6,10.3 6,14.2A6,6 0 0 0 18,14.2C18,10.3 13.9,6.2 12,2.8Z"
+        android:fillColor="#8FC3E6"
+        android:strokeColor="#4D84B8"
+        android:strokeWidth="1.25"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M9.5,15.3Q10,17 12,17.3"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

@@ -1,6 +1,7 @@
 package com.example.appjuntavecinos.ui.components
 
 import androidx.camera.core.CameraSelector
+import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview

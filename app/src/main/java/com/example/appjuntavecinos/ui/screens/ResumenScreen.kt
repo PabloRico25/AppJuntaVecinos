@@ -1,19 +1,27 @@
 package com.example.appjuntavecinos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,15 +29,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.appjuntavecinos.ui.theme.ErrorRojo
-import com.example.appjuntavecinos.ui.theme.FondoSaldo
-import com.example.appjuntavecinos.ui.theme.FondoTarjeta
-import com.example.appjuntavecinos.ui.theme.IngresoVerde
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.ActualizarAlVolver
+import com.example.appjuntavecinos.ui.components.BarraDeGasto
+import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.FichaDeGasto
+import com.example.appjuntavecinos.ui.components.IlustracionDeKit
+import com.example.appjuntavecinos.ui.components.TarjetaBlanca
+import com.example.appjuntavecinos.ui.components.categoriaDeGasto
+import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.ResumenFinanciero
 import com.example.appjuntavecinos.utils.anchoDeVentana
 import com.example.appjuntavecinos.utils.nombreDelMes
@@ -37,8 +49,10 @@ import com.example.appjuntavecinos.viewmodel.ResumenViewModel
 
 @Composable
 fun ResumenScreen(
+    titulo: String,
     viewModel: ResumenViewModel = viewModel()
 ) {
+    ActualizarAlVolver { viewModel.actualizar() }
     val resumen by viewModel.resumen.collectAsState(
         initial = ResumenFinanciero(0, 0, 0, emptyMap())
     )
@@ -53,14 +67,14 @@ fun ResumenScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Resumen financiero", style = MaterialTheme.typography.headlineMedium)
+        Text(titulo, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(
+            BotonTexto(
                 onClick = { viewModel.cambiarMes(-1) },
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
             ) {
@@ -71,7 +85,7 @@ fun ResumenScreen(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            TextButton(
+            BotonTexto(
                 onClick = { viewModel.cambiarMes(1) },
                 enabled = mes < viewModel.mesActual,
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onBackground)
@@ -92,41 +106,41 @@ fun ResumenScreen(
                     TarjetaSaldo(resumen, Modifier.weight(1f))
                 }
             }
-            WindowWidthSizeClass.Medium -> {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TarjetaIngresos(resumen, Modifier.weight(1f))
-                    TarjetaGastos(resumen, Modifier.weight(1f))
-                }
-                TarjetaSaldo(resumen, Modifier.fillMaxWidth())
-            }
             else -> {
-                TarjetaIngresos(resumen, Modifier.fillMaxWidth())
-                TarjetaGastos(resumen, Modifier.fillMaxWidth())
                 TarjetaSaldo(resumen, Modifier.fillMaxWidth())
+                // IntrinsicSize.Min hace que las dos tarjetas midan lo mismo que la más alta
+                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    TarjetaIngresos(resumen, Modifier.weight(1f).fillMaxHeight())
+                    TarjetaGastos(resumen, Modifier.weight(1f).fillMaxHeight())
+                }
             }
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = FondoTarjeta,
-                contentColor = TextoPrincipal
-            )
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+        TarjetaBlanca(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "Gastos por categoría",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 )
                 if (resumen.gastosPorCategoria.isEmpty()) {
-                    Text("No hay gastos en este mes.")
+                    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        IlustracionDeKit(R.drawable.ilus_sin_gastos, alto = 120.dp)
+                        Text("No hay gastos en este mes.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 } else {
-                    resumen.gastosPorCategoria.forEach { (categoria, monto) ->
-                        Text("${categoria.lowercase().replaceFirstChar { it.uppercase() }}: ${formatoPesos(monto)}")
+                    val mayor = resumen.gastosPorCategoria.values.maxOrNull()?.coerceAtLeast(1) ?: 1
+                    resumen.gastosPorCategoria.entries.forEachIndexed { indice, (categoria, monto) ->
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            FichaDeGasto(categoriaDeGasto(categoria))
+                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(categoria.lowercase().replaceFirstChar { it.uppercase() }, fontWeight = FontWeight.SemiBold)
+                                    Text(formatoPesos(monto), fontWeight = FontWeight.ExtraBold)
+                                }
+                                BarraDeGasto(proporcion = monto.toFloat() / mayor, indice = indice, clave = mes)
+                            }
+                        }
                     }
                 }
             }
@@ -136,64 +150,71 @@ fun ResumenScreen(
 
 @Composable
 private fun TarjetaIngresos(resumen: ResumenFinanciero, modifier: Modifier = Modifier) {
-    TarjetaMonto(
+    TarjetaFlujo(
         titulo = "Ingresos (arriendos)",
         monto = resumen.ingresos,
-        colorMonto = IngresoVerde,
-        colorFondo = FondoTarjeta,
-        estilo = MaterialTheme.typography.titleLarge,
+        icono = R.drawable.ic_flecha_arriba,
+        fondoIcono = JuntaTheme.colores.confirmadaContenedor,
+        tintaIcono = JuntaTheme.colores.sobreConfirmada,
         modifier = modifier
     )
 }
 
 @Composable
 private fun TarjetaGastos(resumen: ResumenFinanciero, modifier: Modifier = Modifier) {
-    TarjetaMonto(
+    TarjetaFlujo(
         titulo = "Gastos (consumos básicos)",
         monto = resumen.gastos,
-        colorMonto = ErrorRojo,
-        colorFondo = FondoTarjeta,
-        estilo = MaterialTheme.typography.titleLarge,
+        icono = R.drawable.ic_flecha_abajo,
+        fondoIcono = MaterialTheme.colorScheme.primaryContainer,
+        tintaIcono = MaterialTheme.colorScheme.onPrimaryContainer,
         modifier = modifier
     )
 }
 
+// Tarjeta del saldo: oscura, como en el kit. Si el saldo es negativo, la cifra va en el color de error sobre fondo claro.
 @Composable
 private fun TarjetaSaldo(resumen: ResumenFinanciero, modifier: Modifier = Modifier) {
-    TarjetaMonto(
-        titulo = "Saldo",
-        monto = resumen.saldo,
-        colorMonto = if (resumen.saldo < 0) ErrorRojo else IngresoVerde,
-        colorFondo = FondoSaldo,
-        estilo = MaterialTheme.typography.headlineMedium,
-        modifier = modifier
-    )
+    val negativo = resumen.saldo < 0
+    val fondo = if (negativo) MaterialTheme.colorScheme.errorContainer else Color(0xFF6B3F27)
+    val texto = if (negativo) MaterialTheme.colorScheme.onErrorContainer else Color(0xFFFFF4E8)
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = fondo, contentColor = texto)
+    ) {
+        Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Surface(modifier = Modifier.size(52.dp), shape = CircleShape, color = texto.copy(alpha = 0.18f), contentColor = texto) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(painterResource(R.drawable.ic_nav_pagos), contentDescription = null, modifier = Modifier.size(26.dp))
+                }
+            }
+            Column {
+                Text("Saldo", style = MaterialTheme.typography.bodyMedium)
+                Text(formatoPesos(resumen.saldo), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+            }
+        }
+    }
 }
 
 @Composable
-private fun TarjetaMonto(
+private fun TarjetaFlujo(
     titulo: String,
     monto: Int,
-    colorMonto: Color,
-    colorFondo: Color,
-    estilo: TextStyle,
+    icono: Int,
+    fondoIcono: Color,
+    tintaIcono: Color,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = colorFondo,
-            contentColor = TextoPrincipal
-        )
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(titulo)
-            Text(
-                text = formatoPesos(monto),
-                style = estilo,
-                color = colorMonto,
-                fontWeight = FontWeight.Bold
-            )
+    TarjetaBlanca(modifier = modifier) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Surface(modifier = Modifier.size(36.dp), shape = RoundedCornerShape(10.dp), color = fondoIcono, contentColor = tintaIcono) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(painterResource(icono), contentDescription = null, modifier = Modifier.size(20.dp))
+                }
+            }
+            Text(titulo, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(formatoPesos(monto), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
         }
     }
 }

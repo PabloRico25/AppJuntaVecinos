@@ -6,11 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
 import com.example.appjuntavecinos.data.model.ReservaEntity
 import com.example.appjuntavecinos.data.model.UsuarioEntity
+import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(application) {
@@ -18,6 +20,7 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
     private val repositorio = JuntaRepository(application)
 
     val reservas: Flow<List<ReservaEntity>> = repositorio.observarTodasLasReservas()
+        .map { lista -> lista.sortedBy { if (it.estado == "PENDIENTE") 0 else 1 } }
 
     private val _dependencias = MutableStateFlow<List<DependenciaComunitariaEntity>>(emptyList())
     val dependencias: StateFlow<List<DependenciaComunitariaEntity>> = _dependencias.asStateFlow()
@@ -32,6 +35,14 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
         }
     }
 
+    // Pide las reservas al servidor. La pantalla lo llama cada vez que se muestra (ver ActualizarAlVolver)
+    fun actualizar() {
+        viewModelScope.launch {
+            repositorio.refrescarReservas()
+        }
+    }
+
+    // gestionadaPorId ya no se usa: el servidor toma quién confirma desde el token
     fun confirmar(
         reserva: ReservaEntity,
         gestionadaPorId: Int,
@@ -45,10 +56,11 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
         if (reserva.estado != "PENDIENTE") return
 
         viewModelScope.launch {
-            if (repositorio.confirmarReserva(reserva, gestionadaPorId)) {
+            try {
+                repositorio.confirmarReserva(reserva)
                 onResultado("Reserva confirmada")
-            } else {
-                onResultado("No se puede confirmar: ese horario ya está ocupado por una reserva confirmada")
+            } catch (e: Exception) {
+                onResultado(mensajeDeError(e))
             }
         }
     }
@@ -66,8 +78,12 @@ class ReservasDirectivaViewModel(application: Application) : AndroidViewModel(ap
         if (reserva.estado != "PENDIENTE") return
 
         viewModelScope.launch {
-            repositorio.rechazarReserva(reserva, gestionadaPorId)
-            onResultado("Reserva rechazada")
+            try {
+                repositorio.rechazarReserva(reserva)
+                onResultado("Reserva rechazada")
+            } catch (e: Exception) {
+                onResultado(mensajeDeError(e))
+            }
         }
     }
 }

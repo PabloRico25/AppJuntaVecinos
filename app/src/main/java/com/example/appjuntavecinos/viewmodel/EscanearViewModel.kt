@@ -34,6 +34,8 @@ class EscanearViewModel(application: Application) : AndroidViewModel(application
     init {
         viewModelScope.launch {
             _dependencias.value = repositorio.obtenerDependencias()
+            repositorio.refrescarReservas()
+            repositorio.refrescarPagos()
         }
     }
 

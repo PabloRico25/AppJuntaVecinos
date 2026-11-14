@@ -4,14 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,7 +21,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.appjuntavecinos.ui.theme.ErrorRojo
+import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.BannerError
+import com.example.appjuntavecinos.ui.components.BloqueConFoto
+import com.example.appjuntavecinos.ui.components.BotonJunta
+import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.EsqueletoDetalle
+import com.example.appjuntavecinos.ui.components.EstadoDeError
+import com.example.appjuntavecinos.ui.components.EtiquetaEstado
+import com.example.appjuntavecinos.ui.components.FilaDato
+import com.example.appjuntavecinos.ui.components.FranjaAviso
+import com.example.appjuntavecinos.ui.components.TarjetaBlanca
+import com.example.appjuntavecinos.ui.components.fotoDeSala
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.MisReservasViewModel
 
@@ -37,7 +46,11 @@ fun DetalleReservaScreen(
     val flujoDeReservas = remember(vecinoId) { viewModel.reservas(vecinoId) }
     val reservas by flujoDeReservas.collectAsState(initial = null)
     val dependencias by viewModel.dependencias.collectAsState()
+    val usuarios by viewModel.usuarios.collectAsState()
     val pagadas by viewModel.reservasPagadas.collectAsState(initial = null)
+    val cargando by viewModel.cargando.collectAsState()
+    val sinActualizar by viewModel.sinActualizar.collectAsState()
+    val errorCancelar by viewModel.errorCancelar.collectAsState()
     val reserva = reservas?.firstOrNull { it.id == reservaId }
     var confirmandoCancelar by remember { mutableStateOf(false) }
 
@@ -47,40 +60,70 @@ fun DetalleReservaScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Detalle de reserva", style = MaterialTheme.typography.headlineMedium)
+        Text("Detalle de reserva", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
 
         if (reservas == null) {
-            CircularProgressIndicator()
+            EsqueletoDetalle()
         } else if (reserva == null) {
-            Text("Esta reserva no está disponible para tu cuenta.")
+            if (cargando) {
+                EsqueletoDetalle()
+            } else if (sinActualizar) {
+                EstadoDeError(
+                    mensaje = "No se pudo conectar con el servidor. Revisa que esté encendido",
+                    onReintentar = { viewModel.reintentar() }
+                )
+            } else {
+                Text("Esta reserva no está disponible para tu cuenta.")
+            }
         } else {
-            Text(
-                text = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: "",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text("Estado: ${etiquetaEstado(reserva.estado)}")
-            Text("Fecha: ${fechaParaMostrar(reserva.fecha)}")
-            Text("Horario: ${reserva.horaInicio} a ${reserva.horaFin}")
-            Text("Solicitada el: ${reserva.fechaSolicitud}")
+            if (sinActualizar) {
+                FranjaAviso(
+                    texto = "No se pudo actualizar. Se muestran las reservas guardadas en este equipo",
+                    onReintentar = { viewModel.reintentar() }
+                )
+            }
+            val nombreSala = dependencias.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: ""
+            val foto = fotoDeSala(nombreSala)
+            val tinta = if (foto != null) Color.White else MaterialTheme.colorScheme.onSurface
+            TarjetaBlanca(modifier = Modifier.fillMaxWidth()) {
+                Column {
+                    BloqueConFoto(modifier = Modifier.fillMaxWidth().height(190.dp), foto = foto) {
+                        Text(nombreSala, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, color = tinta)
+                        EtiquetaEstado(reserva.estado, etiquetaEstado(reserva.estado), Modifier.padding(top = 2.dp))
+                    }
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        FilaDato(R.drawable.ic_nav_calendario, "Fecha", fechaParaMostrar(reserva.fecha))
+                        FilaDato(R.drawable.ic_reloj, "Horario", "${reserva.horaInicio} a ${reserva.horaFin}")
+                        FilaDato(R.drawable.ic_documento, "Solicitada el", fechaParaMostrar(reserva.fechaSolicitud))
+                        if (reserva.gestionadaPorId != null) {
+                            Text(
+                                "Gestionada por ${usuarios.firstOrNull { it.id == reserva.gestionadaPorId }?.nombre ?: ""}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
 
             if (reserva.estado == "PENDIENTE") {
                 Text("Secretaría aún no revisa tu solicitud. Cuando la confirme, podrás ver tu ticket QR aquí.")
-                Button(
+                BotonJunta(
                     onClick = { confirmandoCancelar = true },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ErrorRojo,
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
                     )
                 ) {
                     Text("Cancelar solicitud", fontWeight = FontWeight.Bold)
                 }
+                errorCancelar?.let { BannerError(it) }
             }
 
             if (reserva.estado == "CONFIRMADA") {
                 if (reserva.id in pagadas.orEmpty()) {
-                    Button(
+                    BotonJunta(
                         onClick = { onTicket(reserva.id) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -89,6 +132,14 @@ fun DetalleReservaScreen(
                 } else if (pagadas != null) {
                     Text("Tu reserva está confirmada. El ticket estará disponible cuando Tesorería registre el pago.")
                 }
+            }
+
+            if (reserva.estado == "RECHAZADA") {
+                Text("La Secretaría rechazó esta solicitud.")
+            }
+
+            if (reserva.estado == "CANCELADA") {
+                Text("Cancelaste esta solicitud.")
             }
         }
     }
@@ -99,21 +150,21 @@ fun DetalleReservaScreen(
             title = { Text("Cancelar reserva") },
             text = { Text("¿Quieres cancelar esta reserva? No se puede deshacer.") },
             confirmButton = {
-                Button(
+                BotonJunta(
                     onClick = {
                         viewModel.cancelar(reserva)
                         confirmandoCancelar = false
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ErrorRojo,
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
                     )
                 ) {
                     Text("Sí, cancelar", fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(
+                BotonTexto(
                     onClick = { confirmandoCancelar = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
                 ) {

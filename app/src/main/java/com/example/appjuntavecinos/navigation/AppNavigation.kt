@@ -3,8 +3,9 @@ package com.example.appjuntavecinos.navigation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -17,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +27,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,7 +38,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.appjuntavecinos.data.remote.EventosSesion
+import com.example.appjuntavecinos.ui.components.CabeceraSesion
 import com.example.appjuntavecinos.ui.components.ContenidoCentrado
+import com.example.appjuntavecinos.ui.components.animacionesActivas
 import com.example.appjuntavecinos.ui.screens.DetalleReservaScreen
 import com.example.appjuntavecinos.ui.screens.DisponibilidadScreen
 import com.example.appjuntavecinos.ui.screens.EscanearScreen
@@ -46,7 +53,10 @@ import com.example.appjuntavecinos.ui.screens.PuertaScreen
 import com.example.appjuntavecinos.ui.screens.RegistrarPagoScreen
 import com.example.appjuntavecinos.ui.screens.ReservasDirectivaScreen
 import com.example.appjuntavecinos.ui.screens.ResumenScreen
+import com.example.appjuntavecinos.ui.screens.SesionVencidaScreen
+import com.example.appjuntavecinos.ui.screens.SolicitudEnviadaScreen
 import com.example.appjuntavecinos.ui.screens.TicketQrScreen
+import com.example.appjuntavecinos.utils.nombreDelCargo
 import com.example.appjuntavecinos.viewmodel.LoginViewModel
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.launch
@@ -67,8 +77,70 @@ fun AppNavigation() {
     val scope = rememberCoroutineScope()
     val anchoMaximo = if (rutaActual == Rutas.RESUMEN || rutaActual == Rutas.FINANZAS) Dp.Unspecified else 640.dp
 
+    // Si el servidor rechaza la sesión en cualquier pantalla, se cierra y se lleva a la pantalla de sesión vencida.
+    // La puerta no cuenta: no tiene una sesión de persona.
+    LaunchedEffect(Unit) {
+        EventosSesion.vencida.collect {
+            if (loginViewModel.sesion.value != null && puertaViewModel.modoPuerta.value != true) {
+                loginViewModel.cerrarSesion()
+                navController.navigate(Rutas.SESION_VENCIDA) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                }
+            }
+        }
+    }
+
+    // Si el sistema mató la app en segundo plano, la pantalla se restaura pero la sesión se perdió: se vuelve al login.
+    // Se mira la pantalla actual en el momento de actuar, para no repetir la navegación cuando se cierra la sesión a mano.
+    LaunchedEffect(sesion, rutaActual, modoPuerta) {
+        val rutaAhora = navController.currentDestination?.route
+        if (debeVolverAlInicioDeSesion(sesion != null, rutaAhora, modoPuerta)) {
+            navController.navigate(Rutas.LOGIN) {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
+        }
+    }
+
+    // Pantallas que se abren encima de otra: llevan flecha para volver.
+    val rutasInternas = listOf(
+        Rutas.NUEVA_RESERVA,
+        Rutas.DETALLE_RESERVA,
+        Rutas.TICKET_QR,
+        Rutas.REGISTRAR_PAGO
+    )
+    // La Disponibilidad solo es interna para la directiva; para el vecino es una pestaña.
+    val esPantallaInterna = rutaActual in rutasInternas ||
+            (rutaActual == Rutas.DISPONIBILIDAD && sesion?.rol == "DIRECTIVA")
+
+    // Pestaña de la barra que queda marcada cuando se está en una pantalla interna.
+    val rutaDePestana = when (rutaActual) {
+        Rutas.NUEVA_RESERVA, Rutas.DETALLE_RESERVA, Rutas.TICKET_QR, Rutas.SOLICITUD_ENVIADA -> Rutas.MIS_RESERVAS
+        Rutas.REGISTRAR_PAGO -> Rutas.PAGOS
+        Rutas.DISPONIBILIDAD -> if (sesion?.rol == "DIRECTIVA") Rutas.RESERVAS else Rutas.DISPONIBILIDAD
+        else -> rutaActual
+    }
+
+    // Movimiento entre pantallas (ver Transiciones.kt). Con "Reducir animaciones" no hay desplazamiento.
+    val animar = animacionesActivas()
+    val desplazamiento = with(LocalDensity.current) { 24.dp.roundToPx() }
+
     val contenido: @Composable () -> Unit = {
-        NavHost(navController = navController, startDestination = Rutas.LOGIN) {
+        NavHost(
+            navController = navController,
+            startDestination = Rutas.LOGIN,
+            enterTransition = {
+                entradaAlAvanzar(tipoAlAvanzar(initialState.destination.route, targetState.destination.route), animar, desplazamiento)
+            },
+            exitTransition = {
+                salidaAlAvanzar(tipoAlAvanzar(initialState.destination.route, targetState.destination.route), animar, desplazamiento)
+            },
+            popEnterTransition = {
+                entradaAlVolver(tipoAlVolver(initialState.destination.route, targetState.destination.route), animar, desplazamiento)
+            },
+            popExitTransition = {
+                salidaAlVolver(tipoAlVolver(initialState.destination.route, targetState.destination.route), animar, desplazamiento)
+            }
+        ) {
             composable(Rutas.LOGIN) {
                 LoginScreen(
                     viewModel = loginViewModel,
@@ -117,8 +189,27 @@ fun AppNavigation() {
                 NuevaReservaScreen(
                     vecinoId = sesion?.id ?: 0,
                     onReservaCreada = {
-                        navController.popBackStack()
-                        scope.launch { avisos.showSnackbar("Reserva solicitada. Queda pendiente de confirmación") }
+                        navController.navigate(Rutas.SOLICITUD_ENVIADA) {
+                            popUpTo(Rutas.NUEVA_RESERVA) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable(Rutas.SOLICITUD_ENVIADA) {
+                SolicitudEnviadaScreen(
+                    onVerMisReservas = {
+                        navController.navigate(Rutas.MIS_RESERVAS) {
+                            popUpTo(Rutas.MIS_RESERVAS)
+                        }
+                    }
+                )
+            }
+            composable(Rutas.SESION_VENCIDA) {
+                SesionVencidaScreen(
+                    onIniciarSesion = {
+                        navController.navigate(Rutas.LOGIN) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
                     }
                 )
             }
@@ -141,10 +232,10 @@ fun AppNavigation() {
                 EscanearScreen()
             }
             composable(Rutas.RESUMEN) {
-                ResumenScreen()
+                ResumenScreen(titulo = "Resumen")
             }
             composable(Rutas.FINANZAS) {
-                ResumenScreen()
+                ResumenScreen(titulo = "Finanzas")
             }
             composable(Rutas.DISPONIBILIDAD) {
                 DisponibilidadScreen(
@@ -168,18 +259,23 @@ fun AppNavigation() {
         Box(modifier = Modifier.fillMaxSize())
     } else if (modoPuerta == true) {
         PuertaScreen(viewModel = puertaViewModel)
-    } else if (rutaActual == Rutas.LOGIN || rutaActual == null) {
+    } else if (rutaActual == Rutas.LOGIN || rutaActual == Rutas.SESION_VENCIDA ||
+        rutaActual == Rutas.SOLICITUD_ENVIADA || rutaActual == null
+    ) {
         ContenidoCentrado(anchoMaximo) { contenido() }
     } else {
         NavigationSuiteScaffold(
             navigationSuiteItems = {
                 destinos.forEach { destino ->
                     item(
-                        icon = { Icon(destino.icono, contentDescription = destino.etiqueta) },
+                        icon = { Icon(painterResource(destino.icono), contentDescription = destino.etiqueta) },
                         label = { Text(destino.etiqueta) },
-                        selected = rutaActual == destino.ruta,
+                        selected = rutaDePestana == destino.ruta,
                         onClick = {
-                            navController.navigate(destino.ruta) { launchSingleTop = true }
+                            navController.navigate(destino.ruta) {
+                                launchSingleTop = true
+                                popUpTo(destino.ruta)
+                            }
                         }
                     )
                 }
@@ -187,30 +283,42 @@ fun AppNavigation() {
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
-                    title = { Text(sesion?.nombre ?: "") },
+                    title = {},
+                    // Flecha para volver, solo en las pantallas internas.
+                    navigationIcon = {
+                        if (esPantallaInterna) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                            }
+                        }
+                    },
                     actions = {
                         if (sesion?.rol == "DIRECTIVA" && rutaActual == Rutas.RESERVAS) {
                             IconButton(onClick = { navController.navigate(Rutas.DISPONIBILIDAD) }) {
                                 Icon(Icons.Filled.DateRange, contentDescription = "Ver disponibilidad")
                             }
                         }
-                        IconButton(onClick = { menuAbierto = true }) {
-                            Icon(Icons.Filled.AccountCircle, contentDescription = "Menú de la cuenta")
-                        }
-                        DropdownMenu(
-                            expanded = menuAbierto,
-                            onDismissRequest = { menuAbierto = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Cerrar sesión") },
-                                onClick = {
-                                    menuAbierto = false
-                                    loginViewModel.cerrarSesion()
-                                    navController.navigate(Rutas.LOGIN) {
-                                        popUpTo(navController.graph.id) { inclusive = true }
-                                    }
-                                }
+                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                            CabeceraSesion(
+                                nombre = sesion?.nombre ?: "",
+                                rol = nombreDelCargo(sesion?.cargo),
+                                onClick = { menuAbierto = true }
                             )
+                            DropdownMenu(
+                                expanded = menuAbierto,
+                                onDismissRequest = { menuAbierto = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Cerrar sesión") },
+                                    onClick = {
+                                        menuAbierto = false
+                                        loginViewModel.cerrarSesion()
+                                        navController.navigate(Rutas.LOGIN) {
+                                            popUpTo(navController.graph.id) { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 )

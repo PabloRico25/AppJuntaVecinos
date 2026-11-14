@@ -13,4 +13,6 @@ object Rutas {
     const val REGISTRAR_PAGO = "registrar_pago"
     const val RESUMEN = "resumen"
     const val ESCANEAR = "escanear"
+    const val SESION_VENCIDA = "sesion_vencida"
+    const val SOLICITUD_ENVIADA = "solicitud_enviada"
 }

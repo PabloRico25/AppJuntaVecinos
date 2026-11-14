@@ -1,11 +1,14 @@
 package com.example.appjuntavecinos.ui.screens
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -21,11 +24,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,19 +40,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.BotonTexto
+import com.example.appjuntavecinos.ui.components.EstadoCompleto
 import com.example.appjuntavecinos.ui.components.IconoDeError
+import com.example.appjuntavecinos.ui.components.IlustracionDeKit
+import com.example.appjuntavecinos.ui.components.IndicadorDeCarga
 import com.example.appjuntavecinos.ui.components.LectorQrFrontal
-import com.example.appjuntavecinos.ui.theme.ErrorRojo
-import com.example.appjuntavecinos.ui.theme.Green
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
-import com.example.appjuntavecinos.utils.EstadoPuerta
+import com.example.appjuntavecinos.ui.components.MarcoDeLecturaQr
+import com.example.appjuntavecinos.ui.components.ResultadoDePuerta
+import com.example.appjuntavecinos.ui.components.sacudirSiHayError
 import com.example.appjuntavecinos.viewmodel.PuertaViewModel
 import kotlinx.coroutines.delay
 
@@ -62,6 +70,7 @@ fun PuertaScreen(
     val salaId by viewModel.salaId.collectAsState()
     val dependencias by viewModel.dependencias.collectAsState()
     val resultado by viewModel.resultado.collectAsState()
+    val validando by viewModel.validando.collectAsState()
     val contexto = LocalContext.current
     val vista = LocalView.current
 
@@ -80,10 +89,34 @@ fun PuertaScreen(
         )
     }
 
+    // Si el permiso se negó y el sistema ya no vuelve a preguntar (pasa al negarlo dos veces), pedirlo de nuevo no hace
+    // nada: lo único posible es que la persona lo active a mano en los ajustes de la app.
+    var soloEnAjustes by remember { mutableStateOf(false) }
+
     val pedirPermiso = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
         tienePermiso = concedido
+        if (!concedido) {
+            // No visto en clase: shouldShowRequestPermissionRationale es false cuando el sistema ya no mostrará el aviso.
+            soloEnAjustes = (contexto as? Activity)?.let {
+                !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.CAMERA)
+            } ?: false
+        }
+    }
+
+    // Al volver a la app (por ejemplo desde los ajustes) se vuelve a mirar el permiso, para que la cámara se abra sola
+    // si ahora sí está concedido. Sin esto, la pantalla seguía diciendo "sin permiso".
+    val ciclo = (contexto as? LifecycleOwner)?.lifecycle
+    DisposableEffect(ciclo) {
+        val vigilante = LifecycleEventObserver { _, evento ->
+            if (evento == Lifecycle.Event.ON_RESUME) {
+                tienePermiso = ContextCompat.checkSelfPermission(contexto, Manifest.permission.CAMERA) ==
+                        PackageManager.PERMISSION_GRANTED
+            }
+        }
+        ciclo?.addObserver(vigilante)
+        onDispose { ciclo?.removeObserver(vigilante) }
     }
 
 
@@ -149,51 +182,56 @@ fun PuertaScreen(
 
             if (tienePermiso) {
 
-                LectorQrFrontal(
-                    activo = resultado == null,
-                    onQrLeido = { texto -> viewModel.validar(texto) },
+                Box(
                     modifier = Modifier
                         .widthIn(max = 420.dp)
                         .fillMaxWidth()
                         .aspectRatio(3f / 4f)
                         .clip(RoundedCornerShape(16.dp))
-                )
+                ) {
+                    LectorQrFrontal(
+                        activo = resultado == null,
+                        onQrLeido = { texto -> viewModel.validar(texto) },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    // El marco con la línea que sube y baja: se ve mientras la puerta espera un QR
+                    if (resultado == null && !validando) {
+                        MarcoDeLecturaQr(modifier = Modifier.fillMaxSize())
+                    }
+                }
             } else {
 
-                Text("La puerta necesita la cámara para leer los códigos QR.")
-                Spacer(Modifier.height(16.dp))
-                Button(onClick = { pedirPermiso.launch(Manifest.permission.CAMERA) }) {
-                    Text("Dar permiso de cámara")
-                }
+                EstadoCompleto(
+                    icono = { IlustracionDeKit(R.drawable.ilus_camara_sin_permiso) },
+                    titulo = "Sin permiso de cámara",
+                    mensaje = if (soloEnAjustes) "La puerta necesita la cámara para leer los códigos QR. Actívala en Permisos, Cámara."
+                              else "La puerta necesita la cámara para leer los códigos QR.",
+                    textoBoton = if (soloEnAjustes) "Abrir ajustes de la app" else "Dar permiso de cámara",
+                    iconoBoton = null,
+                    circulo = false,
+                    onBoton = {
+                        if (soloEnAjustes) {
+                            contexto.startActivity(
+                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", contexto.packageName, null))
+                            )
+                        } else {
+                            pedirPermiso.launch(Manifest.permission.CAMERA)
+                        }
+                    }
+                )
             }
         }
 
 
-        resultado?.let { r ->
-            val abierta = r.estado == EstadoPuerta.ABIERTA
-            val colorTexto = if (abierta) TextoPrincipal else Color.White
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(if (abierta) Green else ErrorRojo)
-                    .clickable { viewModel.limpiarResultado() }
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = if (abierta) "Puerta abierta" else "Puerta cerrada",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = colorTexto
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = r.mensaje,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = colorTexto
-                )
+        // Mientras el servidor revisa el QR, la casa de la marca se muestra encima de todo
+        if (validando && resultado == null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                IndicadorDeCarga(tamano = 160.dp)
             }
+        }
+
+        resultado?.let { r ->
+            ResultadoDePuerta(resultado = r, onToque = { viewModel.limpiarResultado() })
         }
     }
 
@@ -217,14 +255,19 @@ fun PuertaScreen(
                         trailingIcon = { if (errorSalida != null) IconoDeError() },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                            .sacudirSiHayError(errorSalida)
                     )
                     errorSalida?.let {
-                        Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             },
             confirmButton = {
-                TextButton(
+                BotonTexto(
                     onClick = {
                         viewModel.desactivar(claveSalida) { correcta ->
                             if (correcta) {
@@ -239,7 +282,7 @@ fun PuertaScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { mostrarSalida = false }) {
+                BotonTexto(onClick = { mostrarSalida = false }) {
                     Text("Cancelar")
                 }
             }

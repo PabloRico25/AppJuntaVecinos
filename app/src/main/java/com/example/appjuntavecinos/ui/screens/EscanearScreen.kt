@@ -1,33 +1,40 @@
 package com.example.appjuntavecinos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.appjuntavecinos.R
+import com.example.appjuntavecinos.ui.components.BotonContorno
+import com.example.appjuntavecinos.ui.components.BotonJunta
 import com.example.appjuntavecinos.ui.components.IconoDeError
-import com.example.appjuntavecinos.ui.theme.ErrorRojo
-import com.example.appjuntavecinos.ui.theme.Gray
-import com.example.appjuntavecinos.ui.theme.Green
-import com.example.appjuntavecinos.ui.theme.TextoPrincipal
+import com.example.appjuntavecinos.ui.components.IlustracionQrScan
+import com.example.appjuntavecinos.ui.components.sacudirSiHayError
+import com.example.appjuntavecinos.ui.theme.JuntaTheme
 import com.example.appjuntavecinos.utils.EstadoIngreso
 import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.viewmodel.EscanearViewModel
@@ -64,10 +71,17 @@ fun EscanearScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Escanear QR", style = MaterialTheme.typography.headlineMedium)
+        Text("Escanear QR", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
         Text("Escanea el código del vecino para ver si puede entrar.")
 
-        Button(
+        // Mientras no hay nada que mostrar, el marco con el QR del diseño (kit: sin_resultados_qr)
+        if (estado.resultado == null) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                IlustracionQrScan(tamano = 150.dp)
+            }
+        }
+
+        BotonJunta(
             onClick = { abrirLector() },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -81,9 +95,9 @@ fun EscanearScreen(
             isError = estado.error != null,
             trailingIcon = { if (estado.error != null) IconoDeError() },
             supportingText = { estado.error?.let { Text(it) } },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().sacudirSiHayError(estado.error)
         )
-        OutlinedButton(
+        BotonContorno(
             onClick = { viewModel.validarEscrito() },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -91,12 +105,22 @@ fun EscanearScreen(
         }
 
         estado.resultado?.let { resultado ->
+            val colores = JuntaTheme.colores
             val colorFondo = when (resultado.estado) {
-                EstadoIngreso.VALIDO -> Green
-                EstadoIngreso.FUERA_DE_HORARIO -> Gray
-                EstadoIngreso.NO_VALIDO -> ErrorRojo
+                EstadoIngreso.VALIDO -> colores.confirmadaContenedor
+                EstadoIngreso.FUERA_DE_HORARIO -> colores.avisoContenedor
+                EstadoIngreso.NO_VALIDO -> colores.rechazadaContenedor
             }
-            val colorTexto = if (resultado.estado == EstadoIngreso.NO_VALIDO) Color.White else TextoPrincipal
+            val colorTexto = when (resultado.estado) {
+                EstadoIngreso.VALIDO -> colores.sobreConfirmada
+                EstadoIngreso.FUERA_DE_HORARIO -> colores.sobreAviso
+                EstadoIngreso.NO_VALIDO -> colores.sobreRechazada
+            }
+            val icono = when (resultado.estado) {
+                EstadoIngreso.VALIDO -> R.drawable.ic_escaner_permitido
+                EstadoIngreso.FUERA_DE_HORARIO -> R.drawable.ic_escaner_horario
+                EstadoIngreso.NO_VALIDO -> R.drawable.ic_escaner_no_valido
+            }
             val titulo = when (resultado.estado) {
                 EstadoIngreso.VALIDO -> "Acceso permitido"
                 EstadoIngreso.FUERA_DE_HORARIO -> "Fuera de horario"
@@ -107,15 +131,25 @@ fun EscanearScreen(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = colorFondo,
-                    contentColor = colorTexto
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = titulo,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(icono),
+                            contentDescription = null,
+                            tint = colorTexto,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = titulo,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = colorTexto,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                     val datos = resultado.datos
                     if (datos != null) {
                         Text("Vecino: ${datos.nombreVecino}")

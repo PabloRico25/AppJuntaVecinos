@@ -5,13 +5,14 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appjuntavecinos.data.model.DependenciaComunitariaEntity
-import com.example.appjuntavecinos.data.model.PagoEntity
 import com.example.appjuntavecinos.data.model.RegistrarPagoErrores
 import com.example.appjuntavecinos.data.model.RegistrarPagoUiState
 import com.example.appjuntavecinos.data.model.ReservaEntity
+import com.example.appjuntavecinos.data.remote.mensajeDeError
 import com.example.appjuntavecinos.data.repository.JuntaRepository
 import com.example.appjuntavecinos.utils.fechaDeHoy
 import com.example.appjuntavecinos.utils.fechaDesdeMillis
+import com.example.appjuntavecinos.utils.fechaParaMostrar
 import com.example.appjuntavecinos.utils.guardarComprobante
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,7 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
 
     fun etiquetaReserva(reserva: ReservaEntity): String {
         val nombre = _dependencias.value.firstOrNull { it.id == reserva.dependenciaId }?.nombre ?: ""
-        return "$nombre, ${reserva.fecha}, ${reserva.horaInicio} a ${reserva.horaFin}"
+        return "$nombre, ${fechaParaMostrar(reserva.fecha)}, ${reserva.horaInicio} a ${reserva.horaFin}"
     }
 
     fun onTipoChange(valor: String) {
@@ -149,6 +150,7 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
         return nuevosErrores == RegistrarPagoErrores()
     }
 
+    // registradoPorId ya no se envía: el servidor lo toma del token
     fun guardar(registradoPorId: Int, puedeRegistrar: Boolean, onExito: () -> Unit) {
         if (_estado.value.guardando) return
         if (!puedeRegistrar) {
@@ -178,19 +180,22 @@ class RegistrarPagoViewModel(application: Application) : AndroidViewModel(applic
                 }
             }
 
-            repositorio.crearPago(
-                PagoEntity(
+            try {
+                repositorio.crearPago(
                     reservaId = if (actual.tipo == "ARRIENDO") actual.reserva?.id else null,
                     tipo = actual.tipo,
                     categoria = if (actual.tipo == "CONSUMO_BASICO") actual.categoria else "",
                     monto = actual.monto.toInt(),
                     fecha = actual.fecha,
                     comprobanteUri = comprobanteGuardado,
-                    registradoPorId = registradoPorId,
                     descripcion = actual.descripcion.trim()
                 )
-            )
-            onExito()
+                onExito()
+            } catch (e: Exception) {
+                _estado.update {
+                    it.copy(guardando = false, errores = it.errores.copy(general = mensajeDeError(e)))
+                }
+            }
         }
     }
 }

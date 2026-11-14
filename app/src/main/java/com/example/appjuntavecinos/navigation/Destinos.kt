@@ -1,28 +1,23 @@
 package com.example.appjuntavecinos.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.DrawableRes
+import com.example.appjuntavecinos.R
 
 data class Destino(
     val ruta: String,
     val etiqueta: String,
-    val icono: ImageVector
+    @param:DrawableRes val icono: Int
 )
 
 val destinosVecino = listOf(
-    Destino(Rutas.MIS_RESERVAS, "Mis reservas", Icons.Filled.DateRange),
-    Destino(Rutas.DISPONIBILIDAD, "Disponibilidad", Icons.Filled.CheckCircle),
-    Destino(Rutas.FINANZAS, "Finanzas", Icons.Filled.Info)
+    Destino(Rutas.MIS_RESERVAS, "Mis reservas", R.drawable.ic_nav_calendario),
+    Destino(Rutas.DISPONIBILIDAD, "Disponibilidad", R.drawable.ic_reloj),
+    Destino(Rutas.FINANZAS, "Finanzas", R.drawable.ic_nav_barras)
 )
 
 val destinosDirectiva = listOf(
-    Destino(Rutas.RESERVAS, "Reservas", Icons.Filled.DateRange),
-    Destino(Rutas.PAGOS, "Pagos", Icons.Filled.ShoppingCart),
-    Destino(Rutas.RESUMEN, "Resumen", Icons.Filled.Info),
-    Destino(Rutas.ESCANEAR, "Escanear", Icons.Filled.Search)
+    Destino(Rutas.RESERVAS, "Reservas", R.drawable.ic_nav_calendario),
+    Destino(Rutas.PAGOS, "Pagos", R.drawable.ic_nav_pagos),
+    Destino(Rutas.RESUMEN, "Resumen", R.drawable.ic_nav_barras),
+    Destino(Rutas.ESCANEAR, "Escanear", R.drawable.ic_nav_escaner)
 )
