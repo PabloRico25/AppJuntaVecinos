@@ -214,10 +214,15 @@ fun PuertaScreen(
                         isError = errorSalida != null,
                         trailingIcon = { if (errorSalida != null) IconoDeError() },
                         visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp).sacudirSiHayError(errorSalida)
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                            .sacudirSiHayError(errorSalida)
                     )
                     errorSalida?.let {
-                        Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             },
