@@ -125,7 +125,7 @@ Si el teléfono ya tenía la app instalada con otra firma, hay que desinstalarla
 
 ## Pruebas
 
-136 pruebas unitarias en `app/src/test`, con Kotest, MockK y coroutines-test. Cubren las reglas de fechas, bloques horarios, QR y puerta, el resumen financiero, las validaciones, los mensajes de error del servidor, el `TokenInterceptor`, el repositorio y los ViewModel del login, nueva reserva, mis reservas y disponibilidad. Se ejecutan con `gradlew testDebugUnitTest`. No hay pruebas de pantalla instrumentadas: ver [DECISIONES.md](DECISIONES.md).
+157 pruebas unitarias en `app/src/test`, con Kotest, MockK y coroutines-test. Cubren las reglas de fechas, bloques horarios, QR y puerta, el resumen financiero, las validaciones, los mensajes de error del servidor, el `TokenInterceptor`, el repositorio y los ViewModel del login, nueva reserva, mis reservas y disponibilidad. Se ejecutan con `gradlew testDebugUnitTest`. No hay pruebas de pantalla instrumentadas: ver [DECISIONES.md](DECISIONES.md).
 
 El backend tiene otras 68 pruebas propias.
 
@@ -209,6 +209,9 @@ Las integramos por nuestra cuenta. Las herramientas externas, con el permiso del
 | `imePadding` | `MainActivity.kt` | Deja sitio al teclado para que no tape lo que se escribe |
 | `KeyboardOptions` y `KeyboardActions` | `ui/screens/LoginScreen.kt` | Teclado de correo y tecla de confirmar |
 | `toggleable` | Nueva reserva y Registrar pago | Tocar el texto de una casilla también la marca |
+| `LifecycleEventObserver` | `ui/components/ActualizarAlVolver.kt` | Las listas vuelven a pedir sus datos cada vez que se muestran |
+| `LocalDensity.fontScale` | `ui/components/FilaCampoYBoton.kt` | Con letra muy grande, el botón pasa debajo del campo |
+| `LocalSoftwareKeyboardController` | `ui/screens/LoginScreen.kt` | Oculta el teclado al enviar el login |
 | `combine` | Resumen | Junta varios flujos de datos en uno |
 | `navArgument` | `navigation/AppNavigation.kt` | Pasa el número de la reserva al Detalle y al Ticket QR |
 | `darkColorScheme` e `isSystemInDarkTheme()` | `ui/theme/Theme.kt` | Definen la paleta oscura y eligen la clara o la oscura según el modo del teléfono |
