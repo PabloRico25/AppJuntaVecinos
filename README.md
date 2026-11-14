@@ -104,7 +104,12 @@ Requisitos: una versión de Android Studio que soporte el Android Gradle Plugin 
 3. Abrir la carpeta con Android Studio y esperar a que termine la sincronización de Gradle.
 4. Ejecutar el módulo `app` en un emulador. Por defecto la app llama a `http://10.0.2.2:9090`, que es el computador visto desde el emulador.
 
-**Con un teléfono real.** El teléfono y el computador deben estar en el mismo wifi, y el computador debe dejar pasar el puerto 9090 en su firewall. La IP del computador debe estar en `app/src/main/res/xml/network_security_config.xml`. Luego se compila con esa dirección:
+**Con un teléfono real.** Hay dos caminos, y en los dos el computador debe dejar pasar el puerto 9090 en su firewall y su IP debe estar en `app/src/main/res/xml/network_security_config.xml`:
+
+- **Mismo wifi.** Se usa la IP del computador en esa red. Cambia cada vez que cambia la red.
+- **Tailscale.** El teléfono y el computador están en la misma red de Tailscale y se usa la IP de Tailscale del computador, que no cambia con la red. Es lo que se usa en la presentación: ver [Presentación en sala](#presentación-en-sala).
+
+Luego se compila con esa dirección:
 
 ```
 gradlew assembleDebug -PurlServidor=http://IP-DEL-COMPUTADOR:9090/
@@ -129,9 +134,45 @@ Si el teléfono ya tenía la app instalada con otra firma, hay que desinstalarla
 
 El backend tiene otras 68 pruebas propias.
 
+Además de las pruebas automáticas, el APK de `release` (versión 1.1) se recorrió en un teléfono real conectado por Tailscale: los flujos del vecino, la Secretaría y la Tesorería, con letra grande, con animaciones reducidas, con el servidor apagado y matando la app en segundo plano. En un segundo teléfono se comprobó que el modo puerta lee el QR de un ticket real y lo evalúa contra su horario.
+
+## Presentación en sala
+
+En la presentación el backend corre en el notebook de quien presenta y los teléfonos lo alcanzan por Tailscale. El porqué está en [DECISIONES.md](DECISIONES.md).
+
+**Cómo está montado**
+
+- **Dirección fija.** El notebook tiene en Tailscale la IP `100.65.13.28`, que no cambia con la red. El APK se compila con `-PurlServidor=http://100.65.13.28:9090/` y esa IP está en `network_security_config.xml`, que es lo que deja a Android usar http hacia ella.
+- **Solo entra el gateway.** El firewall del notebook acepta el puerto 9090 únicamente desde el rango de Tailscale, y los tres servicios escuchan solo en `127.0.0.1`. El comando de la regla y los scripts para encender y apagar todo están en el [README del backend](https://github.com/PabloRico25/junta-zaror-backend).
+- **Permisos de Tailscale.** Cada aparato necesita Tailscale instalado y un permiso en la política de acceso de la cuenta para llegar al notebook solo por el puerto TCP 9090.
+- **Internet.** Tailscale necesita alguna salida a internet para conectar los aparatos. Si la red de la sala no sirve, se comparte internet desde un teléfono (hotspot).
+
+**Antes de presentar**
+
+1. Notebook conectado al cargador y con la suspensión desactivada, para que no se duerma a mitad de la presentación.
+2. Tailscale conectado en el notebook y en cada aparato que se vaya a usar.
+3. Encender el backend con `levantar.ps1` y esperar el mensaje "Todo encendido". Tarda varios minutos: hacerlo antes de entrar a la sala.
+4. Abrir `http://100.65.13.28:9090/dependencias` en el navegador del teléfono. Debe mostrar las dos salas. Si las muestra, el camino completo funciona.
+5. Iniciar sesión en cada aparato con su usuario de prueba.
+6. Si se quieren los datos de ejemplo recién cargados, correr `reiniciar-datos.ps1`. Se hace el mismo día porque las reservas de ejemplo se crean con la fecha de hoy.
+
+**Si algo falla**
+
+| Síntoma | Qué revisar |
+|---|---|
+| La app dice que no puede conectar | Tailscale conectado en el teléfono y en el notebook, y el paso 4 de arriba |
+| La red de la sala bloquea o no tiene internet | Compartir internet desde un teléfono al notebook y a los demás aparatos |
+| Un servicio no responde | Correr `levantar.ps1` otra vez (deja como está lo que ya funciona) y leer `logs\<servicio>.log` |
+| La puerta no abre | Hace falta una reserva de hoy, confirmada y pagada, y dentro de su ventana de ingreso: de 10 minutos antes a 15 después de la hora de inicio, con la sede abierta de 09:00 a 22:00 |
+| Se cerró la sesión de golpe | Es esperado si el sistema mató la app o si pasaron 12 horas: se vuelve a entrar |
+
 ## APK firmado
 
-El APK de `release` se genera desde Android Studio con Build, Generate Signed App Bundle or APK. Usa la optimización de R8 y las reglas de `app/proguard-rules.pro`. El archivo de llave (`.jks`) no está en el repositorio.
+El APK de `release` (versión 1.1, `versionCode` 2) se genera desde Android Studio con Build, Generate Signed App Bundle or APK, variante `release`. Usa la optimización de R8 y las reglas de `app/proguard-rules.pro`, que conservan los modelos que Gson lee del servidor y las clases de ML Kit. Sin esa última regla el APK se cerraba al abrir la cámara de la puerta. El archivo de llave (`.jks`) y sus claves no están en el repositorio: las escribe quien firma.
+
+La dirección del servidor se fija al compilar. Para que el APK apunte a la de Tailscale, se escribe `urlServidor=http://100.65.13.28:9090/` en el `gradle.properties` del usuario (`%USERPROFILE%\.gradle\gradle.properties`), no en el del proyecto, y se vuelve a firmar. Sin esa línea el APK usa la del emulador (`10.0.2.2`) y no conecta en un teléfono real. R8 deja un archivo `mapping.txt` junto al APK, que sirve para leer los errores de un APK de `release`.
+
+Si el teléfono tenía la app instalada con otra firma, Android la rechaza: hay que desinstalarla primero.
 
 ## Estructura del proyecto
 
