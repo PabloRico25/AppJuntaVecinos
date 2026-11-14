@@ -154,7 +154,7 @@ En la presentación el backend corre en el notebook de quien presenta y los tel�
 3. Encender el backend con `levantar.ps1` y esperar el mensaje "Todo encendido". Tarda varios minutos: hacerlo antes de entrar a la sala.
 4. Abrir `http://100.65.13.28:9090/dependencias` en el navegador del teléfono. Debe mostrar las dos salas. Si las muestra, el camino completo funciona.
 5. Iniciar sesión en cada aparato con su usuario de prueba.
-6. Si se quieren los datos de ejemplo recién cargados, correr `reiniciar-datos.ps1`. Se hace el mismo día porque las reservas de ejemplo se crean con la fecha de hoy.
+6. Si se quieren los datos de ejemplo recién cargados, correr `reiniciar-datos.ps1`. Se hace el mismo día porque las fechas de las reservas de ejemplo se calculan a partir del día en que se corre el script.
 
 **Si algo falla**
 
